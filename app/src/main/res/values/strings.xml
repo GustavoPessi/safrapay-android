@@ -24,6 +24,7 @@
     <string name="hint_telefone">Telefone (opcional)</string>
     <string name="hint_nascimento">Data de nascimento (opcional)</string>
     <string name="hint_confirmar_senha">Confirmar senha</string>
+    <string name="hint_senha_atual">Senha atual</string>
     <string name="action_entrar">Entrar</string>
     <string name="action_cadastrar">Criar conta</string>
     <string name="action_recuperar">Recuperar senha</string>
@@ -42,10 +43,14 @@
     <string name="err_cpf_invalido">CPF deve ter 11 dígitos</string>
     <string name="err_senha_curta">A senha deve ter ao menos 6 caracteres</string>
     <string name="err_senhas_diferentes">As senhas não coincidem</string>
+    <string name="err_senha_atual_incorreta">Senha atual incorreta</string>
     <string name="err_email_existente">Já existe uma conta com este e-mail</string>
     <string name="err_cpf_existente">Já existe uma conta com este CPF</string>
     <string name="err_credenciais">E-mail ou senha incorretos</string>
+    <string name="err_email_nao_confirmado">Confirme seu e-mail antes de entrar</string>
+    <string name="err_servidor">Não foi possível conectar ao servidor. Verifique sua internet</string>
     <string name="msg_conta_criada">Conta criada com sucesso</string>
+    <string name="msg_confirme_email">Cadastro realizado! Confira seu e-mail para confirmar a conta antes de entrar</string>
     <string name="msg_recuperacao_enviada">Se o e-mail existir, enviaremos instruções</string>
 
     <!-- Home / Menu -->

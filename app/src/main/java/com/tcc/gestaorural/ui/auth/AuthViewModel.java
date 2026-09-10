@@ -15,9 +15,13 @@ public class AuthViewModel extends AndroidViewModel {
     /** Resultado de uma operação de auth. */
     public static class Resultado {
         public final boolean sucesso;
+        /** true quando o cadastro foi aceito mas precisa confirmar o e-mail antes de logar. */
+        public final boolean pendente;
         public final long usuarioId;
         public final int erroResId;
-        Resultado(boolean s, long id, int erro) { sucesso = s; usuarioId = id; erroResId = erro; }
+        Resultado(boolean s, boolean p, long id, int erro) {
+            sucesso = s; pendente = p; usuarioId = id; erroResId = erro;
+        }
     }
 
     private final AuthRepository repo;
@@ -35,11 +39,15 @@ public class AuthViewModel extends AndroidViewModel {
     private final AuthRepository.Callback cb = new AuthRepository.Callback() {
         @Override public void onSucesso(long usuarioId) {
             carregando.postValue(false);
-            resultado.postValue(new Resultado(true, usuarioId, 0));
+            resultado.postValue(new Resultado(true, false, usuarioId, 0));
+        }
+        @Override public void onCadastroPendente() {
+            carregando.postValue(false);
+            resultado.postValue(new Resultado(false, true, -1, 0));
         }
         @Override public void onErro(int stringResId) {
             carregando.postValue(false);
-            resultado.postValue(new Resultado(false, -1, stringResId));
+            resultado.postValue(new Resultado(false, false, -1, stringResId));
         }
     };
 

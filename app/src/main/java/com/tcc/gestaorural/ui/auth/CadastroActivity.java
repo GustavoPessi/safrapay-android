@@ -48,7 +48,11 @@ public class CadastroActivity extends BaseActivity {
         vm.getCarregando().observe(this, c -> btnCadastrar.setEnabled(!c));
         vm.getResultado().observe(this, res -> {
             if (res == null) return;
-            if (res.sucesso) {
+            if (res.pendente) {
+                // Backend exige confirmacao de e-mail antes de logar - volta pra tela de login.
+                Toast.makeText(this, R.string.msg_confirme_email, Toast.LENGTH_LONG).show();
+                finish();
+            } else if (res.sucesso) {
                 new SessionManager(this).salvarLogin(res.usuarioId);
                 Toast.makeText(this, R.string.msg_conta_criada, Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(this, DashboardActivity.class);

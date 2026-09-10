@@ -79,16 +79,19 @@ public class ConfiguracoesActivity extends BaseActivity {
 
     private void dialogAlterarSenha() {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_alterar_senha, null);
+        TextInputEditText edtSenhaAtual = view.findViewById(R.id.edtSenhaAtual);
         TextInputEditText edtSenha = view.findViewById(R.id.edtSenha);
         TextInputEditText edtConfirmar = view.findViewById(R.id.edtConfirmar);
         new AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_nova_senha)
                 .setView(view)
                 .setPositiveButton(R.string.acao_salvar, (d, w) -> {
+                    String atual = valor(edtSenhaAtual);
                     String s1 = valor(edtSenha), s2 = valor(edtConfirmar);
+                    if (atual.isEmpty()) { Toast.makeText(this, R.string.hint_senha_atual, Toast.LENGTH_LONG).show(); return; }
                     if (s1.length() < 6) { Toast.makeText(this, R.string.err_senha_curta, Toast.LENGTH_LONG).show(); return; }
                     if (!s1.equals(s2)) { Toast.makeText(this, R.string.err_senhas_diferentes, Toast.LENGTH_LONG).show(); return; }
-                    vm.alterarSenha(usuarioId, s1);
+                    vm.alterarSenha(usuarioId, atual, s1);
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
