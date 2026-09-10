@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:name=".GestaoRuralApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GestaoRural">
+
+        <activity
+            android:name=".ui.splash.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.GestaoRural.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.onboarding.OnboardingActivity" android:exported="false" />
+        <activity android:name=".ui.auth.LoginActivity" android:exported="false" />
+        <activity android:name=".ui.auth.CadastroActivity" android:exported="false" />
+        <activity android:name=".ui.auth.RecuperarSenhaActivity" android:exported="false" />
+        <activity android:name=".ui.HomePlaceholderActivity" android:exported="false" />
+        <activity android:name=".ui.dashboard.DashboardActivity" android:exported="false" />
+        <activity android:name=".ui.metas.MetasPlaceholderActivity" android:exported="false" />
+        <activity android:name=".ui.metas.ListaMetasActivity" android:exported="false" />
+        <activity android:name=".ui.metas.NovaMetaActivity" android:exported="false" />
+        <activity android:name=".ui.metas.AcompanhamentoMetaActivity" android:exported="false" />
+        <activity android:name=".ui.relatorio.IndicadoresActivity" android:exported="false" />
+        <activity android:name=".ui.relatorio.RelatorioActivity" android:exported="false" />
+        <activity android:name=".ui.relatorio.DreActivity" android:exported="false" />
+        <activity android:name=".ui.perfil.EditarPerfilActivity" android:exported="false" />
+        <activity android:name=".ui.config.ConfiguracoesActivity" android:exported="false" />
+        <activity android:name=".ui.sobre.SobreActivity" android:exported="false" />
+        <activity android:name=".ui.notificacoes.NotificacoesActivity" android:exported="false" />
+        <activity android:name=".ui.sucesso.SucessoActivity" android:exported="false" />
+        <activity android:name=".ui.maquina.ListaMaquinasActivity" android:exported="false" />
+        <activity android:name=".ui.maquina.NovaMaquinaActivity" android:exported="false" />
+        <activity android:name=".ui.maquina.DetalheMaquinaActivity" android:exported="false" />
+        <activity android:name=".ui.perfil.PerfilActivity" android:exported="false" />
+        <activity android:name=".ui.propriedade.ListaPropriedadesActivity" android:exported="false" />
+        <activity android:name=".ui.propriedade.NovaPropriedadeActivity" android:exported="false" />
+        <activity android:name=".ui.propriedade.DetalhePropriedadeActivity" android:exported="false" />
+        <activity android:name=".ui.talhao.ListaTalhoesActivity" android:exported="false" />
+        <activity android:name=".ui.talhao.NovoTalhaoActivity" android:exported="false" />
+        <activity android:name=".ui.talhao.DetalheTalhaoActivity" android:exported="false" />
+        <activity android:name=".ui.safra.ListaSafrasActivity" android:exported="false" />
+        <activity android:name=".ui.safra.NovaSafraActivity" android:exported="false" />
+        <activity android:name=".ui.safra.NovaSafraRapidaActivity" android:exported="false" />
+        <activity android:name=".ui.safra.DetalheSafraActivity" android:exported="false" />
+        <activity android:name=".ui.cultura.ListaCulturasActivity" android:exported="false" />
+        <activity android:name=".ui.cultura.NovaCulturaActivity" android:exported="false" />
+        <activity android:name=".ui.financeiro.FinanceiroActivity" android:exported="false" />
+        <activity android:name=".ui.financeiro.NovaReceitaActivity" android:exported="false" />
+        <activity android:name=".ui.financeiro.NovaDespesaActivity" android:exported="false" />
+        <activity android:name=".ui.financeiro.DetalheLancamentoActivity" android:exported="false" />
+
+    </application>
+</manifest>

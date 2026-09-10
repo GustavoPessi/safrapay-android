@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:clipToPadding="false" android:padding="@dimen/space_lg" />
+
+    <TextView android:id="@+id/txtVazio" style="@style/Text.Body"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center" android:gravity="center"
+        android:text="@string/meta_vazio" android:visibility="gone" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNova"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end" android:layout_margin="@dimen/space_lg"
+        android:contentDescription="@string/meta_nova_title"
+        android:src="@android:drawable/ic_input_add"
+        app:tint="@color/white" app:backgroundTint="@color/green_700" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

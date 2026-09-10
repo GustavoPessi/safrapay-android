@@ -1,0 +1,24 @@
+package com.tcc.gestaorural.data.local.dao;
+
+import androidx.lifecycle.LiveData;
+import androidx.room.Dao;
+import androidx.room.Delete;
+import androidx.room.Insert;
+import androidx.room.Query;
+import androidx.room.Update;
+
+import com.tcc.gestaorural.data.local.entity.Propriedade;
+import java.util.List;
+
+@Dao
+public interface PropriedadeDao {
+    @Insert long inserir(Propriedade p);
+    @Update void atualizar(Propriedade p);
+    @Delete void deletar(Propriedade p);
+
+    @Query("SELECT * FROM propriedade WHERE usuario_id = :usuarioId ORDER BY nome")
+    LiveData<List<Propriedade>> observarPorUsuario(long usuarioId);
+
+    @Query("SELECT * FROM propriedade WHERE id = :id LIMIT 1")
+    LiveData<Propriedade> observarPorId(long id);
+}

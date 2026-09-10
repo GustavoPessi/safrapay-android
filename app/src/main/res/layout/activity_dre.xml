@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <!-- Ano -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="bottom">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/space_sm" android:hint="@string/dre_ano">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtAno" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="number" android:maxLength="4" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <Button android:id="@+id/btnAplicar" style="@style/Widget.App.Button"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/rel_aplicar" />
+        </LinearLayout>
+
+        <!-- Demonstrativo -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
+            android:orientation="vertical" android:padding="@dimen/space_md">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView style="@style/Text.Body" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/dre_receitas" />
+                <TextView android:id="@+id/txtReceitas" style="@style/Text.Body"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/receita" android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" android:orientation="horizontal">
+                <TextView style="@style/Text.Body" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/dre_impostos" />
+                <TextView android:id="@+id/txtImpostos" style="@style/Text.Body"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/despesa" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:layout_marginVertical="@dimen/space_sm" android:background="@color/outline" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView style="@style/Text.H2" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/dre_receita_liquida"
+                    android:textSize="@dimen/text_body" />
+                <TextView android:id="@+id/txtReceitaLiquida" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="@dimen/text_body" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" android:orientation="horizontal">
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical">
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/dre_custos" />
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/dre_custos_obs"
+                        android:textColor="@color/text_hint" android:textSize="11sp" />
+                </LinearLayout>
+                <TextView android:id="@+id/txtCustos" style="@style/Text.Body"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/despesa" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:layout_marginVertical="@dimen/space_sm" android:background="@color/outline" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView style="@style/Text.H2" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/dre_resultado_bruto"
+                    android:textSize="@dimen/text_body" />
+                <TextView android:id="@+id/txtResultadoBruto" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="@dimen/text_body" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" android:orientation="horizontal">
+                <LinearLayout android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:orientation="vertical">
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/dre_outras" />
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/dre_outras_obs"
+                        android:textColor="@color/text_hint" android:textSize="11sp" />
+                </LinearLayout>
+                <TextView android:id="@+id/txtOutras" style="@style/Text.Body"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/despesa" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="2dp"
+                android:layout_marginVertical="@dimen/space_sm" android:background="@color/text_primary" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView style="@style/Text.H1" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/dre_resultado"
+                    android:textSize="@dimen/text_h2" />
+                <TextView android:id="@+id/txtResultado" style="@style/Text.H1"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="@dimen/text_h2" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

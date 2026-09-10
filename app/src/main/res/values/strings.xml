@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AgroConta</string>
+    <string name="app_tagline">Gestão e contabilidade rural</string>
+
+    <!-- Onboarding -->
+    <string name="onb_1_title">Controle sua propriedade</string>
+    <string name="onb_1_desc">Cadastre propriedades, talhões e safras em um só lugar.</string>
+    <string name="onb_2_title">Receitas e despesas</string>
+    <string name="onb_2_desc">Registre lançamentos por safra e categorize seus gastos.</string>
+    <string name="onb_3_title">Metas e indicadores</string>
+    <string name="onb_3_desc">Acompanhe metas financeiras e a saúde do seu negócio rural.</string>
+    <string name="onb_skip">Pular</string>
+    <string name="onb_next">Próximo</string>
+    <string name="onb_start">Começar</string>
+
+    <!-- Auth -->
+    <string name="login_title">Bem-vindo de volta</string>
+    <string name="login_subtitle">Entre para gerenciar sua propriedade</string>
+    <string name="hint_email">E-mail</string>
+    <string name="hint_senha">Senha</string>
+    <string name="hint_nome">Nome completo</string>
+    <string name="hint_cpf">CPF (opcional)</string>
+    <string name="hint_telefone">Telefone (opcional)</string>
+    <string name="hint_nascimento">Data de nascimento (opcional)</string>
+    <string name="hint_confirmar_senha">Confirmar senha</string>
+    <string name="action_entrar">Entrar</string>
+    <string name="action_cadastrar">Criar conta</string>
+    <string name="action_recuperar">Recuperar senha</string>
+    <string name="action_enviar">Enviar</string>
+    <string name="link_esqueci">Esqueci minha senha</string>
+    <string name="link_criar_conta">Não tem conta? Cadastre-se</string>
+    <string name="link_ja_tenho">Já tenho conta. Entrar</string>
+    <string name="cadastro_title">Criar sua conta</string>
+    <string name="cadastro_subtitle">Leva menos de um minuto</string>
+    <string name="recuperar_title">Recuperar senha</string>
+    <string name="recuperar_subtitle">Informe seu e-mail para receber as instruções</string>
+
+    <!-- Mensagens -->
+    <string name="err_campos_obrigatorios">Preencha os campos obrigatórios</string>
+    <string name="err_email_invalido">E-mail inválido</string>
+    <string name="err_cpf_invalido">CPF deve ter 11 dígitos</string>
+    <string name="err_senha_curta">A senha deve ter ao menos 6 caracteres</string>
+    <string name="err_senhas_diferentes">As senhas não coincidem</string>
+    <string name="err_email_existente">Já existe uma conta com este e-mail</string>
+    <string name="err_cpf_existente">Já existe uma conta com este CPF</string>
+    <string name="err_credenciais">E-mail ou senha incorretos</string>
+    <string name="msg_conta_criada">Conta criada com sucesso</string>
+    <string name="msg_recuperacao_enviada">Se o e-mail existir, enviaremos instruções</string>
+
+    <!-- Home / Menu -->
+    <string name="home_ola">Olá, %1$s</string>
+    <string name="home_subtitle">O que você quer gerenciar hoje?</string>
+    <string name="menu_propriedades">Minhas propriedades</string>
+    <string name="menu_perfil">Perfil do produtor</string>
+    <string name="acao_sair">Sair</string>
+
+    <!-- Perfil -->
+    <string name="perfil_title">Perfil do produtor</string>
+    <string name="perfil_editar">Editar perfil</string>
+    <string name="perfil_sem_valor">—</string>
+    <string name="label_email">E-mail</string>
+    <string name="label_cpf">CPF</string>
+    <string name="label_telefone">Telefone</string>
+    <string name="label_nascimento">Nascimento</string>
+    <string name="msg_em_breve">Disponível em breve</string>
+
+    <!-- Propriedades -->
+    <string name="prop_lista_title">Minhas propriedades</string>
+    <string name="prop_vazio">Nenhuma propriedade cadastrada.\nToque em + para adicionar.</string>
+    <string name="prop_nova_title">Nova propriedade</string>
+    <string name="prop_editar_title">Editar propriedade</string>
+    <string name="prop_detalhe_title">Detalhe da propriedade</string>
+    <string name="hint_prop_nome">Nome da propriedade</string>
+    <string name="hint_prop_localidade">Localidade</string>
+    <string name="hint_prop_area">Área total (ha)</string>
+    <string name="hint_prop_tipo_solo">Tipo de solo</string>
+    <string name="hint_prop_matricula">Matrícula</string>
+    <string name="hint_prop_cib">CIB (Cadastro do Imóvel Rural)</string>
+    <string name="hint_prop_valor">Valor estimado (R$)</string>
+    <string name="hint_prop_observacoes">Observações</string>
+    <string name="acao_salvar">Salvar</string>
+    <string name="acao_excluir">Excluir</string>
+    <string name="acao_editar">Editar</string>
+    <string name="msg_prop_salva">Propriedade salva</string>
+    <string name="msg_prop_excluida">Propriedade excluída</string>
+    <string name="err_prop_nome_obrigatorio">Informe o nome da propriedade</string>
+    <string name="fmt_area_ha">%1$s ha</string>
+
+    <!-- Talhões -->
+    <string name="menu_talhoes">Talhões</string>
+    <string name="talhao_lista_title">Talhões</string>
+    <string name="talhao_vazio">Nenhum talhão cadastrado.\nToque em + para adicionar.</string>
+    <string name="talhao_novo_title">Novo talhão</string>
+    <string name="talhao_editar_title">Editar talhão</string>
+    <string name="talhao_detalhe_title">Detalhe do talhão</string>
+    <string name="hint_talhao_nome">Nome do talhão</string>
+    <string name="hint_talhao_cultura">Cultura (ex.: Soja)</string>
+    <string name="hint_talhao_area">Área (ha)</string>
+    <string name="msg_talhao_salvo">Talhão salvo</string>
+    <string name="msg_talhao_excluido">Talhão excluído</string>
+    <string name="err_talhao_nome_obrigatorio">Informe o nome do talhão</string>
+
+    <!-- Safras / Culturas -->
+    <string name="menu_safras">Culturas / Safras</string>
+    <string name="safra_lista_title">Culturas / Safras</string>
+    <string name="safra_vazio">Nenhuma cultura/safra cadastrada.\nToque em + para adicionar.</string>
+    <string name="safra_nova_title">Nova cultura / safra</string>
+    <string name="safra_editar_title">Editar cultura / safra</string>
+    <string name="safra_detalhe_title">Detalhe da cultura / safra</string>
+    <string name="hint_safra_cultura">Cultura (ex.: Soja)</string>
+    <string name="hint_safra_variedade">Variedade da semente (ex.: Intacta RR2)</string>
+    <string name="hint_safra_ano">Ano safra (ex.: 2025/2026)</string>
+    <string name="hint_safra_inicio">Início (dd/mm/aaaa)</string>
+    <string name="hint_safra_fim">Fim (dd/mm/aaaa)</string>
+    <string name="msg_safra_salva">Cultura/safra salva</string>
+    <string name="msg_safra_excluida">Cultura/safra excluída</string>
+    <string name="err_safra_obrigatorio">Informe o ano da safra</string>
+    <string name="safra_talhao_info">Talhão</string>
+    <string name="safra_talhao_fmt">Talhão: %1$s • %2$s</string>
+    <string name="safra_sem_cultura">Sem cultura</string>
+
+    <!-- Nova safra rápida -->
+    <string name="safra_rapida_title">Nova safra rápida</string>
+    <string name="safra_rapida_subtitulo">Cadastre a safra (e o talhão, se for novo) em uma única tela.</string>
+    <string name="label_propriedade">Propriedade</string>
+    <string name="label_talhao">Talhão</string>
+    <string name="opcao_novo_talhao">+ Novo talhão</string>
+    <string name="safra_rapida_novo_talhao_titulo">Dados do novo talhão</string>
+    <string name="label_definir_meta">Definir meta financeira para essa safra</string>
+    <string name="err_safra_rapida_propriedade">Selecione a propriedade</string>
+    <string name="err_safra_rapida_sem_propriedades">Cadastre uma propriedade antes de continuar</string>
+    <string name="err_safra_rapida_talhao">Selecione um talhão ou cadastre um novo</string>
+    <string name="msg_safra_rapida_salva">Safra cadastrada com sucesso</string>
+    <string name="dash_nova_safra_rapida">+ Nova safra</string>
+
+    <!-- Financeiro -->
+    <string name="financeiro_title">Financeiro</string>
+    <string name="menu_ver_financeiro">Ver controle financeiro</string>
+    <string name="extrato_receitas">Receitas</string>
+    <string name="extrato_despesas">Despesas</string>
+    <string name="extrato_saldo">Saldo</string>
+    <string name="filtro_tudo">Tudo</string>
+    <string name="filtro_mes">Este mês</string>
+    <string name="extrato_vazio">Nenhum lançamento ainda.\nToque em + para adicionar.</string>
+    <string name="dialog_escolher_tipo">O que deseja lançar?</string>
+
+    <string name="nova_receita_title">Nova receita</string>
+    <string name="nova_despesa_title">Nova despesa</string>
+    <string name="editar_receita_title">Editar receita</string>
+    <string name="editar_despesa_title">Editar despesa</string>
+    <string name="acao_salvar_receita">Salvar receita</string>
+    <string name="acao_salvar_despesa">Salvar despesa</string>
+
+    <string name="hint_descricao">Descrição</string>
+    <string name="hint_valor">Valor (R$)</string>
+    <string name="hint_data">Data (dd/mm/aaaa)</string>
+    <string name="label_categoria">Categoria</string>
+    <string name="label_safra">Safra vinculada</string>
+    <string name="hint_desc_receita">Ex.: Venda de soja (120 sc)</string>
+    <string name="hint_desc_despesa">Ex.: Combustível trator</string>
+
+    <string name="err_descricao_obrigatoria">Informe a descrição</string>
+    <string name="err_valor_obrigatorio">Informe um valor válido</string>
+    <string name="err_categoria_obrigatoria">Selecione uma categoria</string>
+    <string name="err_safra_obrigatoria">Selecione a safra</string>
+    <string name="err_sem_safra">Cadastre uma cultura/safra antes de lançar</string>
+    <string name="msg_receita_salva">Receita salva</string>
+    <string name="msg_despesa_salva">Despesa salva</string>
+    <string name="msg_lancamento_excluido">Lançamento excluído</string>
+
+    <string name="lancamento_detalhe_title">Detalhe do lançamento</string>
+    <string name="label_tipo">Tipo</string>
+    <string name="tipo_receita">Receita</string>
+    <string name="tipo_despesa">Despesa</string>
+    <string name="label_data">Data</string>
+
+    <!-- Dashboard / Metas -->
+    <string name="metas_title">Metas</string>
+    <string name="dash_saldo_titulo">Saldo geral</string>
+    <string name="dash_add_receita">+ Receita</string>
+    <string name="dash_add_despesa">+ Despesa</string>
+    <string name="financas_global_title">Finanças</string>
+    <string name="financas_todas_safras">Todas as safras</string>
+
+    <!-- Metas -->
+    <string name="meta_lista_title">Metas financeiras</string>
+    <string name="meta_vazio">Nenhuma meta cadastrada.\nToque em + para adicionar.</string>
+    <string name="meta_nova_title">Nova meta</string>
+    <string name="meta_editar_title">Editar meta</string>
+    <string name="meta_detalhe_title">Acompanhamento da meta</string>
+    <string name="hint_meta_descricao">Descrição da meta</string>
+    <string name="hint_meta_valor">Valor alvo (R$)</string>
+    <string name="hint_meta_prazo">Prazo (dd/mm/aaaa)</string>
+    <string name="meta_de">%1$s de %2$s</string>
+    <string name="meta_percentual">%1$d%% da meta atingida</string>
+    <string name="meta_falta">Falta %1$s para atingir a meta</string>
+    <string name="meta_concluida">Meta atingida! 🎉</string>
+    <string name="meta_prazo_label">Prazo: %1$s</string>
+    <string name="meta_estimativas">Estimativas para atingir a meta</string>
+    <string name="hint_preco_saca">Preço por saca (R$)</string>
+    <string name="meta_sacas_result">Faltam ~%1$s sacas (a %2$s/sc)</string>
+    <string name="meta_sacas_info">Informe o preço da saca para estimar a produção necessária.</string>
+    <string name="msg_meta_salva">Meta salva</string>
+    <string name="msg_meta_excluida">Meta excluída</string>
+    <string name="err_meta_descricao">Informe a descrição da meta</string>
+    <string name="err_meta_valor">Informe o valor alvo</string>
+    <string name="err_meta_propriedade">Selecione a propriedade</string>
+
+    <!-- Indicadores / Relatório -->
+    <string name="indicadores_title">Indicadores</string>
+    <string name="ind_margem">Margem líquida</string>
+    <string name="ind_receita_ha">Receita por hectare</string>
+    <string name="ind_custo_ha">Custo por hectare</string>
+    <string name="ind_metas">Metas cadastradas</string>
+    <string name="ind_ver_relatorio">Ver relatório por período</string>
+    <string name="dash_ver_indicadores">Ver indicadores</string>
+    <string name="fmt_por_ha">%1$s / ha</string>
+    <string name="fmt_metas_ativas">%1$d ativa(s)</string>
+
+    <string name="relatorio_title">Relatório por período</string>
+    <string name="hint_data_inicio">Início (dd/mm/aaaa)</string>
+    <string name="hint_data_fim">Fim (dd/mm/aaaa)</string>
+    <string name="rel_aplicar">Aplicar</string>
+    <string name="rel_exportar">Exportar relatório</string>
+    <string name="rel_grafico_titulo">Receitas x Despesas por mês</string>
+    <string name="rel_vazio">Sem lançamentos no período.</string>
+    <string name="msg_export_em_breve">Exportação disponível em breve</string>
+
+    <!-- DRE -->
+    <string name="dre_title">DRE — Resultado do exercício</string>
+    <string name="dre_ano">Ano</string>
+    <string name="dre_receitas">Receitas (receita bruta)</string>
+    <string name="dre_impostos">(−) Impostos</string>
+    <string name="dre_receita_liquida">(=) Receita líquida</string>
+    <string name="dre_custos">(−) Custos de produção</string>
+    <string name="dre_custos_obs">Sementes · Insumos · Combustível · Máquinas</string>
+    <string name="dre_resultado_bruto">(=) Resultado bruto</string>
+    <string name="dre_outras">(−) Outras despesas</string>
+    <string name="dre_outras_obs">Documentos · Outras despesas operacionais</string>
+    <string name="dre_resultado">(=) Resultado do exercício</string>
+    <string name="dre_ver">Ver DRE (resultado anual)</string>
+
+    <!-- Editar perfil -->
+    <string name="editar_perfil_title">Editar perfil</string>
+    <string name="acao_salvar_alteracoes">Salvar alterações</string>
+    <string name="msg_perfil_salvo">Perfil atualizado</string>
+
+    <!-- Configurações -->
+    <string name="config_title">Configurações</string>
+    <string name="config_preferencias">Preferências</string>
+    <string name="config_notif_push">Notificações push</string>
+    <string name="config_modo_escuro">Modo escuro</string>
+    <string name="config_backup">Backup automático</string>
+    <string name="config_dados">Dados e privacidade</string>
+    <string name="config_exportar">Exportar meus dados</string>
+    <string name="config_alterar_senha">Alterar senha</string>
+    <string name="config_excluir_conta">Excluir conta</string>
+    <string name="config_sobre_item">Sobre e ajuda</string>
+    <string name="dialog_nova_senha">Nova senha</string>
+    <string name="dialog_confirmar_exclusao">Excluir a conta e todos os dados? Esta ação não pode ser desfeita.</string>
+    <string name="msg_senha_alterada">Senha alterada</string>
+    <string name="msg_conta_excluida">Conta excluída</string>
+    <string name="msg_export_dados_em_breve">Exportação de dados disponível em breve</string>
+
+    <!-- Notificações -->
+    <string name="notif_title">Notificações</string>
+    <string name="notif_vazio">Nenhuma notificação por enquanto.</string>
+    <string name="notif_receita">Receita registrada</string>
+    <string name="notif_despesa">Despesa registrada</string>
+
+    <!-- Sobre e ajuda -->
+    <string name="sobre_title">Sobre e ajuda</string>
+    <string name="sobre_versao">Versão 1.0 · Funciona offline</string>
+    <string name="sobre_descricao">Protótipo desenvolvido como Trabalho de Conclusão de Curso em Ciência da Computação (UNESC), para auxiliar produtores rurais no acompanhamento financeiro e contábil.</string>
+    <string name="sobre_faq">Perguntas frequentes</string>
+    <string name="sobre_suporte">Falar com o suporte</string>
+    <string name="sobre_termos">Termos de uso</string>
+    <string name="sobre_privacidade">Política de privacidade</string>
+
+    <!-- Sucesso -->
+    <string name="sucesso_voltar">Voltar ao início</string>
+    <string name="sucesso_receita">Receita salva com sucesso!</string>
+    <string name="sucesso_despesa">Despesa salva com sucesso!</string>
+
+    <!-- Perfil (itens) -->
+    <string name="perfil_configuracoes">Configurações</string>
+    <string name="perfil_notificacoes">Notificações</string>
+
+    <!-- Máquinas -->
+    <string name="maquina_lista_title">Máquinas</string>
+    <string name="maquina_vazio">Nenhuma máquina cadastrada.\nToque em + para adicionar.</string>
+    <string name="maquina_nova_title">Nova máquina</string>
+    <string name="maquina_editar_title">Editar máquina</string>
+    <string name="maquina_detalhe_title">Detalhe da máquina</string>
+    <string name="perfil_maquinas">Minhas máquinas</string>
+    <string name="perfil_propriedades">Minhas propriedades</string>
+    <string name="perfil_cadastros">Cadastros</string>
+    <string name="hint_maq_nome">Nome / apelido</string>
+    <string name="hint_maq_nome_ex">Ex.: Trator MF 4275</string>
+    <string name="hint_maq_tipo">Tipo</string>
+    <string name="hint_maq_marca">Marca</string>
+    <string name="hint_maq_modelo">Modelo</string>
+    <string name="hint_maq_ano">Ano</string>
+    <string name="hint_maq_identificacao">Identificação (série/placa)</string>
+    <string name="hint_maq_valor">Valor estimado (R$)</string>
+    <string name="hint_maq_observacoes">Observações</string>
+    <string name="acao_salvar_maquina">Salvar máquina</string>
+    <string name="err_maq_nome">Informe o nome/apelido da máquina</string>
+    <string name="msg_maquina_salva">Máquina salva</string>
+    <string name="msg_maquina_excluida">Máquina excluída</string>
+    <string name="maq_gasto_total">Gasto total: %1$s</string>
+    <string name="maq_despesas_titulo">Despesas vinculadas</string>
+    <string name="maq_anotacoes_titulo">Anotações / manutenção</string>
+    <string name="maq_sem_despesas">Nenhuma despesa vinculada a esta máquina.</string>
+    <string name="maq_sem_anotacoes">Nenhuma anotação ainda.</string>
+    <string name="maq_nova_anotacao">Nova anotação</string>
+    <string name="hint_anotacao_texto">Anotação (ex.: Revisão da S400)</string>
+    <string name="hint_anotacao_data">Data (dd/mm/aaaa) — opcional</string>
+    <string name="msg_anotacao_salva">Anotação salva</string>
+    <string name="err_anotacao_texto">Escreva a anotação</string>
+    <string name="anotacao_marcar_realizada">Marcar como realizada</string>
+    <string name="anotacao_marcar_pendente">Marcar como pendente</string>
+    <string name="anotacao_status_concluida">Concluída</string>
+    <string name="anotacao_status_atrasada">Atrasada</string>
+    <string name="anotacao_status_no_prazo">No prazo</string>
+    <string name="anotacao_status_sem_prazo">Sem prazo</string>
+    <string name="msg_anotacao_atualizada">Anotação atualizada</string>
+
+    <!-- Avisos de manutenção (Notificações) -->
+    <string name="notif_manutencao_titulo">Manutenção de máquinas</string>
+    <string name="aviso_atrasado">Atrasado</string>
+    <string name="aviso_prazo">Vence %1$s</string>
+
+    <!-- Despesa: máquina opcional -->
+    <string name="label_maquina_opcional">Máquina (opcional)</string>
+    <string name="maquina_nenhuma">Nenhuma</string>
+
+    <!-- Culturas -->
+    <string name="cultura_lista_title">Culturas</string>
+    <string name="menu_culturas">Culturas</string>
+    <string name="cultura_vazio">Nenhuma cultura cadastrada.\nToque em + para adicionar.</string>
+    <string name="cultura_nova_title">Nova cultura</string>
+    <string name="cultura_editar_title">Editar cultura</string>
+    <string name="hint_cultura_nome">Nome da cultura (ex.: Soja)</string>
+    <string name="msg_cultura_salva">Cultura salva</string>
+    <string name="err_cultura_nome">Informe o nome da cultura</string>
+
+    <!-- Meta: safra -->
+    <string name="hint_meta_safra">Safra</string>
+    <string name="err_meta_safra">Selecione a safra</string>
+</resources>

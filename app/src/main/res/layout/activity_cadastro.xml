@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_lg">
+
+        <TextView
+            style="@style/Text.H1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/cadastro_title" />
+
+        <TextView
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/cadastro_subtitle" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:hint="@string/hint_nome">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtNome" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textPersonName"
+                android:maxLength="80" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_email">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtEmail" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textEmailAddress"
+                android:maxLength="120" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_cpf">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtCpf" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="number"
+                android:maxLength="14" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_telefone">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTelefone" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="number"
+                android:maxLength="15" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_nascimento">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtNascimento" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="number"
+                android:maxLength="10" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" app:endIconMode="password_toggle"
+            android:hint="@string/hint_senha">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtSenha" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textPassword"
+                android:maxLength="40" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" app:endIconMode="password_toggle"
+            android:hint="@string/hint_confirmar_senha">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtConfirmar" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textPassword"
+                android:maxLength="40" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/btnCadastrar"
+            style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/action_cadastrar" />
+
+        <Button
+            android:id="@+id/btnIrLogin"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm" android:text="@string/link_ja_tenho" />
+    </LinearLayout>
+</ScrollView>

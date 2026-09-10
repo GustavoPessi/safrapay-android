@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Design System AgroConta (hex exatos do Figma) -->
+    <color name="green_900">#1B5E20</color>  <!-- Primária escura -->
+    <color name="green_700">#2E7D32</color>  <!-- Primária -->
+    <color name="green_500">#43A047</color>
+    <color name="green_300">#A5D6A7</color>  <!-- Primária clara -->
+    <color name="green_100">#E8F5E9</color>  <!-- Verde 50 -->
+
+    <color name="earth_700">#5D4037</color>
+    <color name="amber_500">#F9A825</color>  <!-- Alerta -->
+
+    <color name="receita">#2E7D32</color>    <!-- Receita -->
+    <color name="despesa">#E53935</color>    <!-- Despesa -->
+
+    <color name="text_primary">#1A241C</color>
+    <color name="text_secondary">#607063</color>
+    <color name="text_hint">#8A9689</color>
+
+    <color name="surface">#FFFFFF</color>
+    <color name="background">#F3F7F2</color>  <!-- Fundo -->
+    <color name="outline">#DCE3D6</color>
+    <color name="error">#E53935</color>
+    <color name="white">#FFFFFF</color>
+</resources>

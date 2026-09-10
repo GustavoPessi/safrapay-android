@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:layout_marginBottom="@dimen/space_md">
+
+    <TextView android:id="@+id/txtMes" style="@style/Text.Body"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textSize="@dimen/text_caption" android:textColor="@color/text_primary" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="10dp"
+        android:layout_marginTop="4dp" android:orientation="horizontal" android:weightSum="1">
+        <View android:id="@+id/barReceita" android:layout_width="0dp"
+            android:layout_height="match_parent" android:background="@color/receita" />
+        <View android:id="@+id/spacerReceita" android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="10dp"
+        android:layout_marginTop="3dp" android:orientation="horizontal" android:weightSum="1">
+        <View android:id="@+id/barDespesa" android:layout_width="0dp"
+            android:layout_height="match_parent" android:background="@color/despesa" />
+        <View android:id="@+id/spacerDespesa" android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/txtValores" style="@style/Text.Body"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="2dp" android:textSize="11sp" />
+</LinearLayout>

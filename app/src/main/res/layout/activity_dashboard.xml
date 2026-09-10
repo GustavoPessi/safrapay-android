@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <TextView android:id="@+id/txtOla" style="@style/Text.H1"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+        <!-- Saldo geral -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:background="@drawable/bg_card"
+            android:orientation="vertical" android:padding="@dimen/space_lg">
+            <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/dash_saldo_titulo"
+                android:textSize="@dimen/text_caption" />
+            <TextView android:id="@+id/txtSaldo" style="@style/Text.H1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs" android:textSize="32sp" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md" android:orientation="horizontal">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/extrato_receitas"
+                        android:textSize="@dimen/text_caption" />
+                    <TextView android:id="@+id/txtReceitas" style="@style/Text.H2"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/receita" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/extrato_despesas"
+                        android:textSize="@dimen/text_caption" />
+                    <TextView android:id="@+id/txtDespesas" style="@style/Text.H2"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="@color/despesa" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Atalhos -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:orientation="horizontal">
+            <Button android:id="@+id/btnAddReceita" style="@style/Widget.App.Button"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginEnd="@dimen/space_sm"
+                android:text="@string/dash_add_receita" />
+            <Button android:id="@+id/btnAddDespesa" style="@style/Widget.App.Button"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_marginStart="@dimen/space_sm"
+                android:backgroundTint="@color/despesa"
+                android:text="@string/dash_add_despesa" />
+        </LinearLayout>
+
+        <Button android:id="@+id/btnIndicadores" style="@style/Widget.App.Button.Text"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:text="@string/dash_ver_indicadores" />
+
+        <Button android:id="@+id/btnNovaSafraRapida" style="@style/Widget.App.Button.Text"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs" android:text="@string/dash_nova_safra_rapida" />
+    </LinearLayout>
+</ScrollView>

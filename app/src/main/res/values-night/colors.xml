@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Modo escuro do AgroConta -->
+    <color name="green_900">#1B5E20</color>
+    <color name="green_700">#2E7D32</color>
+    <color name="green_500">#43A047</color>
+    <color name="green_300">#2E7D32</color>
+    <color name="green_100">#24311F</color>   <!-- tint de ícones em fundo escuro -->
+
+    <color name="earth_700">#8D6E63</color>
+    <color name="amber_500">#F9A825</color>
+
+    <color name="receita">#66BB6A</color>
+    <color name="despesa">#EF5350</color>
+
+    <color name="text_primary">#ECF1EC</color>
+    <color name="text_secondary">#B4BEB4</color>
+    <color name="text_hint">#7E8A7E</color>
+
+    <color name="surface">#1C241C</color>
+    <color name="background">#10160F</color>
+    <color name="outline">#39423A</color>
+    <color name="error">#EF5350</color>
+    <color name="white">#FFFFFF</color>
+</resources>

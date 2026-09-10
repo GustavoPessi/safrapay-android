@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/space_md"
+    android:background="@drawable/bg_card"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="@dimen/space_md">
+
+    <ImageView android:layout_width="40dp" android:layout_height="40dp"
+        android:background="@color/green_100" android:padding="@dimen/space_sm"
+        android:src="@drawable/ic_farm" android:contentDescription="@null" />
+
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1" android:layout_marginStart="@dimen/space_md"
+        android:orientation="vertical">
+        <TextView android:id="@+id/txtNome" style="@style/Text.H2"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:maxLines="1" android:ellipsize="end" />
+        <TextView android:id="@+id/txtInfo" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:maxLines="1" android:ellipsize="end"
+            android:textSize="@dimen/text_caption" />
+    </LinearLayout>
+
+    <ImageView android:layout_width="24dp" android:layout_height="24dp"
+        android:src="@drawable/ic_chevron" android:contentDescription="@null" />
+</LinearLayout>

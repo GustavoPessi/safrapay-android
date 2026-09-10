@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="@string/config_preferencias"
+            android:textColor="@color/text_hint" android:textSize="@dimen/text_caption" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm" android:background="@drawable/bg_card"
+            android:orientation="vertical" android:padding="@dimen/space_sm">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:orientation="horizontal" android:padding="@dimen/space_sm">
+                <TextView style="@style/Text.Body" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/config_notif_push"
+                    android:textColor="@color/text_primary" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swNotif" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:orientation="horizontal" android:padding="@dimen/space_sm">
+                <TextView style="@style/Text.Body" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/config_modo_escuro"
+                    android:textColor="@color/text_primary" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swModoEscuro" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:orientation="horizontal" android:padding="@dimen/space_sm">
+                <TextView style="@style/Text.Body" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/config_backup"
+                    android:textColor="@color/text_primary" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swBackup" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/config_dados" android:textColor="@color/text_hint"
+            android:textSize="@dimen/text_caption" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm" android:background="@drawable/bg_card"
+            android:orientation="vertical">
+            <TextView android:id="@+id/rowExportar" style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:padding="@dimen/space_md" android:text="@string/config_exportar"
+                android:textColor="@color/text_primary" android:background="?attr/selectableItemBackground" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline" />
+            <TextView android:id="@+id/rowAlterarSenha" style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:padding="@dimen/space_md" android:text="@string/config_alterar_senha"
+                android:textColor="@color/text_primary" android:background="?attr/selectableItemBackground" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline" />
+            <TextView android:id="@+id/rowExcluir" style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:padding="@dimen/space_md" android:text="@string/config_excluir_conta"
+                android:textColor="@color/error" android:background="?attr/selectableItemBackground" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/rowSobre" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:background="@drawable/bg_card"
+            android:padding="@dimen/space_md" android:text="@string/config_sobre_item"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/bg_card" android:gravity="center"
+            android:orientation="vertical" android:padding="@dimen/space_lg">
+            <ImageView android:id="@+id/imgTipo" android:layout_width="48dp" android:layout_height="48dp"
+                android:src="@drawable/ic_receita" android:contentDescription="@null" />
+            <TextView android:id="@+id/txtValor" style="@style/Text.H1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" />
+            <TextView android:id="@+id/txtDescricao" style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:background="@drawable/bg_card"
+            android:orientation="vertical" android:padding="@dimen/space_md">
+            <TextView android:id="@+id/txtTipo" style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content" />
+            <TextView android:id="@+id/txtData" style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" />
+        </LinearLayout>
+
+        <Button android:id="@+id/btnEditar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_editar" />
+        <Button android:id="@+id/btnExcluir" style="@style/Widget.App.Button.Text"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs" android:text="@string/acao_excluir"
+            android:textColor="@color/error" />
+    </LinearLayout>
+</ScrollView>

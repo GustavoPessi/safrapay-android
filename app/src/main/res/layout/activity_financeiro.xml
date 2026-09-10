@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/space_lg">
+
+        <TextView android:id="@+id/txtSafra" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipsFiltro"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            app:singleSelection="true" app:selectionRequired="true">
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTudo" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/filtro_tudo" android:checked="true" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipMes" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/filtro_mes" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Resumo -->
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
+            android:orientation="horizontal" android:padding="@dimen/space_md">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_receitas"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtTotalReceitas" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/receita" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_despesas"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtTotalDespesas" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/despesa" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_saldo"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtSaldo" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
+            android:layout_weight="1" android:layout_marginTop="@dimen/space_md">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:clipToPadding="false" android:paddingBottom="80dp" />
+            <TextView android:id="@+id/txtVazio" style="@style/Text.Body"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center" android:gravity="center"
+                android:text="@string/extrato_vazio" android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNovo"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end" android:layout_margin="@dimen/space_lg"
+        android:contentDescription="@string/dialog_escolher_tipo"
+        android:src="@android:drawable/ic_input_add"
+        app:tint="@color/white" app:backgroundTint="@color/green_700" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

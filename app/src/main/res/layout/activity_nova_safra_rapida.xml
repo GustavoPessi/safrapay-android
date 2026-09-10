@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <TextView style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_md"
+            android:textColor="@color/text_secondary"
+            android:text="@string/safra_rapida_subtitulo" />
+
+        <!-- Propriedade -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="@string/label_propriedade"
+            app:endIconMode="dropdown_menu">
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/dropPropriedade" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Talhão -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/label_talhao"
+            app:endIconMode="dropdown_menu">
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/dropTalhao" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Bloco: dados do novo talhão (só aparece se "+ Novo talhão" for escolhido) -->
+        <LinearLayout android:id="@+id/layoutNovoTalhao"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
+            android:orientation="vertical" android:padding="@dimen/space_md"
+            android:visibility="gone">
+
+            <TextView style="@style/Text.Body"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/space_sm"
+                android:textColor="@color/text_secondary" android:textSize="@dimen/text_caption"
+                android:text="@string/safra_rapida_novo_talhao_titulo" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="@string/hint_talhao_nome">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtNovoTalhaoNome" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="textCapWords"
+                    android:maxLength="60" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" android:hint="@string/hint_talhao_cultura">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtNovoTalhaoCultura" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="textCapWords"
+                    android:maxLength="60" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" android:hint="@string/hint_talhao_area">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtNovoTalhaoArea" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="numberDecimal"
+                    android:maxLength="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- Dados da safra -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_safra_ano">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtAno" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="text"
+                android:maxLength="9" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_safra_variedade">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtVariedade" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textCapWords"
+                android:maxLength="60" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_safra_inicio">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtInicio" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="number"
+                android:maxLength="10" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_safra_fim">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtFim" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="number"
+                android:maxLength="10" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Meta opcional -->
+        <LinearLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:background="@drawable/bg_card"
+            android:orientation="vertical" android:padding="@dimen/space_sm">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:gravity="center_vertical" android:orientation="horizontal" android:padding="@dimen/space_sm">
+                <TextView style="@style/Text.Body" android:layout_width="0dp" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:text="@string/label_definir_meta"
+                    android:textColor="@color/text_primary" />
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swMeta" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout android:id="@+id/layoutMeta"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="@dimen/space_sm"
+                android:visibility="gone">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.App.TextInputLayout"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="@string/hint_meta_descricao">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtMetaDescricao" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:inputType="textCapSentences"
+                        android:maxLength="80" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.App.TextInputLayout"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm" android:hint="@string/hint_meta_valor">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtMetaValor" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:inputType="numberDecimal"
+                        android:maxLength="14" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.App.TextInputLayout"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm" android:hint="@string/hint_meta_prazo">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtMetaPrazo" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:inputType="number"
+                        android:maxLength="10" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <Button android:id="@+id/btnSalvar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_salvar" />
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="@string/hint_descricao">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtDescricao" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textCapSentences"
+                android:maxLength="120" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_valor">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtValor" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="numberDecimal"
+                android:maxLength="14" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/label_safra"
+            app:endIconMode="dropdown_menu">
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/dropSafra" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_data">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtData" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="number"
+                android:maxLength="10" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button android:id="@+id/btnSalvar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_salvar_receita" />
+    </LinearLayout>
+</ScrollView>

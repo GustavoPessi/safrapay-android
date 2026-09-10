@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_lg">
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="@string/hint_prop_nome">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtNome" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textCapWords"
+                android:maxLength="80" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_localidade">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtLocalidade" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textCapWords"
+                android:maxLength="120" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_area">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtArea" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="numberDecimal"
+                android:maxLength="12" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_tipo_solo">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtTipoSolo" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textCapSentences"
+                android:maxLength="60" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_matricula">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtMatricula" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="text"
+                android:maxLength="40" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_cib">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtCib" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="text"
+                android:maxLength="40" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_valor">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtValor" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="numberDecimal"
+                android:maxLength="14" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.App.TextInputLayout"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:hint="@string/hint_prop_observacoes">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtObservacoes" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3" android:gravity="top" android:maxLength="500" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button android:id="@+id/btnSalvar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_salvar" />
+    </LinearLayout>
+</ScrollView>

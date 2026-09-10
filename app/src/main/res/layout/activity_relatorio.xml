@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <!-- Período -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/space_sm" android:hint="@string/hint_data_inicio">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtInicio" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="number" android:maxLength="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm" android:hint="@string/hint_data_fim">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtFim" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="number" android:maxLength="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <Button android:id="@+id/btnAplicar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/rel_aplicar" />
+
+        <!-- Totais -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
+            android:orientation="horizontal" android:padding="@dimen/space_md">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_receitas"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtTotReceitas" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/receita" android:textSize="@dimen/text_body" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_despesas"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtTotDespesas" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textColor="@color/despesa" android:textSize="@dimen/text_body" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:orientation="vertical">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_saldo"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtTotSaldo" style="@style/Text.H2"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="@dimen/text_body" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Gráfico -->
+        <TextView style="@style/Text.H2" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/rel_grafico_titulo" android:textSize="@dimen/text_body" />
+
+        <LinearLayout android:id="@+id/chartContainer"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:layout_marginTop="@dimen/space_md" />
+
+        <TextView android:id="@+id/txtVazio" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:gravity="center" android:text="@string/rel_vazio"
+            android:layout_marginTop="@dimen/space_md" android:visibility="gone" />
+
+        <Button android:id="@+id/btnExportar" style="@style/Widget.App.Button.Text"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/rel_exportar" />
+    </LinearLayout>
+</ScrollView>
