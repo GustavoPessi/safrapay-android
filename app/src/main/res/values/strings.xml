@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AgroConta</string>
+    <string name="app_name">SafraPay</string>
     <string name="app_tagline">Gestão e contabilidade rural</string>
 
     <!-- Onboarding -->

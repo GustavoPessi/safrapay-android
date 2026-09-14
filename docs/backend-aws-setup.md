@@ -1,6 +1,6 @@
-# AgroConta — Guia inicial: servidor AWS + backend
+# SafraPay — Guia inicial: servidor AWS + backend
 
-Este guia é o **passo a passo do que você precisa fazer** para ter o backend do AgroConta rodando na AWS. Ele é voltado para TCC (free tier, custo baixo, sem exageros de infraestrutura).
+Este guia é o **passo a passo do que você precisa fazer** para ter o backend do SafraPay rodando na AWS. Ele é voltado para TCC (free tier, custo baixo, sem exageros de infraestrutura).
 
 ## 1. Antes de tudo: entenda a ordem
 
