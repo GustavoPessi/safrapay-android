@@ -5,10 +5,13 @@ import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
 import com.tcc.gestaorural.data.remote.dto.EsqueciSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.LoginRequestDto;
 import com.tcc.gestaorural.data.remote.dto.MensagemResponseDto;
+import com.tcc.gestaorural.data.remote.dto.PerfilRequestDto;
+import com.tcc.gestaorural.data.remote.dto.PerfilResponseDto;
 import com.tcc.gestaorural.data.remote.dto.RegisterRequestDto;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -33,4 +36,13 @@ public interface ApiService {
     @PUT("api/auth/alterar-senha")
     Call<MensagemResponseDto> alterarSenha(@Header("Authorization") String bearerToken,
                                             @Body AlterarSenhaRequestDto request);
+
+    // Perfil (nome/cpf/telefone/nascimento) - e-mail e senha ficam de fora
+    // (tem fluxos proprios). Rotas autenticadas, mesma logica do header acima.
+    @GET("api/usuario/perfil")
+    Call<PerfilResponseDto> buscarPerfil(@Header("Authorization") String bearerToken);
+
+    @PUT("api/usuario/perfil")
+    Call<PerfilResponseDto> atualizarPerfil(@Header("Authorization") String bearerToken,
+                                             @Body PerfilRequestDto request);
 }

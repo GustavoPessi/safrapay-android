@@ -11,6 +11,8 @@ import com.tcc.gestaorural.data.remote.ApiService;
 import com.tcc.gestaorural.data.remote.RetrofitClient;
 import com.tcc.gestaorural.data.remote.dto.AlterarSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.MensagemResponseDto;
+import com.tcc.gestaorural.data.remote.dto.PerfilRequestDto;
+import com.tcc.gestaorural.data.remote.dto.PerfilResponseDto;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.SecurityUtils;
 import com.tcc.gestaorural.util.SessionManager;
@@ -34,26 +36,52 @@ public class UsuarioRepository {
 
     public LiveData<Usuario> obter(long id) { return dao.observarPorId(id); }
 
-    public void atualizarPerfil(final Usuario u, final String emailNovo, final Resultado cb) {
-        AppDatabase.IO.execute(() -> {
-            String email = emailNovo.trim().toLowerCase();
-            Usuario existentePorEmail = dao.buscarPorEmail(email);
-            if (existentePorEmail != null && existentePorEmail.id != u.id) {
-                cb.erro(com.tcc.gestaorural.R.string.err_email_existente);
-                return;
-            }
-            if (u.cpf != null) {
-                Usuario existentePorCpf = dao.buscarPorCpf(u.cpf);
-                if (existentePorCpf != null && existentePorCpf.id != u.id) {
-                    cb.erro(com.tcc.gestaorural.R.string.err_cpf_existente);
-                    return;
+    /**
+     * Atualiza nome/CPF/telefone/nascimento no backend (fonte de verdade) e,
+     * so depois de confirmado, espelha a copia local. O e-mail nao entra
+     * aqui de proposito: mudar o e-mail de uma conta ja verificada exigiria
+     * um fluxo de reconfirmacao que ainda nao existe - por isso o campo de
+     * e-mail fica so-leitura na tela "Editar perfil".
+     */
+    public void atualizarPerfil(final Usuario u, final Resultado cb) {
+        String token = new SessionManager(appContext).getToken();
+        if (token == null) {
+            cb.erro(com.tcc.gestaorural.R.string.err_servidor);
+            return;
+        }
+
+        PerfilRequestDto request = new PerfilRequestDto();
+        request.nome = u.nome;
+        request.cpf = u.cpf;
+        request.telefone = u.telefone;
+        request.nascimento = DateUtils.brParaIso(u.nascimento);
+
+        api.atualizarPerfil("Bearer " + token, request).enqueue(new retrofit2.Callback<PerfilResponseDto>() {
+            @Override
+            public void onResponse(Call<PerfilResponseDto> call, Response<PerfilResponseDto> response) {
+                PerfilResponseDto body = response.body();
+                if (response.isSuccessful() && body != null) {
+                    AppDatabase.IO.execute(() -> {
+                        u.nome = body.nome;
+                        u.cpf = body.cpf;
+                        u.telefone = body.telefone;
+                        u.nascimento = body.nascimento == null ? null : DateUtils.isoParaBr(body.nascimento);
+                        u.atualizadoEm = DateUtils.agora();
+                        u.sincronizado = 1;
+                        dao.atualizar(u);
+                        cb.ok();
+                    });
+                } else if (response.code() == 400) {
+                    cb.erro(com.tcc.gestaorural.R.string.err_cpf_invalido);
+                } else {
+                    cb.erro(com.tcc.gestaorural.R.string.err_servidor);
                 }
             }
-            u.email = email;
-            u.atualizadoEm = DateUtils.agora();
-            u.sincronizado = 0;
-            dao.atualizar(u);
-            cb.ok();
+
+            @Override
+            public void onFailure(Call<PerfilResponseDto> call, Throwable t) {
+                cb.erro(com.tcc.gestaorural.R.string.err_servidor);
+            }
         });
     }
 

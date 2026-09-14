@@ -35,7 +35,7 @@ public class UsuarioViewModel extends AndroidViewModel {
         @Override public void erro(int res) { resultado.postValue(new Evento(false, res)); }
     };
 
-    public void salvarPerfil(Usuario u, String emailNovo) { repo.atualizarPerfil(u, emailNovo, cb); }
+    public void salvarPerfil(Usuario u) { repo.atualizarPerfil(u, cb); }
     public void alterarSenha(long id, String atual, String nova) { repo.alterarSenha(id, atual, nova, cb); }
     public void excluirConta(long id) { repo.excluirConta(id, () -> excluido.postValue(true)); }
 }

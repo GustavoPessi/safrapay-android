@@ -1,7 +1,6 @@
 package com.tcc.gestaorural.ui.perfil;
 
 import android.os.Bundle;
-import android.util.Patterns;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -37,6 +36,11 @@ public class EditarPerfilActivity extends BaseActivity {
         MaskUtils.aplicarTelefone(edtTelefone);
         MaskUtils.aplicarData(edtNascimento);
 
+        // E-mail nao e editavel aqui: mudar o e-mail de uma conta ja
+        // verificada exigiria um fluxo de reconfirmacao que ainda nao
+        // existe no backend. Mostramos o valor, so nao deixamos editar.
+        edtEmail.setEnabled(false);
+
         usuarioId = new SessionManager(this).getUsuarioId();
         vm.obter(usuarioId).observe(this, u -> {
             if (u != null && usuario == null) {
@@ -63,11 +67,8 @@ public class EditarPerfilActivity extends BaseActivity {
 
     private void salvar() {
         if (usuario == null) return;
-        String nome = txt(edtNome), email = txt(edtEmail);
+        String nome = txt(edtNome);
         if (nome.isEmpty()) { Toast.makeText(this, R.string.err_campos_obrigatorios, Toast.LENGTH_LONG).show(); return; }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, R.string.err_email_invalido, Toast.LENGTH_LONG).show(); return;
-        }
         String cpf = txt(edtCpf);
         String cpfDigitos = MaskUtils.digitos(cpf);
         if (!cpfDigitos.isEmpty() && cpfDigitos.length() != 11) {
@@ -77,7 +78,7 @@ public class EditarPerfilActivity extends BaseActivity {
         usuario.cpf = cpfDigitos.isEmpty() ? null : cpfDigitos;
         usuario.telefone = txt(edtTelefone).isEmpty() ? null : txt(edtTelefone);
         usuario.nascimento = txt(edtNascimento).isEmpty() ? null : txt(edtNascimento);
-        vm.salvarPerfil(usuario, email);
+        vm.salvarPerfil(usuario);
     }
 
     private String txt(TextInputEditText e) { return e.getText() == null ? "" : e.getText().toString().trim(); }

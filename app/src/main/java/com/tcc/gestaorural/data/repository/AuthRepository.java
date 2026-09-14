@@ -60,7 +60,8 @@ public class AuthRepository {
                 email.trim().toLowerCase(),
                 senha,
                 cpfDigitos.isEmpty() ? null : cpfDigitos,
-                telefone == null || telefone.trim().isEmpty() ? null : telefone.trim());
+                telefone == null || telefone.trim().isEmpty() ? null : telefone.trim(),
+                DateUtils.brParaIso(nascimento));
 
         api.registrar(request).enqueue(new retrofit2.Callback<MensagemResponseDto>() {
             @Override
@@ -115,16 +116,38 @@ public class AuthRepository {
      * so pra manter funcionando as telas offline que ainda usam usuarioId
      * local. A senha aqui NAO e mais a fonte de verdade (quem autentica e o
      * backend) - so preenchemos a coluna NOT NULL local.
+     *
+     * cpf/telefone/nascimento vem do backend (fonte de verdade hoje, ja que
+     * "Editar perfil" ainda so grava local - ver observacao la). Numa conta
+     * ja existente localmente, so preenchemos os campos que ainda estiverem
+     * vazios aqui, pra nao sobrescrever nada que o usuario tenha digitado em
+     * "Editar perfil" e que ainda nao tenha ido pro servidor.
      */
     private long garantirUsuarioLocal(AuthResponseDto body, String senha) {
         Usuario existente = usuarioDao.buscarPorEmail(body.email);
-        if (existente != null) return existente.id;
+        if (existente != null) {
+            boolean mudou = false;
+            if (existente.cpf == null && body.cpf != null) { existente.cpf = body.cpf; mudou = true; }
+            if (existente.telefone == null && body.telefone != null) { existente.telefone = body.telefone; mudou = true; }
+            if (existente.nascimento == null && body.nascimento != null) {
+                existente.nascimento = DateUtils.isoParaBr(body.nascimento);
+                mudou = true;
+            }
+            if (mudou) {
+                existente.atualizadoEm = DateUtils.agora();
+                usuarioDao.atualizar(existente);
+            }
+            return existente.id;
+        }
 
         Usuario u = new Usuario();
         u.uuid = UUID.randomUUID().toString();
         u.nome = body.nome;
         u.email = body.email;
         u.senhaHash = SecurityUtils.hashSenha(senha);
+        u.cpf = body.cpf;
+        u.telefone = body.telefone;
+        u.nascimento = body.nascimento == null ? null : DateUtils.isoParaBr(body.nascimento);
         u.criadoEm = DateUtils.agora();
         u.atualizadoEm = u.criadoEm;
         u.sincronizado = 0;
