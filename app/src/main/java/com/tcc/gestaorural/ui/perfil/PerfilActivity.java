@@ -16,6 +16,7 @@ import com.tcc.gestaorural.ui.maquina.ListaMaquinasActivity;
 import com.tcc.gestaorural.ui.propriedade.ListaPropriedadesActivity;
 import com.tcc.gestaorural.ui.notificacoes.NotificacoesActivity;
 import com.tcc.gestaorural.ui.auth.LoginActivity;
+import com.tcc.gestaorural.data.sync.SyncManager;
 import com.tcc.gestaorural.util.MaskUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
@@ -41,6 +42,7 @@ public class PerfilActivity extends BaseActivity {
                 startActivity(new Intent(this, ListaPropriedadesActivity.class)));
         findViewById(R.id.rowMaquinas).setOnClickListener(v ->
                 startActivity(new Intent(this, ListaMaquinasActivity.class)));
+        findViewById(R.id.rowSincronizar).setOnClickListener(v -> sincronizar());
         findViewById(R.id.rowConfig).setOnClickListener(v ->
                 startActivity(new Intent(this, ConfiguracoesActivity.class)));
         findViewById(R.id.rowNotif).setOnClickListener(v ->
@@ -70,6 +72,24 @@ public class PerfilActivity extends BaseActivity {
 
     private String ouTraco(String s) {
         return TextUtils.isEmpty(s) ? getString(R.string.perfil_sem_valor) : s;
+    }
+
+    private boolean sincronizando = false;
+
+    private void sincronizar() {
+        if (sincronizando) return;
+        sincronizando = true;
+        Toast.makeText(this, R.string.sync_em_andamento, Toast.LENGTH_SHORT).show();
+        new SyncManager(this).sincronizarTudo(new SyncManager.Callback() {
+            @Override public void onSucesso() {
+                sincronizando = false;
+                Toast.makeText(PerfilActivity.this, R.string.sync_sucesso, Toast.LENGTH_SHORT).show();
+            }
+            @Override public void onErro(String mensagem) {
+                sincronizando = false;
+                Toast.makeText(PerfilActivity.this, mensagem, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override protected boolean isTopLevel() { return true; }

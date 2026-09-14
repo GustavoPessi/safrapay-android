@@ -21,4 +21,14 @@ public interface TalhaoDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId")
     LiveData<Double> totalAreaPorUsuario(long usuarioId);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    @Query("SELECT * FROM talhao WHERE uuid = :uuid LIMIT 1")
+    Talhao buscarPorUuid(String uuid);
+
+    @Query("SELECT talhao.* FROM talhao " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId AND talhao.sincronizado = 0")
+    List<Talhao> listarNaoSincronizadas(long usuarioId);
 }

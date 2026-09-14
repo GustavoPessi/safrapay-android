@@ -95,6 +95,11 @@
                 android:layout_height="wrap_content" android:padding="@dimen/space_md"
                 android:text="@string/perfil_maquinas" android:textColor="@color/text_primary"
                 android:background="?attr/selectableItemBackground" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline" />
+            <TextView android:id="@+id/rowSincronizar" style="@style/Text.Body" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="@dimen/space_md"
+                android:text="@string/perfil_sincronizar" android:textColor="@color/text_primary"
+                android:background="?attr/selectableItemBackground" />
         </LinearLayout>
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"

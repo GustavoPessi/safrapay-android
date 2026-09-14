@@ -3,6 +3,7 @@ package com.tcc.gestaorural.util;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public final class DateUtils {
     private DateUtils() {}
@@ -11,6 +12,14 @@ public final class DateUtils {
 
     private static final SimpleDateFormat ISO = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static final SimpleDateFormat BR = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
+
+    // Instante UTC usado na sincronizacao com o backend (padrao fixo de 3 digitos
+    // nos milissegundos - o backend formata do mesmo jeito, ver SyncDateUtil la).
+    private static final SimpleDateFormat ISO_UTC =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+    static {
+        ISO_UTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     /** Equivalente ao datetime('now') do SQLite. */
     public static String agora() { return DT.format(new Date()); }
@@ -43,5 +52,26 @@ public final class DateUtils {
         if (iso == null) return "";
         try { return BR.format(ISO.parse(iso)); }
         catch (Exception e) { return iso; }
+    }
+
+    /**
+     * Converte um timestamp local (formato usado nas colunas criado_em/atualizado_em,
+     * "yyyy-MM-dd HH:mm:ss" no fuso do aparelho) pro instante UTC ISO-8601 usado nos
+     * campos "atualizadoEm" da sincronizacao com o backend.
+     */
+    public static synchronized String paraIsoUtc(String localDbTime) {
+        if (localDbTime == null) return ISO_UTC.format(new Date());
+        try { return ISO_UTC.format(DT.parse(localDbTime)); }
+        catch (Exception e) { return ISO_UTC.format(new Date()); }
+    }
+
+    /**
+     * Converte um instante UTC ISO-8601 (mandado pelo backend na sincronizacao)
+     * pro formato local usado nas colunas criado_em/atualizado_em.
+     */
+    public static synchronized String deIsoUtc(String isoUtc) {
+        if (isoUtc == null) return agora();
+        try { return DT.format(ISO_UTC.parse(isoUtc)); }
+        catch (Exception e) { return agora(); }
     }
 }

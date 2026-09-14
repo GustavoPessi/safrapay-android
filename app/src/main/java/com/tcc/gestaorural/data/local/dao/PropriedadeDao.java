@@ -21,4 +21,15 @@ public interface PropriedadeDao {
 
     @Query("SELECT * FROM propriedade WHERE id = :id LIMIT 1")
     LiveData<Propriedade> observarPorId(long id);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    @Query("SELECT * FROM propriedade WHERE id = :id LIMIT 1")
+    Propriedade buscarPorId(long id);
+
+    @Query("SELECT * FROM propriedade WHERE uuid = :uuid LIMIT 1")
+    Propriedade buscarPorUuid(String uuid);
+
+    @Query("SELECT * FROM propriedade WHERE usuario_id = :usuarioId AND sincronizado = 0")
+    List<Propriedade> listarNaoSincronizadas(long usuarioId);
 }

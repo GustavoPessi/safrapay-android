@@ -291,6 +291,9 @@
     <!-- Perfil (itens) -->
     <string name="perfil_configuracoes">Configurações</string>
     <string name="perfil_notificacoes">Notificações</string>
+    <string name="perfil_sincronizar">Sincronizar dados</string>
+    <string name="sync_em_andamento">Sincronizando…</string>
+    <string name="sync_sucesso">Dados sincronizados com sucesso</string>
 
     <!-- Máquinas -->
     <string name="maquina_lista_title">Máquinas</string>
