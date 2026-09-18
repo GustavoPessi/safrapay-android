@@ -158,6 +158,8 @@ public class SyncManager {
         dto.cib = p.cib;
         dto.valor = p.valor;
         dto.observacoes = p.observacoes;
+        dto.latitude = p.latitude;
+        dto.longitude = p.longitude;
         dto.atualizadoEm = DateUtils.paraIsoUtc(p.atualizadoEm);
         return dto;
     }
@@ -171,6 +173,8 @@ public class SyncManager {
         p.cib = dto.cib;
         p.valor = dto.valor;
         p.observacoes = dto.observacoes;
+        p.latitude = dto.latitude;
+        p.longitude = dto.longitude;
         p.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
         p.sincronizado = 1;
         if (p.uuid == null) p.uuid = UUID.randomUUID().toString();
@@ -251,6 +255,8 @@ public class SyncManager {
         dto.nome = t.nome;
         dto.areaHa = t.areaHa;
         dto.cultura = t.cultura;
+        dto.latitude = t.latitude;
+        dto.longitude = t.longitude;
         dto.atualizadoEm = DateUtils.paraIsoUtc(t.atualizadoEm);
         return dto;
     }
@@ -259,6 +265,8 @@ public class SyncManager {
         t.nome = dto.nome;
         t.areaHa = dto.areaHa;
         t.cultura = dto.cultura;
+        t.latitude = dto.latitude;
+        t.longitude = dto.longitude;
         t.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
         t.sincronizado = 1;
         if (t.uuid == null) t.uuid = UUID.randomUUID().toString();

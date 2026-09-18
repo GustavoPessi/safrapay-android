@@ -15,5 +15,7 @@ public class PropriedadeSyncItemDto {
     public String cib;
     public Double valor;
     public String observacoes;
+    public Double latitude;
+    public Double longitude;
     public String atualizadoEm;
 }

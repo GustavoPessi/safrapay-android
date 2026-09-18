@@ -11,5 +11,7 @@ public class TalhaoSyncItemDto {
     public String nome;
     public Double areaHa;
     public String cultura;
+    public Double latitude;
+    public Double longitude;
     public String atualizadoEm;
 }
