@@ -25,6 +25,8 @@ public class Propriedade {
     public String cib;                    // Cadastro do Imóvel Rural (INCRA/CAFIR) — opcional
     public Double valor;                  // valor estimado da propriedade — opcional
     public String observacoes;
+    public Double latitude;               // coordenada GPS — opcional (Geolocalização Nível 1)
+    public Double longitude;              // coordenada GPS — opcional (Geolocalização Nível 1)
 
     @NonNull @ColumnInfo(name = "criado_em") public String criadoEm;
     @NonNull @ColumnInfo(name = "atualizado_em") public String atualizadoEm;

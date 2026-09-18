@@ -357,4 +357,11 @@
     <!-- Meta: safra -->
     <string name="hint_meta_safra">Safra</string>
     <string name="err_meta_safra">Selecione a safra</string>
+    <!-- Geolocalização Nível 1 (pin GPS) - 18/09/2026 -->
+    <string name="acao_usar_localizacao">📍 Usar minha localização</string>
+    <string name="localizacao_nao_definida">Localização não definida</string>
+    <string name="localizacao_salva_formato">Localização salva: %1$.5f, %2$.5f</string>
+    <string name="localizacao_capturada">Localização capturada</string>
+    <string name="localizacao_permissao_negada">Permissão de localização negada</string>
+    <string name="localizacao_indisponivel">Não foi possível obter a localização agora</string>
 </resources>

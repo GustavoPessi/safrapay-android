@@ -20,6 +20,8 @@ public class Talhao {
     @NonNull public String nome;
     @ColumnInfo(name = "area_ha") public Double areaHa;
     public String cultura;                // cultura do talhão (ex.: Soja) — escolhida da lista de cotações
+    public Double latitude;               // coordenada GPS — opcional (Geolocalização Nível 1)
+    public Double longitude;              // coordenada GPS — opcional (Geolocalização Nível 1)
 
     @NonNull @ColumnInfo(name = "criado_em") public String criadoEm;
     @NonNull @ColumnInfo(name = "atualizado_em") public String atualizadoEm;

@@ -48,6 +48,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.4'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.8.4'
 
+    // Geolocalização Nível 1 (pin GPS) — Propriedade e Talhão
+    implementation 'com.google.android.gms:play-services-location:21.4.0'
+
     // Rede (fase de testes: cadastro/login falando com o backend SafraPay real)
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'

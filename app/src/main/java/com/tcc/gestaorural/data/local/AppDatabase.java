@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
         CategoriaDespesa.class, Receita.class, Despesa.class, MetaFinanceira.class,
         Maquina.class, AnotacaoMaquina.class, Cultura.class
     },
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -105,6 +105,20 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /**
+     * Migração 8 → 9: coordenadas de GPS (Geolocalização Nível 1 — ponto/pin) em
+     * propriedade e talhão. Colunas opcionais, aditivas — não exige reset de dados.
+     */
+    static final Migration MIGRATION_8_9 = new Migration(8, 9) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE `propriedade` ADD COLUMN `latitude` REAL");
+            db.execSQL("ALTER TABLE `propriedade` ADD COLUMN `longitude` REAL");
+            db.execSQL("ALTER TABLE `talhao` ADD COLUMN `latitude` REAL");
+            db.execSQL("ALTER TABLE `talhao` ADD COLUMN `longitude` REAL");
+        }
+    };
+
     /** Pool para operações de banco fora da main thread (Room exige). */
     public static final ExecutorService IO = Executors.newFixedThreadPool(4);
 
@@ -123,7 +137,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "gestao_rural.db")
                         .addCallback(SEED_CALLBACK)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9)
                         .fallbackToDestructiveMigration()
                         .build();
                 }
