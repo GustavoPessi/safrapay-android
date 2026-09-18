@@ -16,7 +16,7 @@ import com.tcc.gestaorural.ui.metas.ListaMetasActivity;
 import com.tcc.gestaorural.ui.perfil.PerfilActivity;
 
 /**
- * Activity base do AgroConta: injeta a barra superior verde (título + voltar) e,
+ * Activity base do SafraPay: injeta a barra superior verde (título + voltar) e,
  * quando a tela é uma aba principal, a navegação inferior do Design System.
  */
 public abstract class BaseActivity extends AppCompatActivity {

@@ -3,24 +3,50 @@ package com.tcc.gestaorural.ui.propriedade;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tcc.gestaorural.ui.BaseActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.entity.Propriedade;
+import com.tcc.gestaorural.util.LocationHelper;
 import com.tcc.gestaorural.util.SessionManager;
 
 public class NovaPropriedadeActivity extends BaseActivity {
 
     private PropriedadeViewModel vm;
     private TextInputEditText edtNome, edtLocalidade, edtArea, edtTipoSolo, edtMatricula, edtCib, edtValor, edtObservacoes;
-    private Button btnSalvar;
+    private Button btnSalvar, btnUsarLocalizacao;
+    private TextView tvLocalizacaoStatus;
 
     private long propriedadeId = 0L;      // 0 = nova
     private Propriedade existente;        // preenchida no modo edição
+    private Double latitude, longitude;   // capturadas pelo GPS (Geolocalização Nível 1)
+
+    private final LocationHelper.Callback locationCallback = new LocationHelper.Callback() {
+        @Override public void onLocalizacaoObtida(double lat, double lng) {
+            latitude = lat; longitude = lng;
+            atualizarStatusLocalizacao();
+            Toast.makeText(NovaPropriedadeActivity.this, R.string.localizacao_capturada, Toast.LENGTH_SHORT).show();
+        }
+        @Override public void onPermissaoNegada() {
+            Toast.makeText(NovaPropriedadeActivity.this, R.string.localizacao_permissao_negada, Toast.LENGTH_LONG).show();
+        }
+        @Override public void onIndisponivel() {
+            Toast.makeText(NovaPropriedadeActivity.this, R.string.localizacao_indisponivel, Toast.LENGTH_LONG).show();
+        }
+    };
+
+    private final ActivityResultLauncher<String> permissaoLocalizacao = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), concedida -> {
+                if (concedida) LocationHelper.obter(this, locationCallback);
+                else locationCallback.onPermissaoNegada();
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +63,8 @@ public class NovaPropriedadeActivity extends BaseActivity {
         edtValor = findViewById(R.id.edtValor);
         edtObservacoes = findViewById(R.id.edtObservacoes);
         btnSalvar = findViewById(R.id.btnSalvar);
+        btnUsarLocalizacao = findViewById(R.id.btnUsarLocalizacao);
+        tvLocalizacaoStatus = findViewById(R.id.tvLocalizacaoStatus);
 
         propriedadeId = getIntent().getLongExtra(Extras.PROPRIEDADE_ID, 0L);
         setTitle(propriedadeId == 0L ? R.string.prop_nova_title : R.string.prop_editar_title);
@@ -47,6 +75,7 @@ public class NovaPropriedadeActivity extends BaseActivity {
             });
         }
 
+        btnUsarLocalizacao.setOnClickListener(v -> LocationHelper.solicitar(this, permissaoLocalizacao, locationCallback));
         btnSalvar.setOnClickListener(v -> salvar());
         vm.getSalvoComId().observe(this, id -> {
             if (id == null) return;
@@ -64,6 +93,17 @@ public class NovaPropriedadeActivity extends BaseActivity {
         edtCib.setText(p.cib);
         edtValor.setText(p.valor == null ? "" : String.valueOf(p.valor));
         edtObservacoes.setText(p.observacoes);
+        latitude = p.latitude;
+        longitude = p.longitude;
+        atualizarStatusLocalizacao();
+    }
+
+    private void atualizarStatusLocalizacao() {
+        if (latitude != null && longitude != null) {
+            tvLocalizacaoStatus.setText(getString(R.string.localizacao_salva_formato, latitude, longitude));
+        } else {
+            tvLocalizacaoStatus.setText(R.string.localizacao_nao_definida);
+        }
     }
 
     private void salvar() {
@@ -83,6 +123,8 @@ public class NovaPropriedadeActivity extends BaseActivity {
         p.cib = nullSeVazio(txt(edtCib));
         p.valor = parseDouble(txt(edtValor));
         p.observacoes = nullSeVazio(txt(edtObservacoes));
+        p.latitude = latitude;
+        p.longitude = longitude;
         vm.salvar(p);
     }
 

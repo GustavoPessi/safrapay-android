@@ -35,6 +35,15 @@
                 android:maxLength="12" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <Button android:id="@+id/btnUsarLocalizacao" style="@style/Widget.App.Button.Text"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_usar_localizacao" />
+
+        <TextView android:id="@+id/tvLocalizacaoStatus"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm" android:textSize="13sp"
+            android:textColor="@color/text_hint" android:text="@string/localizacao_nao_definida" />
+
         <Button android:id="@+id/btnSalvar" style="@style/Widget.App.Button"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_salvar" />

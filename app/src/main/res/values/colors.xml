@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Design System AgroConta (hex exatos do Figma) -->
+    <!-- Design System SafraPay (hex exatos do Figma) -->
     <color name="green_900">#1B5E20</color>  <!-- Primária escura -->
     <color name="green_700">#2E7D32</color>  <!-- Primária -->
     <color name="green_500">#43A047</color>
