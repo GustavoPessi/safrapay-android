@@ -26,4 +26,14 @@ public interface AnotacaoMaquinaDao {
            "AND a.data IS NOT NULL AND a.data <= :limite " +
            "ORDER BY a.data ASC")
     LiveData<List<AvisoManutencao>> avisos(long usuarioId, String limite);
+
+    // --- Consultas sincronas usadas pelo SyncManager (Fase 4, roda em background) ---
+
+    @Query("SELECT * FROM anotacao_maquina WHERE uuid = :uuid LIMIT 1")
+    AnotacaoMaquina buscarPorUuid(String uuid);
+
+    @Query("SELECT anotacao_maquina.* FROM anotacao_maquina " +
+           "JOIN maquina ON maquina.id = anotacao_maquina.maquina_id " +
+           "WHERE maquina.usuario_id = :usuarioId AND anotacao_maquina.sincronizado = 0")
+    List<AnotacaoMaquina> listarNaoSincronizadas(long usuarioId);
 }

@@ -26,4 +26,8 @@ public interface MaquinaDao {
 
     @Query("SELECT * FROM maquina WHERE uuid = :uuid LIMIT 1")
     Maquina buscarPorUuid(String uuid);
+
+    // Sincronizacao de Maquina (Fase 4).
+    @Query("SELECT * FROM maquina WHERE usuario_id = :usuarioId AND sincronizado = 0")
+    List<Maquina> listarNaoSincronizadas(long usuarioId);
 }

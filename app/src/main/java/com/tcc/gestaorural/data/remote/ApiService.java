@@ -1,10 +1,12 @@
 package com.tcc.gestaorural.data.remote;
 
 import com.tcc.gestaorural.data.remote.dto.AlterarSenhaRequestDto;
+import com.tcc.gestaorural.data.remote.dto.AnotacaoMaquinaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
 import com.tcc.gestaorural.data.remote.dto.DespesaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.EsqueciSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.LoginRequestDto;
+import com.tcc.gestaorural.data.remote.dto.MaquinaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.MensagemResponseDto;
 import com.tcc.gestaorural.data.remote.dto.MetaFinanceiraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.PerfilRequestDto;
@@ -108,5 +110,21 @@ public interface ApiService {
 
     @GET("api/metas-financeiras/sync")
     Call<List<MetaFinanceiraSyncItemDto>> sincronizarPullMetas(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    @POST("api/maquinas/sync")
+    Call<List<MaquinaSyncItemDto>> sincronizarPushMaquinas(
+            @Header("Authorization") String bearerToken, @Body List<MaquinaSyncItemDto> itens);
+
+    @GET("api/maquinas/sync")
+    Call<List<MaquinaSyncItemDto>> sincronizarPullMaquinas(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    @POST("api/anotacoes-maquina/sync")
+    Call<List<AnotacaoMaquinaSyncItemDto>> sincronizarPushAnotacoes(
+            @Header("Authorization") String bearerToken, @Body List<AnotacaoMaquinaSyncItemDto> itens);
+
+    @GET("api/anotacoes-maquina/sync")
+    Call<List<AnotacaoMaquinaSyncItemDto>> sincronizarPullAnotacoes(
             @Header("Authorization") String bearerToken, @Query("desde") String desde);
 }
