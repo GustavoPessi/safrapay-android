@@ -24,6 +24,9 @@ public interface TalhaoDao {
 
     // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
 
+    @Query("SELECT * FROM talhao WHERE id = :id LIMIT 1")
+    Talhao buscarPorId(long id);
+
     @Query("SELECT * FROM talhao WHERE uuid = :uuid LIMIT 1")
     Talhao buscarPorUuid(String uuid);
 

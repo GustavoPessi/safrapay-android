@@ -37,4 +37,15 @@ public interface SafraDao {
            "WHERE propriedade.usuario_id = :usuarioId " +
            "ORDER BY safra.ano_safra DESC, talhao.nome")
     LiveData<List<SafraOpcao>> observarOpcoesPorUsuario(long usuarioId);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    @Query("SELECT * FROM safra WHERE uuid = :uuid LIMIT 1")
+    Safra buscarPorUuid(String uuid);
+
+    @Query("SELECT safra.* FROM safra " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId AND safra.sincronizado = 0")
+    List<Safra> listarNaoSincronizadas(long usuarioId);
 }
