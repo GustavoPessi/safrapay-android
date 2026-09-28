@@ -12,10 +12,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         android:theme="@style/Theme.GestaoRural">
-        <!-- usesCleartextTraffic: fase de testes, backend ainda em HTTP puro (IP da EC2).
-             Remover/restringir quando o backend tiver dominio+HTTPS. -->
+        <!-- usesCleartextTraffic=false: backend em HTTPS desde 28/09/2026
+             (https://api.safra-pay.com). Bloqueia qualquer chamada HTTP puro. -->
 
         <activity
             android:name=".ui.splash.SplashActivity"
