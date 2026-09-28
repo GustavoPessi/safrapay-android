@@ -42,7 +42,11 @@ public interface DespesaDao {
     @Query("SELECT IFNULL(SUM(valor),0) FROM despesa WHERE maquina_id = :maquinaId")
     LiveData<Double> totalPorMaquina(long maquinaId);
 
-    @Query("UPDATE despesa SET maquina_id = NULL WHERE maquina_id = :maquinaId")
+    // Marca sincronizado = 0 (e atualiza atualizado_em, mesmo formato de DateUtils.agora())
+    // pra que a remocao do vinculo com a maquina tambem seja enviada no proximo "Sincronizar".
+    @Query("UPDATE despesa SET maquina_id = NULL, sincronizado = 0, " +
+           "atualizado_em = datetime('now', 'localtime') " +
+           "WHERE maquina_id = :maquinaId")
     void desvincularMaquina(long maquinaId);
 
     @Query("SELECT despesa.maquina_id AS maquinaId, IFNULL(SUM(despesa.valor),0) AS total " +
@@ -100,4 +104,16 @@ public interface DespesaDao {
            "AND despesa.data_registro BETWEEN :ini AND :fim " +
            "GROUP BY mes ORDER BY mes")
     LiveData<java.util.List<MesTotal>> totaisMensais(long usuarioId, String ini, String fim);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    @Query("SELECT * FROM despesa WHERE uuid = :uuid LIMIT 1")
+    Despesa buscarPorUuid(String uuid);
+
+    @Query("SELECT despesa.* FROM despesa " +
+           "JOIN safra ON safra.id = despesa.safra_id " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId AND despesa.sincronizado = 0")
+    List<Despesa> listarNaoSincronizadas(long usuarioId);
 }

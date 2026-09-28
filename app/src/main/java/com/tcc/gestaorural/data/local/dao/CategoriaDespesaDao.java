@@ -15,4 +15,16 @@ public interface CategoriaDespesaDao {
 
     @Query("SELECT * FROM categoria_despesa ORDER BY id")
     LiveData<List<CategoriaDespesa>> observarTodas();
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    // Categoria viaja pelo NOME na sincronizacao (ids nao coincidem entre celular e servidor).
+    @Query("SELECT * FROM categoria_despesa WHERE id = :id LIMIT 1")
+    CategoriaDespesa buscarPorId(long id);
+
+    @Query("SELECT * FROM categoria_despesa WHERE nome = :nome LIMIT 1")
+    CategoriaDespesa buscarPorNome(String nome);
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long inserir(CategoriaDespesa c);
 }

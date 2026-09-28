@@ -2,12 +2,15 @@ package com.tcc.gestaorural.data.remote;
 
 import com.tcc.gestaorural.data.remote.dto.AlterarSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
+import com.tcc.gestaorural.data.remote.dto.DespesaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.EsqueciSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.LoginRequestDto;
 import com.tcc.gestaorural.data.remote.dto.MensagemResponseDto;
+import com.tcc.gestaorural.data.remote.dto.MetaFinanceiraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.PerfilRequestDto;
 import com.tcc.gestaorural.data.remote.dto.PerfilResponseDto;
 import com.tcc.gestaorural.data.remote.dto.PropriedadeSyncItemDto;
+import com.tcc.gestaorural.data.remote.dto.ReceitaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.RegisterRequestDto;
 import com.tcc.gestaorural.data.remote.dto.SafraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.TalhaoSyncItemDto;
@@ -52,7 +55,8 @@ public interface ApiService {
     Call<PerfilResponseDto> atualizarPerfil(@Header("Authorization") String bearerToken,
                                              @Body PerfilRequestDto request);
 
-    // --- Sincronizacao offline-first (Fase 1: Propriedade + Talhao) ---
+    // --- Sincronizacao offline-first (Fase 1: Propriedade + Talhao; Fase 2: Safra;
+    //     Fase 3: Receita + Despesa + Meta Financeira) ---
     // Push manda o que foi criado/editado offline (sincronizado = 0); o servidor
     // devolve o estado final de cada item (aceito ou nao, "last write wins").
     // Pull traz o que mudou no servidor desde a ultima sincronizacao ("desde"
@@ -80,5 +84,29 @@ public interface ApiService {
 
     @GET("api/safras/sync")
     Call<List<SafraSyncItemDto>> sincronizarPullSafras(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    @POST("api/receitas/sync")
+    Call<List<ReceitaSyncItemDto>> sincronizarPushReceitas(
+            @Header("Authorization") String bearerToken, @Body List<ReceitaSyncItemDto> itens);
+
+    @GET("api/receitas/sync")
+    Call<List<ReceitaSyncItemDto>> sincronizarPullReceitas(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    @POST("api/despesas/sync")
+    Call<List<DespesaSyncItemDto>> sincronizarPushDespesas(
+            @Header("Authorization") String bearerToken, @Body List<DespesaSyncItemDto> itens);
+
+    @GET("api/despesas/sync")
+    Call<List<DespesaSyncItemDto>> sincronizarPullDespesas(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    @POST("api/metas-financeiras/sync")
+    Call<List<MetaFinanceiraSyncItemDto>> sincronizarPushMetas(
+            @Header("Authorization") String bearerToken, @Body List<MetaFinanceiraSyncItemDto> itens);
+
+    @GET("api/metas-financeiras/sync")
+    Call<List<MetaFinanceiraSyncItemDto>> sincronizarPullMetas(
             @Header("Authorization") String bearerToken, @Query("desde") String desde);
 }

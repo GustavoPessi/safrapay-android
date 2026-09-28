@@ -48,4 +48,7 @@ public interface SafraDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId AND safra.sincronizado = 0")
     List<Safra> listarNaoSincronizadas(long usuarioId);
+
+    @Query("SELECT * FROM safra WHERE id = :id LIMIT 1")
+    Safra buscarPorId(long id);
 }
