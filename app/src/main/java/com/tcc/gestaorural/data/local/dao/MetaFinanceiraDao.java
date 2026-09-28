@@ -33,4 +33,16 @@ public interface MetaFinanceiraDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId")
     LiveData<Integer> contarPorUsuario(long usuarioId);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    @Query("SELECT * FROM meta_financeira WHERE uuid = :uuid LIMIT 1")
+    MetaFinanceira buscarPorUuid(String uuid);
+
+    @Query("SELECT meta_financeira.* FROM meta_financeira " +
+           "JOIN safra ON safra.id = meta_financeira.safra_id " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId AND meta_financeira.sincronizado = 0")
+    List<MetaFinanceira> listarNaoSincronizadas(long usuarioId);
 }

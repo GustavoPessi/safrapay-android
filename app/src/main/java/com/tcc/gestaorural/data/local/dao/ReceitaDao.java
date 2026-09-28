@@ -77,4 +77,16 @@ public interface ReceitaDao {
            "WHERE propriedade.usuario_id = :usuarioId " +
            "AND receita.data_registro BETWEEN :ini AND :fim")
     LiveData<Double> totalNoPeriodo(long usuarioId, String ini, String fim);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    @Query("SELECT * FROM receita WHERE uuid = :uuid LIMIT 1")
+    Receita buscarPorUuid(String uuid);
+
+    @Query("SELECT receita.* FROM receita " +
+           "JOIN safra ON safra.id = receita.safra_id " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId AND receita.sincronizado = 0")
+    List<Receita> listarNaoSincronizadas(long usuarioId);
 }

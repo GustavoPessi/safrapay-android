@@ -5,15 +5,28 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.tcc.gestaorural.data.local.AppDatabase;
+import com.tcc.gestaorural.data.local.dao.CategoriaDespesaDao;
+import com.tcc.gestaorural.data.local.dao.DespesaDao;
+import com.tcc.gestaorural.data.local.dao.MaquinaDao;
+import com.tcc.gestaorural.data.local.dao.MetaFinanceiraDao;
 import com.tcc.gestaorural.data.local.dao.PropriedadeDao;
+import com.tcc.gestaorural.data.local.dao.ReceitaDao;
 import com.tcc.gestaorural.data.local.dao.SafraDao;
 import com.tcc.gestaorural.data.local.dao.TalhaoDao;
+import com.tcc.gestaorural.data.local.entity.CategoriaDespesa;
+import com.tcc.gestaorural.data.local.entity.Despesa;
+import com.tcc.gestaorural.data.local.entity.Maquina;
+import com.tcc.gestaorural.data.local.entity.MetaFinanceira;
 import com.tcc.gestaorural.data.local.entity.Propriedade;
+import com.tcc.gestaorural.data.local.entity.Receita;
 import com.tcc.gestaorural.data.local.entity.Safra;
 import com.tcc.gestaorural.data.local.entity.Talhao;
 import com.tcc.gestaorural.data.remote.ApiService;
 import com.tcc.gestaorural.data.remote.RetrofitClient;
+import com.tcc.gestaorural.data.remote.dto.DespesaSyncItemDto;
+import com.tcc.gestaorural.data.remote.dto.MetaFinanceiraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.PropriedadeSyncItemDto;
+import com.tcc.gestaorural.data.remote.dto.ReceitaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.SafraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.TalhaoSyncItemDto;
 import com.tcc.gestaorural.util.DateUtils;
@@ -31,9 +44,9 @@ import retrofit2.Response;
  *
  * Disparado manualmente (botão "Sincronizar" no Perfil - decisão de 11/09/2026:
  * nada de sincronização automática em background por enquanto). Cobre a Fase 1
- * (Propriedade + Talhão) e a Fase 2 (Safra - adicionada em 28/09/2026); as
- * próximas fases repetem exatamente este padrão pras outras entidades
- * (Receita/Despesa/Meta, Máquina/Anotação).
+ * (Propriedade + Talhão), a Fase 2 (Safra) e a Fase 3 (Receita + Despesa +
+ * Meta Financeira) - Fases 2 e 3 adicionadas em 28/09/2026. A Fase 4
+ * (Máquina/Anotação) repete exatamente este padrão.
  *
  * OBS (28/09/2026): a entidade Cultura NÃO faz parte da sincronização - o app
  * abandonou esse modelo em 14/09/2026 (a cultura vem do talhão, campo texto
@@ -42,8 +55,9 @@ import retrofit2.Response;
  * navegue até ele - mantido por enquanto, não removido nesta tarefa.
  *
  * Regra de ordem: entidades-pai sincronizam sempre antes das filhas (aqui,
- * Propriedade antes de Talhão, e Talhão antes de Safra), porque o talhão manda
- * "propriedadeUuid" e a safra manda "talhaoUuid" pro servidor resolver o pai -
+ * Propriedade antes de Talhão, Talhão antes de Safra, e Safra antes de
+ * Receita/Despesa/Meta), porque cada filho manda o uuid do pai
+ * ("propriedadeUuid", "talhaoUuid", "safraUuid") pro servidor resolver o pai -
  * se o pai ainda não tiver chegado lá, o item é pulado nesta passada e tentado
  * de novo na próxima sincronização.
  *
@@ -74,7 +88,7 @@ public class SyncManager {
         this.settings = new SettingsManager(appContext);
     }
 
-    /** Sincroniza tudo que as Fases 1 e 2 cobrem (Propriedade, Talhão e Safra), nesta ordem. */
+    /** Sincroniza tudo que as Fases 1-3 cobrem, nesta ordem (pais antes dos filhos). */
     public void sincronizarTudo(Callback cb) {
         String token = session.getToken();
         long usuarioId = session.getUsuarioId();
@@ -89,6 +103,9 @@ public class SyncManager {
                 sincronizarPropriedades(bearer, usuarioId);
                 sincronizarTalhoes(bearer, usuarioId);
                 sincronizarSafras(bearer, usuarioId);
+                sincronizarReceitas(bearer, usuarioId);
+                sincronizarDespesas(bearer, usuarioId);
+                sincronizarMetas(bearer, usuarioId);
                 mainHandler.post(cb::onSucesso);
             } catch (SyncException e) {
                 mainHandler.post(() -> cb.onErro(e.getMessage()));
@@ -374,5 +391,302 @@ public class SyncManager {
         s.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
         s.sincronizado = 1;
         if (s.uuid == null) s.uuid = UUID.randomUUID().toString();
+    }
+
+    // ------------------------------------------------------------------
+    // Receita (depende de Safra já sincronizada)
+    // ------------------------------------------------------------------
+
+    private void sincronizarReceitas(String bearer, long usuarioId) throws Exception {
+        ReceitaDao dao = db.receitaDao();
+        SafraDao safraDao = db.safraDao();
+
+        List<Receita> pendentes = dao.listarNaoSincronizadas(usuarioId);
+        if (!pendentes.isEmpty()) {
+            List<ReceitaSyncItemDto> itens = new ArrayList<>();
+            for (Receita r : pendentes) {
+                Safra pai = safraDao.buscarPorId(r.safraId);
+                if (pai == null) continue;
+                itens.add(paraDto(r, pai.uuid));
+            }
+            if (!itens.isEmpty()) {
+                Response<List<ReceitaSyncItemDto>> resp = api.sincronizarPushReceitas(bearer, itens).execute();
+                if (!resp.isSuccessful()) throw new SyncException("Falha ao enviar receitas para o servidor.");
+                List<ReceitaSyncItemDto> confirmadas = resp.body();
+                if (confirmadas != null) {
+                    for (ReceitaSyncItemDto dto : confirmadas) {
+                        Receita local = dao.buscarPorUuid(dto.uuid);
+                        if (local == null) continue;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+            }
+        }
+
+        String chave = "ultima_sync_receita_" + usuarioId;
+        String desde = settings.get(chave, null);
+        Response<List<ReceitaSyncItemDto>> respPull = api.sincronizarPullReceitas(bearer, desde).execute();
+        if (!respPull.isSuccessful()) throw new SyncException("Falha ao buscar receitas do servidor.");
+
+        List<ReceitaSyncItemDto> doServidor = respPull.body();
+        String maior = desde;
+        if (doServidor != null) {
+            for (ReceitaSyncItemDto dto : doServidor) {
+                Safra pai = safraDao.buscarPorUuid(dto.safraUuid);
+                if (pai == null) continue; // safra-mãe ainda não chegou localmente; tenta na próxima
+
+                Receita local = dao.buscarPorUuid(dto.uuid);
+                if (local == null) {
+                    Receita nova = new Receita();
+                    nova.uuid = dto.uuid;
+                    nova.safraId = pai.id;
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    aplicarDto(nova, dto);
+                    dao.inserir(nova);
+                } else {
+                    String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
+                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                        local.safraId = pai.id;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
+                    maior = dto.atualizadoEm;
+                }
+            }
+        }
+        if (maior != null) settings.set(chave, maior);
+    }
+
+    private ReceitaSyncItemDto paraDto(Receita r, String safraUuid) {
+        ReceitaSyncItemDto dto = new ReceitaSyncItemDto();
+        dto.uuid = r.uuid;
+        dto.safraUuid = safraUuid;
+        dto.descricao = r.descricao;
+        dto.valor = r.valor;
+        dto.dataRegistro = r.dataRegistro;
+        dto.atualizadoEm = DateUtils.paraIsoUtc(r.atualizadoEm);
+        return dto;
+    }
+
+    private void aplicarDto(Receita r, ReceitaSyncItemDto dto) {
+        r.descricao = dto.descricao;
+        r.valor = dto.valor == null ? 0 : dto.valor;
+        if (dto.dataRegistro != null) r.dataRegistro = dto.dataRegistro;
+        r.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        r.sincronizado = 1;
+        if (r.uuid == null) r.uuid = UUID.randomUUID().toString();
+    }
+
+    // ------------------------------------------------------------------
+    // Despesa (depende de Safra; categoria viaja pelo nome, máquina pelo uuid)
+    // ------------------------------------------------------------------
+
+    private void sincronizarDespesas(String bearer, long usuarioId) throws Exception {
+        DespesaDao dao = db.despesaDao();
+        SafraDao safraDao = db.safraDao();
+
+        List<Despesa> pendentes = dao.listarNaoSincronizadas(usuarioId);
+        if (!pendentes.isEmpty()) {
+            List<DespesaSyncItemDto> itens = new ArrayList<>();
+            for (Despesa d : pendentes) {
+                Safra pai = safraDao.buscarPorId(d.safraId);
+                if (pai == null) continue;
+                DespesaSyncItemDto dto = paraDto(d, pai.uuid);
+                if (dto.categoriaNome == null) continue; // não deveria acontecer (FK), mas o servidor exige categoria
+                itens.add(dto);
+            }
+            if (!itens.isEmpty()) {
+                Response<List<DespesaSyncItemDto>> resp = api.sincronizarPushDespesas(bearer, itens).execute();
+                if (!resp.isSuccessful()) throw new SyncException("Falha ao enviar despesas para o servidor.");
+                List<DespesaSyncItemDto> confirmadas = resp.body();
+                if (confirmadas != null) {
+                    for (DespesaSyncItemDto dto : confirmadas) {
+                        Despesa local = dao.buscarPorUuid(dto.uuid);
+                        if (local == null) continue;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+            }
+        }
+
+        String chave = "ultima_sync_despesa_" + usuarioId;
+        String desde = settings.get(chave, null);
+        Response<List<DespesaSyncItemDto>> respPull = api.sincronizarPullDespesas(bearer, desde).execute();
+        if (!respPull.isSuccessful()) throw new SyncException("Falha ao buscar despesas do servidor.");
+
+        List<DespesaSyncItemDto> doServidor = respPull.body();
+        String maior = desde;
+        if (doServidor != null) {
+            for (DespesaSyncItemDto dto : doServidor) {
+                Safra pai = safraDao.buscarPorUuid(dto.safraUuid);
+                if (pai == null) continue; // safra-mãe ainda não chegou localmente; tenta na próxima
+
+                Despesa local = dao.buscarPorUuid(dto.uuid);
+                if (local == null) {
+                    Despesa nova = new Despesa();
+                    nova.uuid = dto.uuid;
+                    nova.safraId = pai.id;
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    if (!aplicarDto(nova, dto)) continue; // sem categoria resolvível: não dá pra inserir (FK)
+                    dao.inserir(nova);
+                } else {
+                    String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
+                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                        local.safraId = pai.id;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
+                    maior = dto.atualizadoEm;
+                }
+            }
+        }
+        if (maior != null) settings.set(chave, maior);
+    }
+
+    private DespesaSyncItemDto paraDto(Despesa d, String safraUuid) {
+        DespesaSyncItemDto dto = new DespesaSyncItemDto();
+        dto.uuid = d.uuid;
+        dto.safraUuid = safraUuid;
+        CategoriaDespesa cat = db.categoriaDespesaDao().buscarPorId(d.categoriaId);
+        dto.categoriaNome = cat == null ? null : cat.nome;
+        if (d.maquinaId != null) {
+            Maquina maq = db.maquinaDao().buscarPorId(d.maquinaId);
+            dto.maquinaUuid = maq == null ? null : maq.uuid;
+        }
+        dto.descricao = d.descricao;
+        dto.valor = d.valor;
+        dto.dataRegistro = d.dataRegistro;
+        dto.atualizadoEm = DateUtils.paraIsoUtc(d.atualizadoEm);
+        return dto;
+    }
+
+    /**
+     * Aplica o que veio do servidor. Retorna false se a categoria não pôde ser
+     * resolvida (só importa pra despesa nova, que não pode ser inserida sem ela).
+     *
+     * Máquina: só troca o vínculo local quando o servidor manda um maquinaUuid
+     * que existe aqui. maquinaUuid nulo NÃO apaga o vínculo local - até a Fase 4
+     * (sync de Máquina) o servidor não conhece as máquinas e sempre devolveria
+     * nulo, o que apagaria o vínculo feito no celular.
+     */
+    private boolean aplicarDto(Despesa d, DespesaSyncItemDto dto) {
+        CategoriaDespesaDao catDao = db.categoriaDespesaDao();
+        boolean categoriaOk = true;
+        if (dto.categoriaNome != null) {
+            CategoriaDespesa cat = catDao.buscarPorNome(dto.categoriaNome);
+            if (cat == null) {
+                // categoria que só existe no servidor: cria localmente com o mesmo nome
+                catDao.inserir(new CategoriaDespesa(dto.categoriaNome));
+                cat = catDao.buscarPorNome(dto.categoriaNome);
+            }
+            if (cat != null) d.categoriaId = cat.id; else categoriaOk = false;
+        } else {
+            categoriaOk = false;
+        }
+        if (dto.maquinaUuid != null) {
+            MaquinaDao maqDao = db.maquinaDao();
+            Maquina maq = maqDao.buscarPorUuid(dto.maquinaUuid);
+            if (maq != null) d.maquinaId = maq.id;
+        }
+        d.descricao = dto.descricao;
+        d.valor = dto.valor == null ? 0 : dto.valor;
+        if (dto.dataRegistro != null) d.dataRegistro = dto.dataRegistro;
+        d.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        d.sincronizado = 1;
+        if (d.uuid == null) d.uuid = UUID.randomUUID().toString();
+        return categoriaOk;
+    }
+
+    // ------------------------------------------------------------------
+    // Meta financeira (depende de Safra já sincronizada)
+    // ------------------------------------------------------------------
+
+    private void sincronizarMetas(String bearer, long usuarioId) throws Exception {
+        MetaFinanceiraDao dao = db.metaFinanceiraDao();
+        SafraDao safraDao = db.safraDao();
+
+        List<MetaFinanceira> pendentes = dao.listarNaoSincronizadas(usuarioId);
+        if (!pendentes.isEmpty()) {
+            List<MetaFinanceiraSyncItemDto> itens = new ArrayList<>();
+            for (MetaFinanceira m : pendentes) {
+                Safra pai = safraDao.buscarPorId(m.safraId);
+                if (pai == null) continue;
+                itens.add(paraDto(m, pai.uuid));
+            }
+            if (!itens.isEmpty()) {
+                Response<List<MetaFinanceiraSyncItemDto>> resp = api.sincronizarPushMetas(bearer, itens).execute();
+                if (!resp.isSuccessful()) throw new SyncException("Falha ao enviar metas para o servidor.");
+                List<MetaFinanceiraSyncItemDto> confirmadas = resp.body();
+                if (confirmadas != null) {
+                    for (MetaFinanceiraSyncItemDto dto : confirmadas) {
+                        MetaFinanceira local = dao.buscarPorUuid(dto.uuid);
+                        if (local == null) continue;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+            }
+        }
+
+        String chave = "ultima_sync_meta_" + usuarioId;
+        String desde = settings.get(chave, null);
+        Response<List<MetaFinanceiraSyncItemDto>> respPull = api.sincronizarPullMetas(bearer, desde).execute();
+        if (!respPull.isSuccessful()) throw new SyncException("Falha ao buscar metas do servidor.");
+
+        List<MetaFinanceiraSyncItemDto> doServidor = respPull.body();
+        String maior = desde;
+        if (doServidor != null) {
+            for (MetaFinanceiraSyncItemDto dto : doServidor) {
+                Safra pai = safraDao.buscarPorUuid(dto.safraUuid);
+                if (pai == null) continue; // safra-mãe ainda não chegou localmente; tenta na próxima
+
+                MetaFinanceira local = dao.buscarPorUuid(dto.uuid);
+                if (local == null) {
+                    MetaFinanceira nova = new MetaFinanceira();
+                    nova.uuid = dto.uuid;
+                    nova.safraId = pai.id;
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    aplicarDto(nova, dto);
+                    dao.inserir(nova);
+                } else {
+                    String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
+                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                        local.safraId = pai.id;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
+                    maior = dto.atualizadoEm;
+                }
+            }
+        }
+        if (maior != null) settings.set(chave, maior);
+    }
+
+    private MetaFinanceiraSyncItemDto paraDto(MetaFinanceira m, String safraUuid) {
+        MetaFinanceiraSyncItemDto dto = new MetaFinanceiraSyncItemDto();
+        dto.uuid = m.uuid;
+        dto.safraUuid = safraUuid;
+        dto.descricao = m.descricao;
+        dto.valorAlvo = m.valorAlvo;
+        dto.prazo = m.prazo;
+        dto.atualizadoEm = DateUtils.paraIsoUtc(m.atualizadoEm);
+        return dto;
+    }
+
+    private void aplicarDto(MetaFinanceira m, MetaFinanceiraSyncItemDto dto) {
+        m.descricao = dto.descricao;
+        m.valorAlvo = dto.valorAlvo == null ? 0 : dto.valorAlvo;
+        m.prazo = dto.prazo;
+        m.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        m.sincronizado = 1;
+        if (m.uuid == null) m.uuid = UUID.randomUUID().toString();
     }
 }

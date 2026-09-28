@@ -17,4 +17,13 @@ public interface MaquinaDao {
 
     @Query("SELECT * FROM maquina WHERE id = :id LIMIT 1")
     LiveData<Maquina> observarPorId(long id);
+
+    // --- Consultas sincronas usadas pelo SyncManager (roda em background, fora do LiveData) ---
+
+    // Usadas pela sincronizacao de Despesa (maquina opcional viaja como uuid).
+    @Query("SELECT * FROM maquina WHERE id = :id LIMIT 1")
+    Maquina buscarPorId(long id);
+
+    @Query("SELECT * FROM maquina WHERE uuid = :uuid LIMIT 1")
+    Maquina buscarPorUuid(String uuid);
 }
