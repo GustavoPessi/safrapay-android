@@ -10,13 +10,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Cliente Retrofit pro backend SafraPay.
  *
- * FASE DE TESTES: aponta direto pro IP publico da instancia EC2, via HTTP puro
- * (sem HTTPS ainda). Trocar por um dominio proprio com certificado quando sair
- * da fase de testes - ver pendencia de dominio anotada no Notion do projeto.
+ * Aponta pro dominio proprio via HTTPS (Nginx + certificado Let's Encrypt na
+ * EC2, configurado em 28/09/2026). O Nginx escuta na 443 padrao e repassa pro
+ * Spring Boot na 8080 interna - por isso a URL nao tem porta. Antes disso o app
+ * falava direto com o IP da EC2 em HTTP puro (http://3.140.103.43:8080/).
  */
 public final class RetrofitClient {
 
-    private static final String BASE_URL = "http://3.140.103.43:8080/";
+    private static final String BASE_URL = "https://api.safra-pay.com/";
 
     private static ApiService instance;
 
