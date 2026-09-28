@@ -116,4 +116,17 @@ public interface DespesaDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId AND despesa.sincronizado = 0")
     List<Despesa> listarNaoSincronizadas(long usuarioId);
+
+    // Fase 4 (28/09/2026): antes dela o servidor nao conhecia as maquinas, entao
+    // despesas ja sincronizadas com maquina ficaram SEM maquina no servidor.
+    // Marca essas despesas como pendentes (e atualiza atualizado_em pra vencer o
+    // "last write wins" no servidor) pra reenviar o vinculo. Chamado uma unica
+    // vez por usuario pelo SyncManager, logo depois de sincronizar as maquinas.
+    @Query("UPDATE despesa SET sincronizado = 0, atualizado_em = datetime('now', 'localtime') " +
+           "WHERE maquina_id IS NOT NULL AND safra_id IN (" +
+           "SELECT safra.id FROM safra " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId)")
+    void marcarComMaquinaParaReenvio(long usuarioId);
 }

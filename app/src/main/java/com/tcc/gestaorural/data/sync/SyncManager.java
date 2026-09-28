@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.tcc.gestaorural.data.local.AppDatabase;
+import com.tcc.gestaorural.data.local.dao.AnotacaoMaquinaDao;
 import com.tcc.gestaorural.data.local.dao.CategoriaDespesaDao;
 import com.tcc.gestaorural.data.local.dao.DespesaDao;
 import com.tcc.gestaorural.data.local.dao.MaquinaDao;
@@ -13,6 +14,7 @@ import com.tcc.gestaorural.data.local.dao.PropriedadeDao;
 import com.tcc.gestaorural.data.local.dao.ReceitaDao;
 import com.tcc.gestaorural.data.local.dao.SafraDao;
 import com.tcc.gestaorural.data.local.dao.TalhaoDao;
+import com.tcc.gestaorural.data.local.entity.AnotacaoMaquina;
 import com.tcc.gestaorural.data.local.entity.CategoriaDespesa;
 import com.tcc.gestaorural.data.local.entity.Despesa;
 import com.tcc.gestaorural.data.local.entity.Maquina;
@@ -23,7 +25,9 @@ import com.tcc.gestaorural.data.local.entity.Safra;
 import com.tcc.gestaorural.data.local.entity.Talhao;
 import com.tcc.gestaorural.data.remote.ApiService;
 import com.tcc.gestaorural.data.remote.RetrofitClient;
+import com.tcc.gestaorural.data.remote.dto.AnotacaoMaquinaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.DespesaSyncItemDto;
+import com.tcc.gestaorural.data.remote.dto.MaquinaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.MetaFinanceiraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.PropriedadeSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.ReceitaSyncItemDto;
@@ -44,9 +48,9 @@ import retrofit2.Response;
  *
  * Disparado manualmente (botão "Sincronizar" no Perfil - decisão de 11/09/2026:
  * nada de sincronização automática em background por enquanto). Cobre a Fase 1
- * (Propriedade + Talhão), a Fase 2 (Safra) e a Fase 3 (Receita + Despesa +
- * Meta Financeira) - Fases 2 e 3 adicionadas em 28/09/2026. A Fase 4
- * (Máquina/Anotação) repete exatamente este padrão.
+ * (Propriedade + Talhão), a Fase 2 (Safra), a Fase 3 (Receita + Despesa +
+ * Meta Financeira) e a Fase 4 (Máquina + Anotação de máquina) - Fases 2, 3 e 4
+ * adicionadas em 28/09/2026.
  *
  * OBS (28/09/2026): a entidade Cultura NÃO faz parte da sincronização - o app
  * abandonou esse modelo em 14/09/2026 (a cultura vem do talhão, campo texto
@@ -55,9 +59,11 @@ import retrofit2.Response;
  * navegue até ele - mantido por enquanto, não removido nesta tarefa.
  *
  * Regra de ordem: entidades-pai sincronizam sempre antes das filhas (aqui,
- * Propriedade antes de Talhão, Talhão antes de Safra, e Safra antes de
- * Receita/Despesa/Meta), porque cada filho manda o uuid do pai
- * ("propriedadeUuid", "talhaoUuid", "safraUuid") pro servidor resolver o pai -
+ * Propriedade antes de Talhão, Talhão antes de Safra, Safra antes de
+ * Receita/Despesa/Meta, Máquina antes de Anotação - e Máquina também antes de
+ * Despesa, que referencia a máquina opcionalmente), porque cada filho manda o
+ * uuid do pai ("propriedadeUuid", "talhaoUuid", "safraUuid", "maquinaUuid")
+ * pro servidor resolver o pai -
  * se o pai ainda não tiver chegado lá, o item é pulado nesta passada e tentado
  * de novo na próxima sincronização.
  *
@@ -88,7 +94,7 @@ public class SyncManager {
         this.settings = new SettingsManager(appContext);
     }
 
-    /** Sincroniza tudo que as Fases 1-3 cobrem, nesta ordem (pais antes dos filhos). */
+    /** Sincroniza tudo que as Fases 1-4 cobrem, nesta ordem (pais antes dos filhos). */
     public void sincronizarTudo(Callback cb) {
         String token = session.getToken();
         long usuarioId = session.getUsuarioId();
@@ -103,6 +109,9 @@ public class SyncManager {
                 sincronizarPropriedades(bearer, usuarioId);
                 sincronizarTalhoes(bearer, usuarioId);
                 sincronizarSafras(bearer, usuarioId);
+                sincronizarMaquinas(bearer, usuarioId);
+                sincronizarAnotacoes(bearer, usuarioId);
+                reenviarDespesasComMaquinaUmaVez(usuarioId);
                 sincronizarReceitas(bearer, usuarioId);
                 sincronizarDespesas(bearer, usuarioId);
                 sincronizarMetas(bearer, usuarioId);
@@ -571,9 +580,10 @@ public class SyncManager {
      * resolvida (só importa pra despesa nova, que não pode ser inserida sem ela).
      *
      * Máquina: só troca o vínculo local quando o servidor manda um maquinaUuid
-     * que existe aqui. maquinaUuid nulo NÃO apaga o vínculo local - até a Fase 4
-     * (sync de Máquina) o servidor não conhece as máquinas e sempre devolveria
-     * nulo, o que apagaria o vínculo feito no celular.
+     * que existe aqui. maquinaUuid nulo NÃO apaga o vínculo local - antes da
+     * Fase 4 o servidor não conhecia as máquinas e devolvia nulo, o que apagaria
+     * o vínculo feito no celular. Mantido assim por segurança (limitação
+     * conhecida: remover o vínculo em OUTRO aparelho não se propaga pra cá).
      */
     private boolean aplicarDto(Despesa d, DespesaSyncItemDto dto) {
         CategoriaDespesaDao catDao = db.categoriaDespesaDao();
@@ -688,5 +698,194 @@ public class SyncManager {
         m.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
         m.sincronizado = 1;
         if (m.uuid == null) m.uuid = UUID.randomUUID().toString();
+    }
+
+    // ------------------------------------------------------------------
+    // Máquina (Fase 4 - pertence direto ao usuário, igual a Propriedade)
+    // ------------------------------------------------------------------
+
+    private void sincronizarMaquinas(String bearer, long usuarioId) throws Exception {
+        MaquinaDao dao = db.maquinaDao();
+
+        List<Maquina> pendentes = dao.listarNaoSincronizadas(usuarioId);
+        if (!pendentes.isEmpty()) {
+            List<MaquinaSyncItemDto> itens = new ArrayList<>();
+            for (Maquina m : pendentes) itens.add(paraDto(m));
+
+            Response<List<MaquinaSyncItemDto>> resp = api.sincronizarPushMaquinas(bearer, itens).execute();
+            if (!resp.isSuccessful()) throw new SyncException("Falha ao enviar máquinas para o servidor.");
+
+            List<MaquinaSyncItemDto> confirmadas = resp.body();
+            if (confirmadas != null) {
+                for (MaquinaSyncItemDto dto : confirmadas) {
+                    Maquina local = dao.buscarPorUuid(dto.uuid);
+                    if (local == null) continue;
+                    aplicarDto(local, dto);
+                    dao.atualizar(local);
+                }
+            }
+        }
+
+        String chave = "ultima_sync_maquina_" + usuarioId;
+        String desde = settings.get(chave, null);
+        Response<List<MaquinaSyncItemDto>> respPull = api.sincronizarPullMaquinas(bearer, desde).execute();
+        if (!respPull.isSuccessful()) throw new SyncException("Falha ao buscar máquinas do servidor.");
+
+        List<MaquinaSyncItemDto> doServidor = respPull.body();
+        String maior = desde;
+        if (doServidor != null) {
+            for (MaquinaSyncItemDto dto : doServidor) {
+                Maquina local = dao.buscarPorUuid(dto.uuid);
+                if (local == null) {
+                    Maquina nova = new Maquina();
+                    nova.uuid = dto.uuid;
+                    nova.usuarioId = usuarioId;
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    aplicarDto(nova, dto);
+                    dao.inserir(nova);
+                } else {
+                    String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
+                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
+                    maior = dto.atualizadoEm;
+                }
+            }
+        }
+        if (maior != null) settings.set(chave, maior);
+    }
+
+    private MaquinaSyncItemDto paraDto(Maquina m) {
+        MaquinaSyncItemDto dto = new MaquinaSyncItemDto();
+        dto.uuid = m.uuid;
+        dto.nome = m.nome;
+        dto.marca = m.marca;
+        dto.tipo = m.tipo;
+        dto.modelo = m.modelo;
+        dto.ano = m.ano;
+        dto.identificacao = m.identificacao;
+        dto.valor = m.valor;
+        dto.observacoes = m.observacoes;
+        dto.atualizadoEm = DateUtils.paraIsoUtc(m.atualizadoEm);
+        return dto;
+    }
+
+    private void aplicarDto(Maquina m, MaquinaSyncItemDto dto) {
+        m.nome = dto.nome;
+        m.marca = dto.marca;
+        m.tipo = dto.tipo;
+        m.modelo = dto.modelo;
+        m.ano = dto.ano;
+        m.identificacao = dto.identificacao;
+        m.valor = dto.valor;
+        m.observacoes = dto.observacoes;
+        m.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        m.sincronizado = 1;
+        if (m.uuid == null) m.uuid = UUID.randomUUID().toString();
+    }
+
+    // ------------------------------------------------------------------
+    // Anotação de máquina (Fase 4 - depende de Máquina já sincronizada)
+    // ------------------------------------------------------------------
+
+    private void sincronizarAnotacoes(String bearer, long usuarioId) throws Exception {
+        AnotacaoMaquinaDao dao = db.anotacaoMaquinaDao();
+        MaquinaDao maqDao = db.maquinaDao();
+
+        List<AnotacaoMaquina> pendentes = dao.listarNaoSincronizadas(usuarioId);
+        if (!pendentes.isEmpty()) {
+            List<AnotacaoMaquinaSyncItemDto> itens = new ArrayList<>();
+            for (AnotacaoMaquina a : pendentes) {
+                Maquina pai = maqDao.buscarPorId(a.maquinaId);
+                if (pai == null) continue; // não deveria acontecer (FK com CASCADE), mas por segurança
+                itens.add(paraDto(a, pai.uuid));
+            }
+            if (!itens.isEmpty()) {
+                Response<List<AnotacaoMaquinaSyncItemDto>> resp = api.sincronizarPushAnotacoes(bearer, itens).execute();
+                if (!resp.isSuccessful()) throw new SyncException("Falha ao enviar anotações das máquinas para o servidor.");
+                List<AnotacaoMaquinaSyncItemDto> confirmadas = resp.body();
+                if (confirmadas != null) {
+                    for (AnotacaoMaquinaSyncItemDto dto : confirmadas) {
+                        AnotacaoMaquina local = dao.buscarPorUuid(dto.uuid);
+                        if (local == null) continue;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+            }
+        }
+
+        String chave = "ultima_sync_anotacao_maquina_" + usuarioId;
+        String desde = settings.get(chave, null);
+        Response<List<AnotacaoMaquinaSyncItemDto>> respPull = api.sincronizarPullAnotacoes(bearer, desde).execute();
+        if (!respPull.isSuccessful()) throw new SyncException("Falha ao buscar anotações das máquinas do servidor.");
+
+        List<AnotacaoMaquinaSyncItemDto> doServidor = respPull.body();
+        String maior = desde;
+        if (doServidor != null) {
+            for (AnotacaoMaquinaSyncItemDto dto : doServidor) {
+                Maquina pai = maqDao.buscarPorUuid(dto.maquinaUuid);
+                if (pai == null) continue; // máquina-mãe ainda não chegou localmente; tenta na próxima
+
+                AnotacaoMaquina local = dao.buscarPorUuid(dto.uuid);
+                if (local == null) {
+                    AnotacaoMaquina nova = new AnotacaoMaquina();
+                    nova.uuid = dto.uuid;
+                    nova.maquinaId = pai.id;
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    aplicarDto(nova, dto);
+                    dao.inserir(nova);
+                } else {
+                    String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
+                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                        local.maquinaId = pai.id;
+                        aplicarDto(local, dto);
+                        dao.atualizar(local);
+                    }
+                }
+                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
+                    maior = dto.atualizadoEm;
+                }
+            }
+        }
+        if (maior != null) settings.set(chave, maior);
+    }
+
+    private AnotacaoMaquinaSyncItemDto paraDto(AnotacaoMaquina a, String maquinaUuid) {
+        AnotacaoMaquinaSyncItemDto dto = new AnotacaoMaquinaSyncItemDto();
+        dto.uuid = a.uuid;
+        dto.maquinaUuid = maquinaUuid;
+        dto.texto = a.texto;
+        dto.data = (a.data == null || a.data.isEmpty()) ? null : a.data;
+        dto.concluida = a.concluida == 1;
+        dto.atualizadoEm = DateUtils.paraIsoUtc(a.atualizadoEm);
+        return dto;
+    }
+
+    private void aplicarDto(AnotacaoMaquina a, AnotacaoMaquinaSyncItemDto dto) {
+        a.texto = dto.texto;
+        a.data = dto.data;
+        a.concluida = Boolean.TRUE.equals(dto.concluida) ? 1 : 0;
+        a.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        a.sincronizado = 1;
+        if (a.uuid == null) a.uuid = UUID.randomUUID().toString();
+    }
+
+    /**
+     * Antes da Fase 4 o servidor não conhecia as máquinas, então as despesas já
+     * sincronizadas com máquina ficaram SEM máquina no servidor (o app manteve o
+     * vínculo local). Na primeira sincronização depois da Fase 4 - já com as
+     * máquinas no servidor - marca essas despesas como pendentes pra que o
+     * vínculo suba no push de despesas logo em seguida. Roda uma vez só por
+     * usuário (flag no SettingsManager).
+     */
+    private void reenviarDespesasComMaquinaUmaVez(long usuarioId) {
+        String flag = "fase4_reenvio_despesas_maquina_" + usuarioId;
+        if (settings.get(flag, false)) return;
+        db.despesaDao().marcarComMaquinaParaReenvio(usuarioId);
+        settings.set(flag, true);
     }
 }
