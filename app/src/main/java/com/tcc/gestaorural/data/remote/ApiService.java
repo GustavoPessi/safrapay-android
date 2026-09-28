@@ -9,6 +9,7 @@ import com.tcc.gestaorural.data.remote.dto.PerfilRequestDto;
 import com.tcc.gestaorural.data.remote.dto.PerfilResponseDto;
 import com.tcc.gestaorural.data.remote.dto.PropriedadeSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.RegisterRequestDto;
+import com.tcc.gestaorural.data.remote.dto.SafraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.TalhaoSyncItemDto;
 
 import java.util.List;
@@ -71,5 +72,13 @@ public interface ApiService {
 
     @GET("api/talhoes/sync")
     Call<List<TalhaoSyncItemDto>> sincronizarPullTalhoes(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    @POST("api/safras/sync")
+    Call<List<SafraSyncItemDto>> sincronizarPushSafras(
+            @Header("Authorization") String bearerToken, @Body List<SafraSyncItemDto> itens);
+
+    @GET("api/safras/sync")
+    Call<List<SafraSyncItemDto>> sincronizarPullSafras(
             @Header("Authorization") String bearerToken, @Query("desde") String desde);
 }
