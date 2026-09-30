@@ -31,9 +31,7 @@
         <activity android:name=".ui.auth.LoginActivity" android:exported="false" />
         <activity android:name=".ui.auth.CadastroActivity" android:exported="false" />
         <activity android:name=".ui.auth.RecuperarSenhaActivity" android:exported="false" />
-        <activity android:name=".ui.HomePlaceholderActivity" android:exported="false" />
         <activity android:name=".ui.dashboard.DashboardActivity" android:exported="false" />
-        <activity android:name=".ui.metas.MetasPlaceholderActivity" android:exported="false" />
         <activity android:name=".ui.metas.ListaMetasActivity" android:exported="false" />
         <activity android:name=".ui.metas.NovaMetaActivity" android:exported="false" />
         <activity android:name=".ui.metas.AcompanhamentoMetaActivity" android:exported="false" />
@@ -59,8 +57,6 @@
         <activity android:name=".ui.safra.NovaSafraActivity" android:exported="false" />
         <activity android:name=".ui.safra.NovaSafraRapidaActivity" android:exported="false" />
         <activity android:name=".ui.safra.DetalheSafraActivity" android:exported="false" />
-        <activity android:name=".ui.cultura.ListaCulturasActivity" android:exported="false" />
-        <activity android:name=".ui.cultura.NovaCulturaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.FinanceiroActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.NovaReceitaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.NovaDespesaActivity" android:exported="false" />
