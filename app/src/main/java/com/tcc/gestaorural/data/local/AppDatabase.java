@@ -38,6 +38,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CulturaDao culturaDao();
     public abstract MaquinaDao maquinaDao();
     public abstract AnotacaoMaquinaDao anotacaoMaquinaDao();
+    public abstract RelatorioExportDao relatorioExportDao(); // só consultas (exportação), não muda o schema
 
     private static volatile AppDatabase INSTANCE;
 

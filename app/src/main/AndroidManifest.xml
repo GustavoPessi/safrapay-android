@@ -66,5 +66,16 @@
         <activity android:name=".ui.financeiro.NovaDespesaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.DetalheLancamentoActivity" android:exported="false" />
 
+        <!-- Compartilhar os arquivos do "Exportar relatório" (PDF/Excel/CSV) com outros apps -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 </manifest>

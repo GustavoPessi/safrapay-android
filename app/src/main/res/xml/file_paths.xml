@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pastas que o FileProvider pode compartilhar com outros apps.
+     "exports": arquivos do "Exportar relatório" (PDF/Excel/CSV), gerados em cacheDir/exports. -->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>
