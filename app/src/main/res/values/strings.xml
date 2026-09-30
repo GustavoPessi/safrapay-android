@@ -231,6 +231,14 @@
     <string name="rel_grafico_titulo">Receitas x Despesas por mês</string>
     <string name="rel_vazio">Sem lançamentos no período.</string>
     <string name="msg_export_em_breve">Exportação disponível em breve</string>
+    <string name="exp_titulo">Exportar relatório</string>
+    <string name="exp_opcao_pdf">PDF — para ler, imprimir ou enviar</string>
+    <string name="exp_opcao_xlsx">Excel (.xlsx) — resumo e lançamentos em planilha</string>
+    <string name="exp_opcao_csv">CSV — lançamentos para outros sistemas</string>
+    <string name="exp_gerando">Gerando arquivo…</string>
+    <string name="exp_erro">Não foi possível gerar o arquivo. Tente novamente.</string>
+    <string name="exp_compartilhar">Enviar relatório</string>
+    <string name="exp_assunto">Relatório financeiro — SafraPay</string>
 
     <!-- DRE -->
     <string name="dre_title">DRE — Resultado do exercício</string>
