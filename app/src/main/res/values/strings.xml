@@ -381,7 +381,11 @@
     <string name="chat_proposta_titulo">A IA entendeu:</string>
     <string name="chat_confirmar">Confirmar e lançar</string>
     <string name="chat_descartar">Descartar</string>
-    <string name="chat_bem_vindo">Oi! Sou o assistente do SafraPay. Me conte um gasto ou uma receita em linguagem normal — por exemplo: \"gastei 200 reais de diesel ontem na soja\" — que eu organizo e lanço pra você confirmar.</string>
-    <string name="chat_sem_login">Pra usar o assistente você precisa entrar na sua conta primeiro (o recurso fala com o servidor).</string>
+    <string name="chat_bem_vindo">Oi! Sou o assistente do SafraPay. Posso lançar gastos e receitas pra você — é só falar do seu jeito, tipo \"gastei 200 reais de diesel ontem na soja\" — e também responder perguntas sobre seus gastos, safras, área, metas e máquinas. Toque numa sugestão ou escreva.</string>
+    <string name="chat_sug_gastos_mes">Quanto gastei este mês?</string>
+    <string name="chat_sug_safras_ativas">Quais safras estão ativas?</string>
+    <string name="chat_sug_lancar_gasto">Quero lançar um gasto</string>
+    <string name="chat_sug_metas">Como estão minhas metas?</string>
+    <string name="chat_sem_login">Sua sessão com o servidor não está ativa (ela vale 24h). Saia da conta e entre de novo para usar o assistente.</string>
     <string name="dash_assistente_ia">💬 Falar com o assistente (IA)</string>
 </resources>

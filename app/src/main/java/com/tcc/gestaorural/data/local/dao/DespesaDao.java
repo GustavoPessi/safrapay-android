@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.local.dao;
 
+import com.tcc.gestaorural.data.local.model.LancamentoLinha;
 import androidx.lifecycle.LiveData;
 import androidx.room.*;
 import com.tcc.gestaorural.data.local.entity.Despesa;
@@ -129,4 +130,26 @@ public interface DespesaDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId)")
     void marcarComMaquinaParaReenvio(long usuarioId);
+
+    // --- Assistente de IA: consultas (o app calcula; a IA so interpreta a pergunta) ---
+
+    @Query("SELECT 'DESPESA' AS tipo, despesa.data_registro AS data, despesa.valor AS valor, " +
+           "despesa.descricao AS descricao, categoria_despesa.nome AS categoria, safra.uuid AS safraUuid, " +
+           "talhao.cultura AS cultura, safra.ano_safra AS anoSafra, talhao.nome AS talhaoNome, " +
+           "talhao.uuid AS talhaoUuid, propriedade.uuid AS propriedadeUuid, " +
+           "maquina.uuid AS maquinaUuid, maquina.nome AS maquinaNome " +
+           "FROM despesa " +
+           "JOIN categoria_despesa ON categoria_despesa.id = despesa.categoria_id " +
+           "JOIN safra ON safra.id = despesa.safra_id " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "LEFT JOIN maquina ON maquina.id = despesa.maquina_id " +
+           "WHERE propriedade.usuario_id = :usuarioId AND despesa.data_registro BETWEEN :ini AND :fim " +
+           "ORDER BY despesa.data_registro DESC")
+    List<LancamentoLinha> listarLinhas(long usuarioId, String ini, String fim);
+
+    /** Possivel duplicata: mesma safra, mesmo valor (centavos) e mesma data. */
+    @Query("SELECT COUNT(*) FROM despesa WHERE safra_id = :safraId AND data_registro = :data " +
+           "AND ABS(valor - :valor) < 0.005")
+    int contarIguais(long safraId, double valor, String data);
 }

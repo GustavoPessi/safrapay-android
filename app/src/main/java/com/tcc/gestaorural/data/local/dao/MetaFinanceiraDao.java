@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.local.dao;
 
+import com.tcc.gestaorural.data.local.model.MetaContexto;
 import androidx.lifecycle.LiveData;
 import androidx.room.*;
 
@@ -45,4 +46,15 @@ public interface MetaFinanceiraDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId AND meta_financeira.sincronizado = 0")
     List<MetaFinanceira> listarNaoSincronizadas(long usuarioId);
+
+    /** Assistente de IA (consulta METAS): metas do usuario com a safra vinculada. */
+    @Query("SELECT m.descricao AS descricao, m.valor_alvo AS valorAlvo, m.prazo AS prazo, " +
+           "safra.uuid AS safraUuid, talhao.cultura AS cultura, safra.ano_safra AS anoSafra, " +
+           "talhao.nome AS talhaoNome " +
+           "FROM meta_financeira m " +
+           "JOIN safra ON safra.id = m.safra_id " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId ORDER BY m.prazo")
+    List<MetaContexto> listarContextoSync(long usuarioId);
 }

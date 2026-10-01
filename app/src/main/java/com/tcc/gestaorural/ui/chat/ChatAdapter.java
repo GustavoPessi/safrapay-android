@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.ui.chat;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,10 +8,14 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemResponseDto;
+import com.tcc.gestaorural.data.repository.ChatConsultaExecutor;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MoneyUtils;
 
@@ -22,6 +27,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public interface Acao {
         void confirmar(ChatItem item);
         void descartar(ChatItem item);
+        void sugestao(String texto);
     }
 
     private final List<ChatItem> itens = new ArrayList<>();
@@ -41,22 +47,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inf = LayoutInflater.from(parent.getContext());
-        if (viewType == ChatItem.USUARIO) {
-            return new VHTexto(inf.inflate(R.layout.item_chat_usuario, parent, false));
-        } else if (viewType == ChatItem.PROPOSTA) {
-            return new VHProposta(inf.inflate(R.layout.item_chat_proposta, parent, false));
+        switch (viewType) {
+            case ChatItem.USUARIO:   return new VHTexto(inf.inflate(R.layout.item_chat_usuario, parent, false));
+            case ChatItem.PROPOSTA:  return new VHProposta(inf.inflate(R.layout.item_chat_proposta, parent, false));
+            case ChatItem.RESULTADO: return new VHResultado(inf.inflate(R.layout.item_chat_resultado, parent, false));
+            case ChatItem.SUGESTOES: return new VHSugestoes(inf.inflate(R.layout.item_chat_sugestoes, parent, false));
+            default:                 return new VHTexto(inf.inflate(R.layout.item_chat_assistente, parent, false));
         }
-        return new VHTexto(inf.inflate(R.layout.item_chat_assistente, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatItem item = itens.get(position);
-        if (holder instanceof VHTexto) {
-            ((VHTexto) holder).txt.setText(item.texto);
-        } else if (holder instanceof VHProposta) {
-            ((VHProposta) holder).bind(item);
-        }
+        if (holder instanceof VHTexto) ((VHTexto) holder).txt.setText(item.texto);
+        else if (holder instanceof VHProposta) ((VHProposta) holder).bind(item);
+        else if (holder instanceof VHResultado) ((VHResultado) holder).bind(item.resultado);
+        else if (holder instanceof VHSugestoes) ((VHSugestoes) holder).bind(item.sugestoes);
     }
 
     static class VHTexto extends RecyclerView.ViewHolder {
@@ -89,6 +95,50 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 rodape.setVisibility(View.GONE);
                 btnConfirmar.setOnClickListener(v -> acao.confirmar(item));
                 btnDescartar.setOnClickListener(v -> acao.descartar(item));
+            }
+        }
+    }
+
+    static class VHResultado extends RecyclerView.ViewHolder {
+        final TextView titulo, observacao, linhas, total;
+
+        VHResultado(@NonNull View v) {
+            super(v);
+            titulo = v.findViewById(R.id.txtTitulo);
+            observacao = v.findViewById(R.id.txtObservacao);
+            linhas = v.findViewById(R.id.txtLinhas);
+            total = v.findViewById(R.id.txtTotal);
+        }
+
+        void bind(ChatConsultaExecutor.Resultado r) {
+            if (r == null) return;
+            titulo.setText(r.titulo);
+            observacao.setVisibility(r.observacao == null ? View.GONE : View.VISIBLE);
+            observacao.setText(r.observacao);
+            linhas.setText(android.text.TextUtils.join("\n", r.linhas));
+            total.setVisibility(r.total == null ? View.GONE : View.VISIBLE);
+            total.setText(r.total);
+        }
+    }
+
+    class VHSugestoes extends RecyclerView.ViewHolder {
+        final ChipGroup grupo;
+
+        VHSugestoes(@NonNull View v) { super(v); grupo = v.findViewById(R.id.grupoSugestoes); }
+
+        void bind(List<String> sugestoes) {
+            grupo.removeAllViews();
+            if (sugestoes == null) return;
+            for (String s : sugestoes) {
+                Chip chip = new Chip(grupo.getContext());
+                chip.setText(s);
+                chip.setCheckable(false);
+                chip.setClickable(true);
+                chip.setChipBackgroundColor(ColorStateList.valueOf(
+                        ContextCompat.getColor(grupo.getContext(), R.color.green_100)));
+                chip.setTextColor(ContextCompat.getColor(grupo.getContext(), R.color.green_900));
+                chip.setOnClickListener(v -> acao.sugestao(s));
+                grupo.addView(chip);
             }
         }
     }

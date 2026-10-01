@@ -32,4 +32,8 @@ public interface PropriedadeDao {
 
     @Query("SELECT * FROM propriedade WHERE usuario_id = :usuarioId AND sincronizado = 0")
     List<Propriedade> listarNaoSincronizadas(long usuarioId);
+
+    /** Assistente de IA: propriedades do usuario (contexto + consulta AREA). */
+    @Query("SELECT * FROM propriedade WHERE usuario_id = :usuarioId ORDER BY nome")
+    List<Propriedade> listarPorUsuarioSync(long usuarioId);
 }
