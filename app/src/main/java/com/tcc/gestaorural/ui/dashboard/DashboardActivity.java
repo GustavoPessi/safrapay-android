@@ -56,6 +56,8 @@ public class DashboardActivity extends BaseActivity {
                 startActivity(new Intent(this, IndicadoresActivity.class)));
         findViewById(R.id.btnNovaSafraRapida).setOnClickListener(v ->
                 startActivity(new Intent(this, com.tcc.gestaorural.ui.safra.NovaSafraRapidaActivity.class)));
+        findViewById(R.id.btnAssistente).setOnClickListener(v ->
+                startActivity(new Intent(this, com.tcc.gestaorural.ui.chat.ChatIaActivity.class)));
     }
 
     @Override protected boolean isTopLevel() { return true; }

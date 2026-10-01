@@ -372,4 +372,16 @@
     <string name="localizacao_capturada">Localização capturada</string>
     <string name="localizacao_permissao_negada">Permissão de localização negada</string>
     <string name="localizacao_indisponivel">Não foi possível obter a localização agora</string>
+
+    <!-- Assistente de IA (chat no app) -->
+    <string name="chat_title">Assistente SafraPay</string>
+    <string name="chat_hint">Escreva o que aconteceu…</string>
+    <string name="chat_enviar">Enviar</string>
+    <string name="chat_pensando">Assistente está digitando…</string>
+    <string name="chat_proposta_titulo">A IA entendeu:</string>
+    <string name="chat_confirmar">Confirmar e lançar</string>
+    <string name="chat_descartar">Descartar</string>
+    <string name="chat_bem_vindo">Oi! Sou o assistente do SafraPay. Me conte um gasto ou uma receita em linguagem normal — por exemplo: \"gastei 200 reais de diesel ontem na soja\" — que eu organizo e lanço pra você confirmar.</string>
+    <string name="chat_sem_login">Pra usar o assistente você precisa entrar na sua conta primeiro (o recurso fala com o servidor).</string>
+    <string name="dash_assistente_ia">💬 Falar com o assistente (IA)</string>
 </resources>

@@ -32,6 +32,7 @@
         <activity android:name=".ui.auth.CadastroActivity" android:exported="false" />
         <activity android:name=".ui.auth.RecuperarSenhaActivity" android:exported="false" />
         <activity android:name=".ui.dashboard.DashboardActivity" android:exported="false" />
+        <activity android:name=".ui.chat.ChatIaActivity" android:exported="false" />
         <activity android:name=".ui.metas.ListaMetasActivity" android:exported="false" />
         <activity android:name=".ui.metas.NovaMetaActivity" android:exported="false" />
         <activity android:name=".ui.metas.AcompanhamentoMetaActivity" android:exported="false" />

@@ -5,6 +5,7 @@ import androidx.room.*;
 import com.tcc.gestaorural.data.local.entity.Safra;
 import com.tcc.gestaorural.data.local.model.SafraOpcao;
 import com.tcc.gestaorural.data.local.model.SafraResumo;
+import com.tcc.gestaorural.data.local.model.SafraContexto;
 import java.util.List;
 
 @Dao
@@ -51,4 +52,14 @@ public interface SafraDao {
 
     @Query("SELECT * FROM safra WHERE id = :id LIMIT 1")
     Safra buscarPorId(long id);
+
+    /** Contexto do assistente de IA: safras do usuário com uuid + cultura/ano/talhão + data_fim (ativa). */
+    @Query("SELECT safra.uuid AS uuid, talhao.cultura AS cultura, safra.ano_safra AS anoSafra, " +
+           "talhao.nome AS talhaoNome, safra.data_fim AS dataFim " +
+           "FROM safra " +
+           "JOIN talhao ON talhao.id = safra.talhao_id " +
+           "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId " +
+           "ORDER BY (safra.data_fim IS NULL) DESC, safra.ano_safra DESC")
+    List<SafraContexto> listarContexto(long usuarioId);
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:paddingTop="@dimen/space_xs" android:paddingBottom="@dimen/space_xs">
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card"
+        android:padding="@dimen/space_md">
+
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/chat_proposta_titulo"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_body" />
+
+        <TextView android:id="@+id/txtResumo"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_body" />
+
+        <TextView android:id="@+id/txtRodape"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:textStyle="bold"
+            android:textColor="@color/green_700"
+            android:textSize="@dimen/text_body"
+            android:visibility="gone" />
+
+        <LinearLayout android:id="@+id/rowBotoes"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/space_sm"
+            android:gravity="end">
+
+            <Button android:id="@+id/btnDescartar"
+                style="@style/Widget.App.Button.Text"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/chat_descartar" />
+
+            <Button android:id="@+id/btnConfirmar"
+                style="@style/Widget.App.Button"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm"
+                android:text="@string/chat_confirmar" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
