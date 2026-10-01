@@ -17,5 +17,7 @@ public class GestaoRuralApp extends Application {
                 escuro ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         // Inicializa o banco (dispara o seed de categorias na 1ª execução).
         AppDatabase.getInstance(this);
+        // Cliente da API com renovação automática do token (refresh token).
+        com.tcc.gestaorural.data.remote.RetrofitClient.init(this);
     }
 }

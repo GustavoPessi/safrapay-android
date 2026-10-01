@@ -3,4 +3,6 @@
      "exports": arquivos do "Exportar relatório" (PDF/Excel/CSV), gerados em cacheDir/exports. -->
 <paths>
     <cache-path name="exports" path="exports/" />
+    <!-- "chat": fotos tiradas pela câmera no assistente de IA (cacheDir/chat), lidas pelo app da câmera via FileProvider. -->
+    <cache-path name="chat" path="chat/" />
 </paths>

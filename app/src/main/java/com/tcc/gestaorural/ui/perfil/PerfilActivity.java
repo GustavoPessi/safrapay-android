@@ -48,7 +48,7 @@ public class PerfilActivity extends BaseActivity {
         findViewById(R.id.rowNotif).setOnClickListener(v ->
                 startActivity(new Intent(this, NotificacoesActivity.class)));
         findViewById(R.id.rowSair).setOnClickListener(v -> {
-            new SessionManager(this).logout();
+            new com.tcc.gestaorural.data.repository.AuthRepository(this).sair();
             Intent i = new Intent(this, LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);

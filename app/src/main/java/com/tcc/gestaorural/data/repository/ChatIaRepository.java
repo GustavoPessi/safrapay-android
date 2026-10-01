@@ -67,7 +67,7 @@ public class ChatIaRepository {
     private final Handler main = new Handler(Looper.getMainLooper());
 
     static final String MSG_SESSAO_EXPIRADA =
-            "Sua sessão com o servidor expirou (ela vale 24h). Saia da conta e entre de novo para continuar usando o assistente.";
+            "Sua sessão expirou. Entre de novo na sua conta para continuar usando o assistente.";
 
     public ChatIaRepository(Context context) {
         AppDatabase db = AppDatabase.getInstance(context);
@@ -116,7 +116,11 @@ public class ChatIaRepository {
     }
 
     /** Há token e ele ainda não venceu (lido a cada chamada: o usuário pode ter refeito o login). */
-    public boolean temToken() { return session.tokenValido(); }
+    public boolean temToken() {
+        // Token vencido não bloqueia mais: se há refresh token, o interceptor renova sozinho.
+        String rt = session.getRefreshToken();
+        return session.tokenValido() || (rt != null && !rt.isEmpty());
+    }
 
     /**
      * Envia o histórico da conversa + o contexto do usuário pro assistente.
@@ -124,6 +128,13 @@ public class ChatIaRepository {
      * na main thread.
      */
     public void enviar(long usuarioId, List<ChatMensagemRequestDto.Mensagem> historico, RespostaCallback cb) {
+        enviar(usuarioId, historico, null, null, cb);
+    }
+
+    /** Igual ao enviar normal, com foto OU arquivo anexado à última mensagem do produtor. */
+    public void enviar(long usuarioId, List<ChatMensagemRequestDto.Mensagem> historico,
+                       ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo,
+                       RespostaCallback cb) {
         if (!temToken()) {
             cb.onErro(session.getToken() == null
                     ? "Você precisa entrar na sua conta pra usar o assistente."
@@ -135,6 +146,8 @@ public class ChatIaRepository {
             ChatMensagemRequestDto req = new ChatMensagemRequestDto();
             req.mensagens = historico;
             req.hoje = DateUtils.hojeIso();
+            req.imagem = imagem;
+            req.arquivo = arquivo;
 
             ChatMensagemRequestDto.Contexto ctx = new ChatMensagemRequestDto.Contexto();
             ctx.categorias = categoriaDao.listarNomes();
@@ -211,6 +224,8 @@ public class ChatIaRepository {
         switch (code) {
             case 401:
             case 403: return MSG_SESSAO_EXPIRADA;
+            case 413: return "O anexo é grande demais (foto até 5 MB, arquivo até 2 MB). Tente um menor.";
+            case 415: return "Formato não aceito. Foto: JPEG, PNG ou WebP. Arquivo: .xlsx, .csv ou .txt.";
             case 429: return "Você atingiu o limite de mensagens de hoje. Tente novamente amanhã.";
             case 502: return "O assistente está instável no momento. Tente de novo em instantes.";
             case 503: return "O assistente ainda não está configurado no servidor.";

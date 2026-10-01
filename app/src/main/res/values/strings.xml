@@ -386,6 +386,19 @@
     <string name="chat_sug_safras_ativas">Quais safras estão ativas?</string>
     <string name="chat_sug_lancar_gasto">Quero lançar um gasto</string>
     <string name="chat_sug_metas">Como estão minhas metas?</string>
-    <string name="chat_sem_login">Sua sessão com o servidor não está ativa (ela vale 24h). Saia da conta e entre de novo para usar o assistente.</string>
+    <string name="chat_foto">Enviar foto (nota fiscal, cupom, recibo)</string>
+    <string name="chat_arquivo">Enviar planilha ou bloco de notas</string>
+    <string name="chat_audio">Falar em vez de digitar</string>
+    <string name="chat_foto_titulo">Enviar foto</string>
+    <string name="chat_foto_camera">📷 Tirar foto agora</string>
+    <string name="chat_foto_galeria">🖼️ Escolher da galeria</string>
+    <string name="chat_rotulo_foto">📷 Foto</string>
+    <string name="chat_rotulo_arquivo">📎 %1$s</string>
+    <string name="chat_audio_prompt">Fale o gasto, a receita ou a sua pergunta</string>
+    <string name="chat_audio_indisponivel">O reconhecimento de voz não está disponível neste aparelho.</string>
+    <string name="chat_aguarde">Espere a resposta anterior terminar.</string>
+    <string name="chat_preparando_anexo">Preparando o anexo…</string>
+    <string name="chat_sem_login">Sua sessão com o servidor não está ativa. Saia da conta e entre de novo para usar o assistente.</string>
+    <string name="msg_sessao_encerrada">Sua sessão expirou. Entre de novo para continuar — seus dados continuam salvos no aparelho.</string>
     <string name="dash_assistente_ia">💬 Falar com o assistente (IA)</string>
 </resources>

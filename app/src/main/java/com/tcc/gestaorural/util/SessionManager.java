@@ -9,6 +9,8 @@ public class SessionManager {
     private static final String KEY_USER_ID = "usuario_id";
     private static final String KEY_ONBOARDING = "onboarding_visto";
     private static final String KEY_TOKEN = "jwt_token";
+    private static final String KEY_REFRESH = "refresh_token";
+    private static final String KEY_SESSAO_ENCERRADA = "sessao_encerrada";
 
     private final SharedPreferences prefs;
 
@@ -23,7 +25,33 @@ public class SessionManager {
 
     public long getUsuarioId() { return prefs.getLong(KEY_USER_ID, -1L); }
     public boolean estaLogado() { return getUsuarioId() != -1L; }
-    public void logout() { prefs.edit().remove(KEY_USER_ID).remove(KEY_TOKEN).apply(); }
+    public void logout() {
+        prefs.edit().remove(KEY_USER_ID).remove(KEY_TOKEN).remove(KEY_REFRESH)
+                .remove(KEY_SESSAO_ENCERRADA).apply();
+    }
+
+    /**
+     * Refresh token (backend 01/10/2026): vale 90 dias e muda a cada renovação —
+     * sempre guardar o último. Usado pra pegar um token de acesso novo quando o
+     * de 24h vence, sem o produtor digitar a senha de novo.
+     */
+    public void salvarRefreshToken(String refreshToken) {
+        prefs.edit().putString(KEY_REFRESH, refreshToken).apply();
+    }
+    public String getRefreshToken() { return prefs.getString(KEY_REFRESH, null); }
+
+    /** Salva o par recebido do login/refresh (commit síncrono: quem chama pode estar numa thread de rede). */
+    public synchronized void salvarTokens(String token, String refreshToken) {
+        SharedPreferences.Editor e = prefs.edit().putString(KEY_TOKEN, token).remove(KEY_SESSAO_ENCERRADA);
+        if (refreshToken != null) e.putString(KEY_REFRESH, refreshToken);
+        e.commit();
+    }
+
+    /** O servidor recusou o refresh (401): a sessão acabou de verdade, precisa logar de novo. */
+    public void marcarSessaoEncerrada() {
+        prefs.edit().remove(KEY_TOKEN).remove(KEY_REFRESH).putBoolean(KEY_SESSAO_ENCERRADA, true).commit();
+    }
+    public boolean sessaoEncerrada() { return prefs.getBoolean(KEY_SESSAO_ENCERRADA, false); }
 
     /** Token JWT do backend (fase de testes - ainda nao usado por outras chamadas). */
     public void salvarToken(String token) { prefs.edit().putString(KEY_TOKEN, token).apply(); }

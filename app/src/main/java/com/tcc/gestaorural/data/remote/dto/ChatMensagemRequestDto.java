@@ -19,6 +19,28 @@ public class ChatMensagemRequestDto {
     /** Data de hoje no aparelho (yyyy-MM-dd), pra IA resolver "ontem", "09/08" (ano atual) etc. */
     public String hoje;
     public Contexto contexto;
+    /** Foto opcional (nota fiscal, cupom, recibo) — vai com a ÚLTIMA mensagem. Não pode vir junto com arquivo. */
+    public Imagem imagem;
+    /** Arquivo opcional (.xlsx, .csv ou .txt com vários lançamentos) — vai com a ÚLTIMA mensagem. */
+    public Arquivo arquivo;
+
+    public static class Imagem {
+        /** image/jpeg, image/png ou image/webp (o servidor confere pelos bytes). Até 5 MB. */
+        public String tipo;
+        public String base64;
+
+        public Imagem() {}
+        public Imagem(String tipo, String base64) { this.tipo = tipo; this.base64 = base64; }
+    }
+
+    public static class Arquivo {
+        /** Nome original com extensão (ex.: "gastos-setembro.xlsx"). Até 2 MB. */
+        public String nome;
+        public String base64;
+
+        public Arquivo() {}
+        public Arquivo(String nome, String base64) { this.nome = nome; this.base64 = base64; }
+    }
 
     public static class Mensagem {
         /** "usuario" ou "assistente". */

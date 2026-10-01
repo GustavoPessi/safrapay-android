@@ -35,4 +35,8 @@ public interface UsuarioDao {
 
     @Query("DELETE FROM usuario WHERE id = :id")
     void deletarPorId(long id);
+
+    /** Leitura síncrona (thread de IO): usado pra refazer o login depois de alterar a senha. */
+    @Query("SELECT * FROM usuario WHERE id = :id LIMIT 1")
+    Usuario buscarPorId(long id);
 }
