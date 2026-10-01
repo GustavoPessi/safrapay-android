@@ -23,6 +23,25 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected MaterialToolbar toolbar;
 
+    /**
+     * Se o servidor recusou o refresh token (sessão encerrada de verdade: 90 dias sem
+     * abrir o app, senha trocada em outro aparelho, logout remoto...), manda pro login.
+     * Os dados do Room continuam no aparelho; ao entrar de novo, tudo volta.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        com.tcc.gestaorural.util.SessionManager session = new com.tcc.gestaorural.util.SessionManager(this);
+        if (session.sessaoEncerrada()) {
+            session.logout();
+            android.widget.Toast.makeText(this, R.string.msg_sessao_encerrada, android.widget.Toast.LENGTH_LONG).show();
+            Intent i = new Intent(this, com.tcc.gestaorural.ui.auth.LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+            finish();
+        }
+    }
+
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         View base = getLayoutInflater().inflate(R.layout.base_activity, null);

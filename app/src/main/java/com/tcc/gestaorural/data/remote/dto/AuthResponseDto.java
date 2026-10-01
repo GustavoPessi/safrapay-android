@@ -9,4 +9,6 @@ public class AuthResponseDto {
     public String telefone;
     /** Formato ISO (yyyy-MM-dd), ou null. */
     public String nascimento;
+    /** Refresh token (90 dias, muda a cada renovação). Vem no login e no /refresh. */
+    public String refreshToken;
 }

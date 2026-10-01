@@ -62,7 +62,7 @@ public class ConfiguracoesActivity extends BaseActivity {
         });
         vm.getExcluido().observe(this, excluido -> {
             if (excluido == null || !excluido) return;
-            new SessionManager(this).logout();
+            new com.tcc.gestaorural.data.repository.AuthRepository(this).sair();
             Toast.makeText(this, R.string.msg_conta_excluida, Toast.LENGTH_LONG).show();
             Intent i = new Intent(this, LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

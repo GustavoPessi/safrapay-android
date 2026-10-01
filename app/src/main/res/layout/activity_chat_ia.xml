@@ -28,6 +28,25 @@
         android:padding="@dimen/space_sm"
         android:gravity="center_vertical">
 
+        <ImageButton android:id="@+id/btnFoto"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/chat_foto"
+            android:src="@drawable/ic_chat_foto" />
+
+        <ImageButton android:id="@+id/btnArquivo"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/chat_arquivo"
+            android:src="@drawable/ic_chat_anexo" />
+
+        <ImageButton android:id="@+id/btnAudio"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:layout_marginEnd="@dimen/space_xs"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/chat_audio"
+            android:src="@drawable/ic_chat_mic" />
+
         <EditText android:id="@+id/edtMensagem"
             android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"

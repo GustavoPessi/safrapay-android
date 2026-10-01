@@ -38,6 +38,15 @@ public interface ApiService {
     @POST("api/auth/login")
     Call<AuthResponseDto> login(@Body LoginRequestDto request);
 
+    // Refresh token (01/10/2026). Rotas públicas (sem header Authorization).
+    // /refresh devolve o mesmo formato do login, com token E refreshToken novos;
+    // 401 = sessão encerrada de verdade. /logout revoga o refresh token (sempre 200).
+    @POST("api/auth/refresh")
+    Call<AuthResponseDto> refresh(@Body com.tcc.gestaorural.data.remote.dto.RefreshRequestDto request);
+
+    @POST("api/auth/logout")
+    Call<MensagemResponseDto> logout(@Body com.tcc.gestaorural.data.remote.dto.RefreshRequestDto request);
+
     // Backend sempre responde com sucesso aqui (mesma mensagem exista ou nao o
     // e-mail, pra nao vazar quais contas existem). Se existir, manda um e-mail
     // com link pra pagina de redefinir senha (redefinir-senha.html no backend).

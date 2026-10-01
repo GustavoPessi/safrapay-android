@@ -106,6 +106,9 @@ public class UsuarioRepository {
                 if (response.isSuccessful()) {
                     AppDatabase.IO.execute(() -> {
                         dao.atualizarSenha(id, SecurityUtils.hashSenha(novaSenha), DateUtils.agora());
+                        // O servidor encerra todas as sessões ao trocar a senha: refaz o
+                        // login com a senha nova pra pegar token + refresh token novos.
+                        reautenticar(id, novaSenha);
                         cb.ok();
                     });
                 } else if (response.code() == 400) {
@@ -122,6 +125,21 @@ public class UsuarioRepository {
                 cb.erro(com.tcc.gestaorural.R.string.err_servidor);
             }
         });
+    }
+
+    /** Roda na thread de IO. Se falhar (sem sinal), a próxima chamada cai no fluxo de sessão expirada. */
+    private void reautenticar(long id, String novaSenha) {
+        try {
+            Usuario u = dao.buscarPorId(id);
+            if (u == null || u.email == null) return;
+            Response<com.tcc.gestaorural.data.remote.dto.AuthResponseDto> r = api.login(
+                    new com.tcc.gestaorural.data.remote.dto.LoginRequestDto(u.email, novaSenha)).execute();
+            if (r.isSuccessful() && r.body() != null && r.body().token != null) {
+                new SessionManager(appContext).salvarTokens(r.body().token, r.body().refreshToken);
+            }
+        } catch (Exception ignored) {
+            // sem rede: o produtor vai precisar entrar de novo depois
+        }
     }
 
     public void excluirConta(final long id, final Runnable done) {

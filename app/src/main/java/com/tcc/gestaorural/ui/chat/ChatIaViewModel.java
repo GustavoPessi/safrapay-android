@@ -51,18 +51,39 @@ public class ChatIaViewModel extends AndroidViewModel {
     /** Toque num botão de sugestão = o produtor mandou aquele texto. */
     public void sugestao(String texto) { enviar(texto); }
 
+    public boolean estaEnviando() { return Boolean.TRUE.equals(enviando.getValue()); }
+
     public void enviar(String texto) {
         if (texto == null) return;
         texto = texto.trim();
-        if (texto.isEmpty() || Boolean.TRUE.equals(enviando.getValue())) return;
+        if (texto.isEmpty()) return;
+        enviarInterno(texto, texto, null, null);
+    }
+
+    /**
+     * Foto ou arquivo (com legenda opcional). Na bolha aparece o rótulo do anexo; no
+     * histórico mandado à IA vai só texto (o servidor não reenvia anexos antigos).
+     */
+    public void enviarAnexo(String legenda, String rotulo,
+                            ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo) {
+        String l = legenda == null ? "" : legenda.trim();
+        String bolha = rotulo + (l.isEmpty() ? "" : "\n" + l);
+        String paraIa = !l.isEmpty() ? l
+                : (imagem != null ? "Enviei uma foto." : "Enviei o arquivo " + (arquivo != null ? arquivo.nome : "") + ".");
+        enviarInterno(bolha, paraIa, imagem, arquivo);
+    }
+
+    private void enviarInterno(String textoBolha, String textoHistorico,
+                               ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo) {
+        if (estaEnviando()) return;
 
         removerSugestoes(); // sugestões antigas deixam de valer quando o produtor responde
-        itens.add(ChatItem.usuario(texto));
-        historico.add(new ChatMensagemRequestDto.Mensagem("usuario", texto));
+        itens.add(ChatItem.usuario(textoBolha));
+        historico.add(new ChatMensagemRequestDto.Mensagem("usuario", textoHistorico));
         enviando.setValue(true);
         publicar();
 
-        repo.enviar(usuarioId, new ArrayList<>(historico), new ChatIaRepository.RespostaCallback() {
+        repo.enviar(usuarioId, new ArrayList<>(historico), imagem, arquivo, new ChatIaRepository.RespostaCallback() {
             @Override
             public void onResposta(ChatMensagemResponseDto resp) { tratarResposta(resp); }
             @Override

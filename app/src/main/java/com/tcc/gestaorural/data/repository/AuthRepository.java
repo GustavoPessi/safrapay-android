@@ -82,6 +82,22 @@ public class AuthRepository {
         });
     }
 
+    /**
+     * Botão "Sair": revoga o refresh token no servidor (POST /api/auth/logout, sempre 200;
+     * se estiver offline, ignora) e apaga a sessão local. Os dados do Room continuam no aparelho.
+     */
+    public void sair() {
+        SessionManager session = new SessionManager(appContext);
+        String refresh = session.getRefreshToken();
+        session.logout();
+        if (refresh == null) return;
+        api.logout(new com.tcc.gestaorural.data.remote.dto.RefreshRequestDto(refresh))
+                .enqueue(new retrofit2.Callback<MensagemResponseDto>() {
+                    @Override public void onResponse(Call<MensagemResponseDto> c, Response<MensagemResponseDto> r) {}
+                    @Override public void onFailure(Call<MensagemResponseDto> c, Throwable t) {}
+                });
+    }
+
     public void login(final String email, final String senha, final Callback cb) {
         LoginRequestDto request = new LoginRequestDto(email.trim().toLowerCase(), senha);
 
@@ -90,7 +106,9 @@ public class AuthRepository {
             public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
                 final AuthResponseDto body = response.body();
                 if (response.isSuccessful() && body != null) {
-                    new SessionManager(appContext).salvarToken(body.token);
+                    // Guarda o token de acesso (24h) e o refresh token (90 dias) — este
+                    // permite renovar a sessão sozinho, sem o produtor digitar a senha de novo.
+                    new SessionManager(appContext).salvarTokens(body.token, body.refreshToken);
                     AppDatabase.IO.execute(() -> {
                         long usuarioId = garantirUsuarioLocal(body, senha);
                         cb.onSucesso(usuarioId);
