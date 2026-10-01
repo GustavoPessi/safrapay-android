@@ -25,6 +25,10 @@ public interface CategoriaDespesaDao {
     @Query("SELECT * FROM categoria_despesa WHERE nome = :nome LIMIT 1")
     CategoriaDespesa buscarPorNome(String nome);
 
+    /** Nomes das categorias (contexto do assistente de IA). */
+    @Query("SELECT nome FROM categoria_despesa ORDER BY id")
+    List<String> listarNomes();
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     long inserir(CategoriaDespesa c);
 }

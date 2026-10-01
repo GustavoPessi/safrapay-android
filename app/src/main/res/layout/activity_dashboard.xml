@@ -63,5 +63,9 @@
         <Button android:id="@+id/btnNovaSafraRapida" style="@style/Widget.App.Button.Text"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xs" android:text="@string/dash_nova_safra_rapida" />
+
+        <Button android:id="@+id/btnAssistente" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:text="@string/dash_assistente_ia" />
     </LinearLayout>
 </ScrollView>

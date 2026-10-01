@@ -3,6 +3,8 @@ package com.tcc.gestaorural.data.remote;
 import com.tcc.gestaorural.data.remote.dto.AlterarSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.AnotacaoMaquinaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
+import com.tcc.gestaorural.data.remote.dto.ChatMensagemRequestDto;
+import com.tcc.gestaorural.data.remote.dto.ChatMensagemResponseDto;
 import com.tcc.gestaorural.data.remote.dto.DespesaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.EsqueciSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.LoginRequestDto;
@@ -56,6 +58,13 @@ public interface ApiService {
     @PUT("api/usuario/perfil")
     Call<PerfilResponseDto> atualizarPerfil(@Header("Authorization") String bearerToken,
                                              @Body PerfilRequestDto request);
+
+    // Assistente de lançamentos com IA (chat dentro do app). Rota autenticada.
+    // O backend interpreta a conversa + contexto e devolve a proposta de
+    // lançamento; o app confirma e grava no Room local.
+    @POST("api/chat/mensagem")
+    Call<ChatMensagemResponseDto> enviarMensagemChat(@Header("Authorization") String bearerToken,
+                                                     @Body ChatMensagemRequestDto request);
 
     // --- Sincronizacao offline-first (Fase 1: Propriedade + Talhao; Fase 2: Safra;
     //     Fase 3: Receita + Despesa + Meta Financeira) ---
