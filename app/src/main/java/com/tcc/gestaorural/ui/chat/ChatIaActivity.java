@@ -41,6 +41,7 @@ public class ChatIaActivity extends BaseActivity {
         adapter = new ChatAdapter(new ChatAdapter.Acao() {
             @Override public void confirmar(ChatItem item) { vm.confirmar(item); }
             @Override public void descartar(ChatItem item) { vm.descartar(item); }
+            @Override public void sugestao(String texto) { vm.sugestao(texto); }
         });
         recycler.setAdapter(adapter);
 
@@ -62,9 +63,15 @@ public class ChatIaActivity extends BaseActivity {
             edtMensagem.setText("");
         });
 
-        // Saudação inicial (só na primeira criação, antes de qualquer mensagem).
-        vm.saudacaoInicial(vm.temToken()
-                ? getString(R.string.chat_bem_vindo)
-                : getString(R.string.chat_sem_login));
+        // Saudação inicial + atalhos (só na primeira criação, antes de qualquer mensagem).
+        if (vm.temToken()) {
+            vm.saudacaoInicial(getString(R.string.chat_bem_vindo), java.util.Arrays.asList(
+                    getString(R.string.chat_sug_gastos_mes),
+                    getString(R.string.chat_sug_safras_ativas),
+                    getString(R.string.chat_sug_lancar_gasto),
+                    getString(R.string.chat_sug_metas)));
+        } else {
+            vm.saudacaoInicial(getString(R.string.chat_sem_login), null);
+        }
     }
 }

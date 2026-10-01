@@ -36,4 +36,11 @@ public interface AnotacaoMaquinaDao {
            "JOIN maquina ON maquina.id = anotacao_maquina.maquina_id " +
            "WHERE maquina.usuario_id = :usuarioId AND anotacao_maquina.sincronizado = 0")
     List<AnotacaoMaquina> listarNaoSincronizadas(long usuarioId);
+
+    /** Assistente de IA (consulta MAQUINAS): anotacoes/manutencoes ainda pendentes do usuario. */
+    @Query("SELECT anotacao_maquina.* FROM anotacao_maquina " +
+           "JOIN maquina ON maquina.id = anotacao_maquina.maquina_id " +
+           "WHERE maquina.usuario_id = :usuarioId AND anotacao_maquina.concluida = 0 " +
+           "ORDER BY anotacao_maquina.data")
+    List<AnotacaoMaquina> listarPendentesSync(long usuarioId);
 }

@@ -55,7 +55,9 @@ public interface SafraDao {
 
     /** Contexto do assistente de IA: safras do usuário com uuid + cultura/ano/talhão + data_fim (ativa). */
     @Query("SELECT safra.uuid AS uuid, talhao.cultura AS cultura, safra.ano_safra AS anoSafra, " +
-           "talhao.nome AS talhaoNome, safra.data_fim AS dataFim " +
+           "talhao.nome AS talhaoNome, talhao.uuid AS talhaoUuid, propriedade.uuid AS propriedadeUuid, " +
+           "propriedade.nome AS propriedadeNome, talhao.area_ha AS areaHa, " +
+           "safra.data_inicio AS dataInicio, safra.data_fim AS dataFim " +
            "FROM safra " +
            "JOIN talhao ON talhao.id = safra.talhao_id " +
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +

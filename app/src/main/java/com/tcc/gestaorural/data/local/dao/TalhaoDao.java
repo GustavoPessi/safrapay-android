@@ -34,4 +34,9 @@ public interface TalhaoDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId AND talhao.sincronizado = 0")
     List<Talhao> listarNaoSincronizadas(long usuarioId);
+
+    /** Assistente de IA: talhoes do usuario (contexto + consulta AREA). */
+    @Query("SELECT talhao.* FROM talhao JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
+           "WHERE propriedade.usuario_id = :usuarioId ORDER BY talhao.nome")
+    List<Talhao> listarPorUsuarioSync(long usuarioId);
 }
