@@ -21,6 +21,11 @@ public class ChatMensagemRequestDto {
     private Contexto contexto;
     /** Foto opcional (nota fiscal, cupom, recibo) — vai com a ÚLTIMA mensagem. Não pode vir junto com arquivo. */
     private Imagem imagem;
+    /**
+     * Várias fotos de uma vez (até 5, 7 MB no total) — vai com a ÚLTIMA mensagem. Cada uma
+     * com o número dela na conversa (Foto 1, 2, 3...). O app novo usa sempre esta lista.
+     */
+    private List<Imagem> imagens;
     /** Arquivo opcional (.xlsx, .csv ou .txt com vários lançamentos) — vai com a ÚLTIMA mensagem. */
     private Arquivo arquivo;
     /**
@@ -33,14 +38,19 @@ public class ChatMensagemRequestDto {
         /** image/jpeg, image/png ou image/webp (o servidor confere pelos bytes). Até 5 MB. */
         private String tipo;
         private String base64;
+        /** Número da foto na conversa ("Foto N"); a IA devolve esse N no campo "foto" do lançamento. */
+        private Integer numero;
 
         public Imagem() {}
         public Imagem(String tipo, String base64) { this.tipo = tipo; this.base64 = base64; }
+        public Imagem(String tipo, String base64, Integer numero) { this(tipo, base64); this.numero = numero; }
 
         public String getTipo() { return tipo; }
         public void setTipo(String tipo) { this.tipo = tipo; }
         public String getBase64() { return base64; }
         public void setBase64(String base64) { this.base64 = base64; }
+        public Integer getNumero() { return numero; }
+        public void setNumero(Integer numero) { this.numero = numero; }
     }
 
     public static class Arquivo {
@@ -205,6 +215,8 @@ public class ChatMensagemRequestDto {
     public void setContexto(Contexto contexto) { this.contexto = contexto; }
     public Imagem getImagem() { return imagem; }
     public void setImagem(Imagem imagem) { this.imagem = imagem; }
+    public List<Imagem> getImagens() { return imagens; }
+    public void setImagens(List<Imagem> imagens) { this.imagens = imagens; }
     public Arquivo getArquivo() { return arquivo; }
     public void setArquivo(Arquivo arquivo) { this.arquivo = arquivo; }
     public Audio getAudio() { return audio; }

@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -46,6 +47,7 @@ import com.tcc.gestaorural.util.AnexoUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Assistente de IA (chat dentro do app): texto, foto (câmera/galeria), arquivo
@@ -78,17 +80,20 @@ public class ChatIaActivity extends BaseActivity {
     private final GravadorAudio gravador = new GravadorAudio();
     private final Handler relogio = new Handler(Looper.getMainLooper());
     private TextView txtGravando;
+    private View scrollBandeja;
+    private android.widget.LinearLayout bandeja;
     private float xInicioToque;
     private MediaPlayer player;
     private String audioTocando;
 
     private final ActivityResultLauncher<Uri> tirarFoto = registerForActivityResult(
             new ActivityResultContracts.TakePicture(),
-            ok -> { if (Boolean.TRUE.equals(ok) && fotoCameraUri != null) prepararFoto(fotoCameraUri); });
+            ok -> { if (Boolean.TRUE.equals(ok) && fotoCameraUri != null) prepararFotos(java.util.Collections.singletonList(fotoCameraUri)); });
 
-    private final ActivityResultLauncher<String> escolherFoto = registerForActivityResult(
-            new ActivityResultContracts.GetContent(),
-            uri -> { if (uri != null) prepararFoto(uri); });
+    /** Galeria com várias fotos de uma vez (seletor de fotos do Android; até 5). */
+    private final ActivityResultLauncher<PickVisualMediaRequest> escolherFotos = registerForActivityResult(
+            new ActivityResultContracts.PickMultipleVisualMedia(ChatIaViewModel.MAX_FOTOS),
+            uris -> { if (uris != null && !uris.isEmpty()) prepararFotos(uris); });
 
     private final ActivityResultLauncher<String[]> escolherArquivo = registerForActivityResult(
             new ActivityResultContracts.OpenDocument(),
@@ -162,9 +167,18 @@ public class ChatIaActivity extends BaseActivity {
         atualizarBotaoAcao();
 
         txtGravando = findViewById(R.id.txtGravando);
+        scrollBandeja = findViewById(R.id.scrollBandeja);
+        bandeja = findViewById(R.id.bandeja);
+        renderizarBandeja(); // fotos que já estavam na bandeja antes de girar a tela
         btnAcao.setOnTouchListener(this::toqueMicrofone);
         btnAcao.setOnClickListener(v -> {
             if (!modoEnviar) return; // microfone: tratado no toque (segurar pra gravar)
+            if (!vm.getBandeja().isEmpty()) {
+                vm.enviarFotos(textoDigitado());
+                edtMensagem.setText("");
+                renderizarBandeja();
+                return;
+            }
             String texto = textoDigitado();
             if (texto.isEmpty()) return;
             vm.enviar(texto);
@@ -192,9 +206,9 @@ public class ChatIaActivity extends BaseActivity {
         if (fotoCameraUri != null) outState.putString(ESTADO_FOTO_URI, fotoCameraUri.toString());
     }
 
-    /** Microfone com o campo vazio; seta de enviar quando há texto (igual ao WhatsApp). */
+    /** Microfone com o campo vazio; seta de enviar quando há texto ou fotos na bandeja (igual ao WhatsApp). */
     private void atualizarBotaoAcao() {
-        modoEnviar = !textoDigitado().isEmpty();
+        modoEnviar = !textoDigitado().isEmpty() || !vm.getBandeja().isEmpty();
         btnAcao.setImageResource(modoEnviar ? R.drawable.ic_chat_enviar : R.drawable.ic_chat_mic_branco);
         btnAcao.setContentDescription(getString(modoEnviar ? R.string.chat_enviar : R.string.chat_gravar_audio));
         // Enquanto a IA responde, dá pra digitar, mas não enviar nem gravar outra mensagem.
@@ -212,9 +226,16 @@ public class ChatIaActivity extends BaseActivity {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.chat_anexar_titulo)
                 .setItems(opcoes, (d, qual) -> {
+                    if (qual == 2) {
+                        if (!vm.getBandeja().isEmpty()) { toast(getString(R.string.chat_bandeja_sem_arquivo)); return; }
+                        abrirSeletorArquivo();
+                        return;
+                    }
+                    if (vm.getBandeja().size() >= ChatIaViewModel.MAX_FOTOS) { toast(getString(R.string.chat_bandeja_cheia)); return; }
                     if (qual == 0) abrirCamera();
-                    else if (qual == 1) escolherFoto.launch("image/*");
-                    else abrirSeletorArquivo();
+                    else escolherFotos.launch(new PickVisualMediaRequest.Builder()
+                            .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                            .build());
                 })
                 .show();
     }
@@ -244,22 +265,60 @@ public class ChatIaActivity extends BaseActivity {
         }
     }
 
-    private void prepararFoto(Uri uri) {
-        final String legenda = textoDigitado();
+    /** Comprime as fotos (fora da main thread) e coloca na bandeja; o envio é no botão Enviar. */
+    private void prepararFotos(List<Uri> uris) {
         toast(getString(R.string.chat_preparando_anexo));
         AppDatabase.IO.execute(() -> {
-            try {
-                byte[] jpeg = AnexoUtils.fotoJpeg(this, uri);
-                String base64 = android.util.Base64.encodeToString(jpeg, android.util.Base64.NO_WRAP);
-                runOnUiThread(() -> {
-                    edtMensagem.setText("");
-                    vm.enviarAnexo(legenda, getString(R.string.chat_rotulo_foto),
-                            new ChatMensagemRequestDto.Imagem("image/jpeg", base64), null, jpeg);
-                });
-            } catch (AnexoUtils.AnexoInvalido e) {
-                runOnUiThread(() -> toast(e.getMessage()));
+            List<byte[]> prontas = new ArrayList<>();
+            String erro = null;
+            for (Uri u : uris) {
+                try { prontas.add(AnexoUtils.fotoJpeg(this, u)); }
+                catch (AnexoUtils.AnexoInvalido e) { erro = e.getMessage(); }
             }
+            final String erroFinal = erro;
+            runOnUiThread(() -> {
+                int recusadas = 0;
+                for (byte[] jpeg : prontas) if (!vm.adicionarNaBandeja(jpeg)) recusadas++;
+                renderizarBandeja();
+                if (recusadas > 0) {
+                    toast(getString(vm.getBandeja().size() >= ChatIaViewModel.MAX_FOTOS
+                            ? R.string.chat_bandeja_cheia : R.string.chat_bandeja_grande));
+                } else if (erroFinal != null) {
+                    toast(erroFinal);
+                }
+            });
         });
+    }
+
+    /** Redesenha as miniaturas da bandeja (cada uma com ✕ pra tirar). */
+    private void renderizarBandeja() {
+        bandeja.removeAllViews();
+        List<byte[]> fotos = vm.getBandeja();
+        scrollBandeja.setVisibility(fotos.isEmpty() ? View.GONE : View.VISIBLE);
+        android.view.LayoutInflater inf = getLayoutInflater();
+        for (int i = 0; i < fotos.size(); i++) {
+            View item = inf.inflate(R.layout.item_bandeja_foto, bandeja, false);
+            ((android.widget.ImageView) item.findViewById(R.id.imgMiniatura)).setImageBitmap(miniatura(fotos.get(i)));
+            final int posicao = i;
+            item.findViewById(R.id.btnRemover).setOnClickListener(v -> {
+                vm.removerDaBandeja(posicao);
+                renderizarBandeja();
+            });
+            bandeja.addView(item);
+        }
+        atualizarBotaoAcao();
+    }
+
+    /** JPEG da bandeja (até 1600 px) → miniatura pequena (~200 px) pra não pesar a memória. */
+    private static android.graphics.Bitmap miniatura(byte[] jpeg) {
+        android.graphics.BitmapFactory.Options op = new android.graphics.BitmapFactory.Options();
+        op.inJustDecodeBounds = true;
+        android.graphics.BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length, op);
+        int amostra = 1;
+        while (Math.max(op.outWidth, op.outHeight) / (amostra * 2) >= 200) amostra *= 2;
+        android.graphics.BitmapFactory.Options op2 = new android.graphics.BitmapFactory.Options();
+        op2.inSampleSize = amostra;
+        return android.graphics.BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length, op2);
     }
 
     // --- Arquivo -------------------------------------------------------
@@ -272,8 +331,8 @@ public class ChatIaActivity extends BaseActivity {
                 String[] nomeEConteudo = AnexoUtils.arquivoBase64(this, uri);
                 runOnUiThread(() -> {
                     edtMensagem.setText("");
-                    vm.enviarAnexo(legenda, getString(R.string.chat_rotulo_arquivo, nomeEConteudo[0]), null,
-                            new ChatMensagemRequestDto.Arquivo(nomeEConteudo[0], nomeEConteudo[1]), null);
+                    vm.enviarArquivo(legenda, getString(R.string.chat_rotulo_arquivo, nomeEConteudo[0]),
+                            new ChatMensagemRequestDto.Arquivo(nomeEConteudo[0], nomeEConteudo[1]));
                 });
             } catch (AnexoUtils.AnexoInvalido e) {
                 runOnUiThread(() -> toast(e.getMessage()));

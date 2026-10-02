@@ -30,12 +30,24 @@ public class ChatIaViewModel extends AndroidViewModel {
 
     private final MutableLiveData<List<ChatItem>> lista = new MutableLiveData<>();
     private final MutableLiveData<Boolean> enviando = new MutableLiveData<>(false);
+    /** Máximo de fotos por mensagem (limite do servidor). */
+    public static final int MAX_FOTOS = 5;
+    /** Soma dos JPEGs de uma mensagem: 5 MB de bytes ≈ 6,7 MB em base64 (servidor aceita 7 MB). */
+    public static final long MAX_BYTES_FOTOS = 5L * 1024 * 1024;
+    /** Quantas fotos pendentes guardar na memória no máximo (as mais antigas saem). */
+    private static final int MAX_PENDENTES = 15;
+
     /**
-     * Última foto mandada no chat. Fica pendente até uma proposta que a usa ser CONFIRMADA
-     * (não é "gasta" pela primeira proposta que chegar): se a IA mandar outra proposta, a foto
-     * passa pra nova. Sai quando chega foto nova ou a conversa muda de assunto (consulta/conversa).
+     * Fotos mandadas na conversa e ainda não usadas: número na conversa ("Foto N") → JPEG.
+     * Uma foto só sai daqui quando um lançamento com aquele "foto" é confirmado (vira o
+     * comprovante dele) ou quando a conversa termina (a tela fecha). Foto nova não descarta
+     * as anteriores.
      */
-    private byte[] fotoPendente;
+    private final java.util.LinkedHashMap<Integer, byte[]> fotosPendentes = new java.util.LinkedHashMap<>();
+    /** Contador da conversa: Foto 1, 2, 3... (só cresce, mesmo entre mensagens). */
+    private int proximaFoto = 1;
+    /** Fotos escolhidas/tiradas que ainda estão na bandeja, antes de enviar (sobrevive à rotação). */
+    private final List<byte[]> bandeja = new ArrayList<>();
 
     public ChatIaViewModel(@NonNull Application app) {
         super(app);
@@ -65,23 +77,63 @@ public class ChatIaViewModel extends AndroidViewModel {
         if (texto == null) return;
         texto = texto.trim();
         if (texto.isEmpty()) return;
-        enviarInterno(texto, texto, null, null);
+        enviarInterno(texto, texto, null, null, null);
+    }
+
+    // --- Bandeja de fotos (antes de enviar) -----------------------------
+
+    public List<byte[]> getBandeja() { return bandeja; }
+
+    /** @return false se a bandeja já está cheia ou se passaria do tamanho total permitido. */
+    public boolean adicionarNaBandeja(byte[] jpeg) {
+        if (bandeja.size() >= MAX_FOTOS) return false;
+        long total = jpeg.length;
+        for (byte[] b : bandeja) total += b.length;
+        if (total > MAX_BYTES_FOTOS) return false;
+        bandeja.add(jpeg);
+        return true;
+    }
+
+    public void removerDaBandeja(int posicao) {
+        if (posicao >= 0 && posicao < bandeja.size()) bandeja.remove(posicao);
     }
 
     /**
-     * Foto ou arquivo (com legenda opcional). Na bolha aparece o rótulo do anexo; no
-     * histórico mandado à IA vai só texto (o servidor não reenvia anexos antigos).
+     * Envia as fotos da bandeja (numeradas na conversa) + o texto opcional, tudo numa mensagem.
+     * Na bolha e no histórico: "[Foto 1] [Foto 2] <texto>" — a IA usa esses números pra dizer de
+     * qual foto saiu cada lançamento (campo "foto"), inclusive nas mensagens seguintes.
      */
-    public void enviarAnexo(String legenda, String rotulo,
-                            ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo,
-                            byte[] fotoJpeg) {
+    public void enviarFotos(String legenda) {
+        if (estaEnviando() || bandeja.isEmpty()) return;
+        List<ChatMensagemRequestDto.Imagem> imagens = new ArrayList<>();
+        StringBuilder marcas = new StringBuilder();
+        for (byte[] jpeg : bandeja) {
+            int n = proximaFoto++;
+            imagens.add(new ChatMensagemRequestDto.Imagem("image/jpeg",
+                    android.util.Base64.encodeToString(jpeg, android.util.Base64.NO_WRAP), n));
+            fotosPendentes.put(n, jpeg);
+            marcas.append("[Foto ").append(n).append("] ");
+        }
+        int qtd = bandeja.size();
+        bandeja.clear();
+        // Não deixa a memória crescer sem limite numa conversa longa: as mais antigas saem.
+        while (fotosPendentes.size() > MAX_PENDENTES) {
+            fotosPendentes.remove(fotosPendentes.keySet().iterator().next());
+        }
+
+        String l = legenda == null ? "" : legenda.trim();
+        String texto = marcas.toString().trim() + " "
+                + (!l.isEmpty() ? l : (qtd == 1 ? "Enviei uma foto." : "Enviei " + qtd + " fotos."));
+        enviarInterno("📷 " + texto, texto, null, imagens, null);
+    }
+
+    /** Arquivo (.xlsx/.csv/.txt) com legenda opcional. Arquivo não vira comprovante. */
+    public void enviarArquivo(String legenda, String rotulo, ChatMensagemRequestDto.Arquivo arquivo) {
         if (estaEnviando()) return;
-        if (imagem != null) fotoPendente = fotoJpeg; // arquivo e áudio não viram comprovante
         String l = legenda == null ? "" : legenda.trim();
         String bolha = rotulo + (l.isEmpty() ? "" : "\n" + l);
-        String paraIa = !l.isEmpty() ? l
-                : (imagem != null ? "Enviei uma foto." : "Enviei o arquivo " + (arquivo != null ? arquivo.getNome() : "") + ".");
-        enviarInterno(bolha, paraIa, imagem, arquivo);
+        String paraIa = !l.isEmpty() ? l : "Enviei o arquivo " + (arquivo != null ? arquivo.getNome() : "") + ".";
+        enviarInterno(bolha, paraIa, null, null, arquivo);
     }
 
     /**
@@ -125,7 +177,8 @@ public class ChatIaViewModel extends AndroidViewModel {
     }
 
     private void enviarInterno(String textoBolha, String textoHistorico,
-                               ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo) {
+                               ChatMensagemRequestDto.Imagem imagem, List<ChatMensagemRequestDto.Imagem> imagens,
+                               ChatMensagemRequestDto.Arquivo arquivo) {
         if (estaEnviando()) return;
 
         removerSugestoes(); // sugestões antigas deixam de valer quando o produtor responde
@@ -134,7 +187,7 @@ public class ChatIaViewModel extends AndroidViewModel {
         enviando.setValue(true);
         publicar();
 
-        repo.enviar(usuarioId, new ArrayList<>(historico), imagem, arquivo, new ChatIaRepository.RespostaCallback() {
+        repo.enviar(usuarioId, new ArrayList<>(historico), imagem, imagens, arquivo, null, new ChatIaRepository.RespostaCallback() {
             @Override
             public void onResposta(ChatMensagemResponseDto resp) { tratarResposta(resp); }
             @Override
@@ -157,15 +210,7 @@ public class ChatIaViewModel extends AndroidViewModel {
         }
         if ("PROPOSTA".equalsIgnoreCase(resp.getStatus()) && resp.getLancamentos() != null && !resp.getLancamentos().isEmpty()) {
             substituirPropostasAbertas();
-            ChatItem proposta = ChatItem.proposta(resp.getLancamentos());
-            proposta.setFotoJpeg(fotoPendente); // continua pendente até alguma proposta ser confirmada
-            itens.add(proposta);
-        }
-
-        // Conversa mudou de assunto: propostas novas não recebem mais a foto (as que já estão
-        // na tela continuam com ela e ainda podem ser confirmadas).
-        if ("SEM_LANCAMENTO".equalsIgnoreCase(resp.getStatus()) || "CONSULTA".equalsIgnoreCase(resp.getStatus())) {
-            fotoPendente = null;
+            itens.add(ChatItem.proposta(resp.getLancamentos()));
         }
 
         if ("CONSULTA".equalsIgnoreCase(resp.getStatus()) && resp.getConsulta() != null) {
@@ -211,12 +256,6 @@ public class ChatIaViewModel extends AndroidViewModel {
     private void gravar(ChatItem item) {
         final List<ChatMensagemResponseDto.Lancamento> lancamentos = item.getLancamentos();
         final int total = lancamentos.size();
-        final byte[] foto = item.getFotoJpeg();
-        // Backend novo marca quais lançamentos são da foto (doComprovante); o antigo não manda
-        // o campo e vale a regra anterior (todos os lançamentos da proposta recebem a foto).
-        boolean temMarcacao = false;
-        for (ChatMensagemResponseDto.Lancamento l : lancamentos) if (l.getDoComprovante() != null) temMarcacao = true;
-        final boolean usarMarcacao = temMarcacao;
 
         // Some com os botões já (evita gravar duas vezes num toque duplo).
         item.setResolvido(true);
@@ -225,33 +264,54 @@ public class ChatIaViewModel extends AndroidViewModel {
 
         final int[] concluidos = {0};
         final List<String> salvos = new ArrayList<>();
+        final java.util.Set<Integer> fotosUsadas = new java.util.HashSet<>();
         final String[] erro = {null};
         final boolean[] guardouFoto = {false};
         for (ChatMensagemResponseDto.Lancamento l : lancamentos) {
-            byte[] fotoDeste = (foto != null && (!usarMarcacao || Boolean.TRUE.equals(l.getDoComprovante()))) ? foto : null;
+            final Integer numeroFoto = fotoDoLancamento(l, lancamentos);
+            byte[] fotoDeste = numeroFoto != null ? fotosPendentes.get(numeroFoto) : null;
             repo.confirmar(l, fotoDeste, new ChatIaRepository.GravarCallback() {
                 @Override
                 public void onGravado(String tipo, boolean comprovanteGuardado) {
                     salvos.add(descreverSalvo(l));
-                    if (comprovanteGuardado) guardouFoto[0] = true;
-                    if (++concluidos[0] == total) concluir(item, salvos, erro[0], guardouFoto[0]);
+                    if (comprovanteGuardado) { guardouFoto[0] = true; fotosUsadas.add(numeroFoto); }
+                    if (++concluidos[0] == total) concluir(item, salvos, fotosUsadas, erro[0], guardouFoto[0]);
                 }
                 @Override
                 public void onErro(String mensagem) {
                     if (erro[0] == null) erro[0] = mensagem;
-                    if (++concluidos[0] == total) concluir(item, salvos, erro[0], guardouFoto[0]);
+                    if (++concluidos[0] == total) concluir(item, salvos, fotosUsadas, erro[0], guardouFoto[0]);
                 }
             });
         }
     }
 
+    /**
+     * Qual foto pendente vira comprovante deste lançamento:
+     * 1. "foto" = N (backend novo) → a Foto N;
+     * 2. sem "foto", mas doComprovante = true e só 1 foto pendente → ela (compatibilidade);
+     * 3. backend antigo (proposta sem doComprovante nem foto) e só 1 foto pendente → ela (regra anterior);
+     * senão, nenhuma.
+     */
+    private Integer fotoDoLancamento(ChatMensagemResponseDto.Lancamento l,
+                                     List<ChatMensagemResponseDto.Lancamento> todos) {
+        if (l.getFoto() != null) return fotosPendentes.containsKey(l.getFoto()) ? l.getFoto() : null;
+        if (fotosPendentes.size() != 1) return null;
+        Integer unica = fotosPendentes.keySet().iterator().next();
+        if (Boolean.TRUE.equals(l.getDoComprovante())) return unica;
+        boolean backendAntigo = true;
+        for (ChatMensagemResponseDto.Lancamento x : todos) {
+            if (x.getDoComprovante() != null || x.getFoto() != null) { backendAntigo = false; break; }
+        }
+        return backendAntigo ? unica : null;
+    }
+
     /** Fecha a proposta depois que todos os lançamentos foram tentados. */
-    private void concluir(ChatItem item, List<String> salvos, String erro, boolean guardouFoto) {
-        item.setResolvido(true);
-        item.setFotoJpeg(null); // já está no arquivo (ou não era pra guardar); libera a memória
+    private void concluir(ChatItem item, List<String> salvos, java.util.Set<Integer> fotosUsadas,
+                          String erro, boolean guardouFoto) {
+        // As fotos que viraram comprovante saem das pendentes (as outras continuam esperando).
+        for (Integer n : fotosUsadas) fotosPendentes.remove(n);
         if (!salvos.isEmpty()) {
-            // A foto foi usada por uma proposta confirmada: não vai pra mais nenhuma.
-            fotoPendente = null;
             // Só no histórico mandado ao servidor (o servidor não guarda a conversa): assim a IA
             // sabe o que já foi salvo e não propõe de novo.
             historico.add(new ChatMensagemRequestDto.Mensagem("assistente",
@@ -261,7 +321,7 @@ public class ChatIaViewModel extends AndroidViewModel {
             int total = salvos.size();
             item.setRodape((total == 1) ? "✓ Lançamento salvo" : "✓ " + total + " lançamentos salvos");
             itens.add(ChatItem.assistente(item.getRodape() + " no app. Já aparece no seu financeiro."
-                    + (guardouFoto ? " Guardei a foto como comprovante." : "")));
+                    + (guardouFoto ? (fotosUsadas.size() > 1 ? " Guardei as fotos como comprovantes." : " Guardei a foto como comprovante.") : "")));
         } else {
             item.setRodape(salvos.isEmpty() ? "⚠️ " + erro : "⚠️ " + salvos.size() + " salvo(s); " + erro);
             itens.add(ChatItem.assistente("⚠️ " + erro));
@@ -281,7 +341,6 @@ public class ChatIaViewModel extends AndroidViewModel {
     public void descartar(ChatItem item) {
         if (item.getTipo() != ChatItem.PROPOSTA || item.isResolvido()) return;
         item.setResolvido(true);
-        item.setFotoJpeg(null);
         item.setRodape("Descartado");
         historico.add(new ChatMensagemRequestDto.Mensagem("assistente", "(Proposta descartada pelo produtor)"));
         itens.add(ChatItem.assistente("Ok, descartei. Pode me dizer de outro jeito se quiser."));
@@ -293,7 +352,6 @@ public class ChatIaViewModel extends AndroidViewModel {
         for (ChatItem c : itens) {
             if (c.getTipo() == ChatItem.PROPOSTA && !c.isResolvido()) {
                 c.setResolvido(true);
-                c.setFotoJpeg(null);
                 c.setRodape("Substituída pela proposta abaixo");
             }
         }

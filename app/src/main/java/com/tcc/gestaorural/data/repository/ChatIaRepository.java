@@ -146,6 +146,14 @@ public class ChatIaRepository {
     public void enviar(long usuarioId, List<ChatMensagemRequestDto.Mensagem> historico,
                        ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo,
                        ChatMensagemRequestDto.Audio audio, RespostaCallback cb) {
+        enviar(usuarioId, historico, imagem, null, arquivo, audio, cb);
+    }
+
+    /** Versão completa: uma foto, várias fotos (numeradas), arquivo ou mensagem de voz. */
+    public void enviar(long usuarioId, List<ChatMensagemRequestDto.Mensagem> historico,
+                       ChatMensagemRequestDto.Imagem imagem, List<ChatMensagemRequestDto.Imagem> imagens,
+                       ChatMensagemRequestDto.Arquivo arquivo,
+                       ChatMensagemRequestDto.Audio audio, RespostaCallback cb) {
         if (!temToken()) {
             cb.onErro(session.getToken() == null
                     ? "Você precisa entrar na sua conta pra usar o assistente."
@@ -158,6 +166,7 @@ public class ChatIaRepository {
             req.setMensagens(historico);
             req.setHoje(DateUtils.hojeIso());
             req.setImagem(imagem);
+            req.setImagens(imagens);
             req.setArquivo(arquivo);
             req.setAudio(audio);
 
@@ -236,7 +245,7 @@ public class ChatIaRepository {
         switch (code) {
             case 401:
             case 403: return MSG_SESSAO_EXPIRADA;
-            case 413: return "O anexo é grande demais (foto até 5 MB, arquivo até 2 MB, áudio até 2 minutos). Tente um menor.";
+            case 413: return "O anexo é grande demais (fotos até 7 MB no total, arquivo até 2 MB, áudio até 2 minutos). Tente mandar menos fotos por vez.";
             case 415: return "Formato não aceito. Foto: JPEG, PNG ou WebP. Arquivo: .xlsx, .csv ou .txt. Áudio: Ogg/Opus ou M4A.";
             case 422: return "Não consegui entender o áudio. Tente gravar de novo, num lugar mais silencioso, ou escreva.";
             case 429: return "Você atingiu o limite de mensagens de hoje. Tente novamente amanhã.";

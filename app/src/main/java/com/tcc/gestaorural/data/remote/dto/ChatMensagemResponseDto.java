@@ -49,6 +49,8 @@ public class ChatMensagemResponseDto {
          * null = backend antigo (não manda o campo): vale a regra anterior.
          */
         private Boolean doComprovante;
+        /** Número da foto (na conversa) de onde este lançamento saiu; null = não veio de foto. */
+        private Integer foto;
 
         public String getTipo() { return tipo; }
         public void setTipo(String tipo) { this.tipo = tipo; }
@@ -68,6 +70,8 @@ public class ChatMensagemResponseDto {
         public void setCamposFaltando(List<String> camposFaltando) { this.camposFaltando = camposFaltando; }
         public Boolean getDoComprovante() { return doComprovante; }
         public void setDoComprovante(Boolean doComprovante) { this.doComprovante = doComprovante; }
+        public Integer getFoto() { return foto; }
+        public void setFoto(Integer foto) { this.foto = foto; }
     }
 
     /** v2: pergunta estruturada que o app executa no Room. */
