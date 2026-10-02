@@ -26,6 +26,8 @@ public class ChatMensagemResponseDto {
     private List<String> sugestoes;
     /** Avisos do servidor (ex.: arquivo grande cortado). */
     private List<String> avisos;
+    /** Só quando o pedido trouxe "audio": o texto que o servidor entendeu da mensagem de voz. */
+    private String transcricao;
 
     public static class Lancamento {
         /** "DESPESA" ou "RECEITA". */
@@ -128,4 +130,6 @@ public class ChatMensagemResponseDto {
     public void setSugestoes(List<String> sugestoes) { this.sugestoes = sugestoes; }
     public List<String> getAvisos() { return avisos; }
     public void setAvisos(List<String> avisos) { this.avisos = avisos; }
+    public String getTranscricao() { return transcricao; }
+    public void setTranscricao(String transcricao) { this.transcricao = transcricao; }
 }

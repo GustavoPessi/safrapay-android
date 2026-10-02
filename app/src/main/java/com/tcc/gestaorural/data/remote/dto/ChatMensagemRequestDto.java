@@ -23,6 +23,11 @@ public class ChatMensagemRequestDto {
     private Imagem imagem;
     /** Arquivo opcional (.xlsx, .csv ou .txt com vários lançamentos) — vai com a ÚLTIMA mensagem. */
     private Arquivo arquivo;
+    /**
+     * Mensagem de voz opcional — vai com a ÚLTIMA mensagem (no lugar do texto). O servidor
+     * transcreve e devolve em "transcricao". Não vem junto com imagem nem arquivo.
+     */
+    private Audio audio;
 
     public static class Imagem {
         /** image/jpeg, image/png ou image/webp (o servidor confere pelos bytes). Até 5 MB. */
@@ -50,6 +55,26 @@ public class ChatMensagemRequestDto {
         public void setNome(String nome) { this.nome = nome; }
         public String getBase64() { return base64; }
         public void setBase64(String base64) { this.base64 = base64; }
+    }
+
+    public static class Audio {
+        /** "audio/ogg" (Opus, Android 10+ — igual ao WhatsApp) ou "audio/mp4" (AAC/M4A, Android 7–9). */
+        private String tipo;
+        private String base64;
+        /** Duração em segundos (máx. 120). */
+        private Integer duracaoSegundos;
+
+        public Audio() {}
+        public Audio(String tipo, String base64, Integer duracaoSegundos) {
+            this.tipo = tipo; this.base64 = base64; this.duracaoSegundos = duracaoSegundos;
+        }
+
+        public String getTipo() { return tipo; }
+        public void setTipo(String tipo) { this.tipo = tipo; }
+        public String getBase64() { return base64; }
+        public void setBase64(String base64) { this.base64 = base64; }
+        public Integer getDuracaoSegundos() { return duracaoSegundos; }
+        public void setDuracaoSegundos(Integer duracaoSegundos) { this.duracaoSegundos = duracaoSegundos; }
     }
 
     public static class Mensagem {
@@ -182,4 +207,6 @@ public class ChatMensagemRequestDto {
     public void setImagem(Imagem imagem) { this.imagem = imagem; }
     public Arquivo getArquivo() { return arquivo; }
     public void setArquivo(Arquivo arquivo) { this.arquivo = arquivo; }
+    public Audio getAudio() { return audio; }
+    public void setAudio(Audio audio) { this.audio = audio; }
 }

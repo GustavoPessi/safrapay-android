@@ -139,6 +139,13 @@ public class ChatIaRepository {
     public void enviar(long usuarioId, List<ChatMensagemRequestDto.Mensagem> historico,
                        ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo,
                        RespostaCallback cb) {
+        enviar(usuarioId, historico, imagem, arquivo, null, cb);
+    }
+
+    /** Com foto, arquivo OU mensagem de voz (o servidor transcreve e devolve em "transcricao"). */
+    public void enviar(long usuarioId, List<ChatMensagemRequestDto.Mensagem> historico,
+                       ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo,
+                       ChatMensagemRequestDto.Audio audio, RespostaCallback cb) {
         if (!temToken()) {
             cb.onErro(session.getToken() == null
                     ? "Você precisa entrar na sua conta pra usar o assistente."
@@ -152,6 +159,7 @@ public class ChatIaRepository {
             req.setHoje(DateUtils.hojeIso());
             req.setImagem(imagem);
             req.setArquivo(arquivo);
+            req.setAudio(audio);
 
             ChatMensagemRequestDto.Contexto ctx = new ChatMensagemRequestDto.Contexto();
             ctx.setCategorias(categoriaDao.listarNomes());
@@ -228,8 +236,9 @@ public class ChatIaRepository {
         switch (code) {
             case 401:
             case 403: return MSG_SESSAO_EXPIRADA;
-            case 413: return "O anexo é grande demais (foto até 5 MB, arquivo até 2 MB). Tente um menor.";
-            case 415: return "Formato não aceito. Foto: JPEG, PNG ou WebP. Arquivo: .xlsx, .csv ou .txt.";
+            case 413: return "O anexo é grande demais (foto até 5 MB, arquivo até 2 MB, áudio até 2 minutos). Tente um menor.";
+            case 415: return "Formato não aceito. Foto: JPEG, PNG ou WebP. Arquivo: .xlsx, .csv ou .txt. Áudio: Ogg/Opus ou M4A.";
+            case 422: return "Não consegui entender o áudio. Tente gravar de novo, num lugar mais silencioso, ou escreva.";
             case 429: return "Você atingiu o limite de mensagens de hoje. Tente novamente amanhã.";
             case 502: return "O assistente está instável no momento. Tente de novo em instantes.";
             case 503: return "O assistente ainda não está configurado no servidor.";

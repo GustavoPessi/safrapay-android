@@ -81,6 +81,46 @@ public class ChatIaViewModel extends AndroidViewModel {
         enviarInterno(bolha, paraIa, imagem, arquivo);
     }
 
+    /**
+     * Mensagem de voz: a bolha mostra o áudio; o servidor transcreve e devolve o texto, que
+     * aparece embaixo da bolha e passa a valer no histórico (as próximas mensagens têm contexto).
+     */
+    public void enviarAudio(String caminho, String mime, int duracaoSegundos, String base64) {
+        if (estaEnviando()) return;
+        removerSugestoes();
+        final ChatItem bolha = ChatItem.audio(caminho, duracaoSegundos);
+        itens.add(bolha);
+        final ChatMensagemRequestDto.Mensagem msg =
+                new ChatMensagemRequestDto.Mensagem("usuario", "(mensagem de voz)");
+        historico.add(msg);
+        enviando.setValue(true);
+        publicar();
+
+        repo.enviar(usuarioId, new ArrayList<>(historico), null, null,
+                new ChatMensagemRequestDto.Audio(mime, base64, duracaoSegundos),
+                new ChatIaRepository.RespostaCallback() {
+                    @Override
+                    public void onResposta(ChatMensagemResponseDto resp) {
+                        String t = resp.getTranscricao() == null ? "" : resp.getTranscricao().trim();
+                        if (!t.isEmpty()) {
+                            bolha.setTexto(t);
+                            bolha.setEstadoTranscricao(ChatItem.TRANSCRICAO_OK);
+                            msg.setTexto(t);
+                        } else {
+                            bolha.setEstadoTranscricao(ChatItem.TRANSCRICAO_INDISPONIVEL);
+                        }
+                        tratarResposta(resp);
+                    }
+                    @Override
+                    public void onErro(String mensagem) {
+                        bolha.setEstadoTranscricao(ChatItem.TRANSCRICAO_INDISPONIVEL);
+                        enviando.setValue(false);
+                        itens.add(ChatItem.assistente("⚠️ " + mensagem));
+                        publicar();
+                    }
+                });
+    }
+
     private void enviarInterno(String textoBolha, String textoHistorico,
                                ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo) {
         if (estaEnviando()) return;
