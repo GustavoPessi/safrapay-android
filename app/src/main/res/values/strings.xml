@@ -386,7 +386,6 @@
     <string name="chat_sug_safras_ativas">Quais safras estão ativas?</string>
     <string name="chat_sug_lancar_gasto">Quero lançar um gasto</string>
     <string name="chat_sug_metas">Como estão minhas metas?</string>
-    <string name="chat_audio">Falar em vez de digitar</string>
     <string name="chat_anexar">Anexar foto ou arquivo</string>
     <string name="chat_anexar_titulo">Anexar</string>
     <string name="chat_anexo_arquivo">📄 Planilha ou bloco de notas (.xlsx, .csv, .txt)</string>
@@ -394,8 +393,6 @@
     <string name="chat_foto_galeria">🖼️ Escolher da galeria</string>
     <string name="chat_rotulo_foto">📷 Foto</string>
     <string name="chat_rotulo_arquivo">📎 %1$s</string>
-    <string name="chat_audio_prompt">Fale o gasto, a receita ou a sua pergunta</string>
-    <string name="chat_audio_indisponivel">O reconhecimento de voz não está disponível neste aparelho.</string>
     <string name="chat_aguarde">Espere a resposta anterior terminar.</string>
     <string name="chat_preparando_anexo">Preparando o anexo…</string>
     <string name="chat_sem_login">Sua sessão com o servidor não está ativa. Saia da conta e entre de novo para usar o assistente.</string>
@@ -414,4 +411,17 @@
     <string name="comprovante_preparando">Preparando a foto…</string>
     <string name="comprovante_tela_titulo">Comprovante</string>
     <string name="chat_comprovante_sem_foto">Sem comprovante anexado</string>
+    <!-- Mensagem de voz no assistente -->
+    <string name="chat_gravar_audio">Segure para gravar uma mensagem de voz</string>
+    <string name="chat_segure_para_gravar">Segure o microfone para gravar. Solte para enviar.</string>
+    <string name="chat_gravando">🔴 %1$s   ‹ deslize para cancelar</string>
+    <string name="chat_audio_cancelado">Gravação cancelada.</string>
+    <string name="chat_permissao_microfone">Para mandar mensagem de voz, permita o uso do microfone.</string>
+    <string name="chat_audio_erro_gravar">Não consegui usar o microfone.</string>
+    <string name="chat_audio_rotulo">🎤 Mensagem de voz</string>
+    <string name="chat_audio_transcrevendo">Transcrevendo…</string>
+    <string name="chat_audio_sem_transcricao">Transcrição indisponível</string>
+    <string name="chat_audio_tocar">Ouvir</string>
+    <string name="chat_audio_pausar">Pausar</string>
+    <string name="chat_audio_nao_encontrado">Não consegui tocar esse áudio.</string>
 </resources>

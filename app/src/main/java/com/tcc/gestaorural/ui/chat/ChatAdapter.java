@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.graphics.Bitmap;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,6 +19,7 @@ import com.google.android.material.chip.ChipGroup;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.AppDatabase;
 import com.tcc.gestaorural.util.ComprovanteUtils;
+import com.tcc.gestaorural.util.GravadorAudio;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemResponseDto;
 import com.tcc.gestaorural.data.repository.ChatConsultaExecutor;
 import com.tcc.gestaorural.util.DateUtils;
@@ -35,10 +37,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void abrirComprovante(ChatConsultaExecutor.Comprovante c);
         void compartilharComprovante(ChatConsultaExecutor.Comprovante c);
         void anexarComprovante(ChatConsultaExecutor.Comprovante c);
+        void tocarAudio(ChatItem item);
     }
 
     private final List<ChatItem> itens = new ArrayList<>();
     private final Acao acao;
+    /** Caminho do áudio tocando agora (mostra o ícone de pausa nessa bolha). */
+    private String audioTocando;
+
+    public void setAudioTocando(String caminho) {
+        audioTocando = caminho;
+        notifyDataSetChanged();
+    }
 
     public ChatAdapter(Acao acao) { this.acao = acao; }
 
@@ -60,6 +70,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case ChatItem.RESULTADO: return new VHResultado(inf.inflate(R.layout.item_chat_resultado, parent, false));
             case ChatItem.SUGESTOES: return new VHSugestoes(inf.inflate(R.layout.item_chat_sugestoes, parent, false));
             case ChatItem.COMPROVANTE: return new VHComprovante(inf.inflate(R.layout.item_chat_comprovante, parent, false));
+            case ChatItem.AUDIO:     return new VHAudio(inf.inflate(R.layout.item_chat_audio, parent, false));
             default:                 return new VHTexto(inf.inflate(R.layout.item_chat_assistente, parent, false));
         }
     }
@@ -72,6 +83,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         else if (holder instanceof VHResultado) ((VHResultado) holder).bind(item.getResultado());
         else if (holder instanceof VHSugestoes) ((VHSugestoes) holder).bind(item.getSugestoes());
         else if (holder instanceof VHComprovante) ((VHComprovante) holder).bind(item.getComprovante());
+        else if (holder instanceof VHAudio) ((VHAudio) holder).bind(item);
     }
 
     static class VHTexto extends RecyclerView.ViewHolder {
@@ -148,6 +160,37 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 chip.setTextColor(ContextCompat.getColor(grupo.getContext(), R.color.green_900));
                 chip.setOnClickListener(v -> acao.sugestao(s));
                 grupo.addView(chip);
+            }
+        }
+    }
+
+    class VHAudio extends RecyclerView.ViewHolder {
+        final ImageButton btnTocar;
+        final TextView duracao, transcricao;
+
+        VHAudio(@NonNull View v) {
+            super(v);
+            btnTocar = v.findViewById(R.id.btnTocar);
+            duracao = v.findViewById(R.id.txtDuracao);
+            transcricao = v.findViewById(R.id.txtTranscricao);
+        }
+
+        void bind(ChatItem item) {
+            boolean tocando = item.getCaminhoAudio() != null && item.getCaminhoAudio().equals(audioTocando);
+            btnTocar.setImageResource(tocando ? R.drawable.ic_chat_pause : R.drawable.ic_chat_play);
+            btnTocar.setContentDescription(btnTocar.getContext().getString(
+                    tocando ? R.string.chat_audio_pausar : R.string.chat_audio_tocar));
+            btnTocar.setOnClickListener(v -> acao.tocarAudio(item));
+            duracao.setText(GravadorAudio.formatar(item.getDuracaoSegundos() * 1000L));
+            switch (item.getEstadoTranscricao()) {
+                case ChatItem.TRANSCRICAO_OK:
+                    transcricao.setText("“" + item.getTexto() + "”");
+                    break;
+                case ChatItem.TRANSCRICAO_INDISPONIVEL:
+                    transcricao.setText(R.string.chat_audio_sem_transcricao);
+                    break;
+                default:
+                    transcricao.setText(R.string.chat_audio_transcrevendo);
             }
         }
     }

@@ -1,10 +1,17 @@
 package com.tcc.gestaorural.ui.chat;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
+import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.MotionEvent;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -16,6 +23,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,19 +39,19 @@ import com.tcc.gestaorural.ui.comprovante.ComprovanteActivity;
 import com.tcc.gestaorural.ui.financeiro.NovaDespesaActivity;
 import com.tcc.gestaorural.ui.financeiro.NovaReceitaActivity;
 import com.tcc.gestaorural.util.ComprovanteUtils;
+import com.tcc.gestaorural.util.GravadorAudio;
 import com.tcc.gestaorural.ui.BaseActivity;
 import com.tcc.gestaorural.util.AnexoUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * Assistente de IA (chat dentro do app): texto, foto (câmera/galeria), arquivo
- * (.xlsx/.csv/.txt) e áudio. O áudio usa o reconhecimento de voz do próprio
- * aparelho (fala → texto no campo, pra o produtor conferir antes de enviar) —
- * o servidor não precisa transcrever nada.
+ * (.xlsx/.csv/.txt) e mensagem de voz. A voz é gravada como áudio de verdade
+ * (segurar o microfone, soltar pra enviar, deslizar pra esquerda pra cancelar) e
+ * transcrita no servidor — o mesmo caminho que as mensagens de voz do WhatsApp vão usar.
  */
 public class ChatIaActivity extends BaseActivity {
 
@@ -66,6 +74,14 @@ public class ChatIaActivity extends BaseActivity {
     private boolean enviando;
     private Uri fotoCameraUri;
 
+    // Mensagem de voz
+    private final GravadorAudio gravador = new GravadorAudio();
+    private final Handler relogio = new Handler(Looper.getMainLooper());
+    private TextView txtGravando;
+    private float xInicioToque;
+    private MediaPlayer player;
+    private String audioTocando;
+
     private final ActivityResultLauncher<Uri> tirarFoto = registerForActivityResult(
             new ActivityResultContracts.TakePicture(),
             ok -> { if (Boolean.TRUE.equals(ok) && fotoCameraUri != null) prepararFoto(fotoCameraUri); });
@@ -78,11 +94,9 @@ public class ChatIaActivity extends BaseActivity {
             new ActivityResultContracts.OpenDocument(),
             uri -> { if (uri != null) prepararArquivo(uri); });
 
-    private final ActivityResultLauncher<Intent> falar = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(), resultado -> {
-                if (resultado.getResultCode() != RESULT_OK || resultado.getData() == null) return;
-                ArrayList<String> textos = resultado.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                if (textos != null && !textos.isEmpty()) inserirTexto(textos.get(0));
+    private final ActivityResultLauncher<String> pedirMicrofone = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), ok -> {
+                toast(getString(Boolean.TRUE.equals(ok) ? R.string.chat_segure_para_gravar : R.string.chat_permissao_microfone));
             });
 
     @Override
@@ -116,6 +130,7 @@ public class ChatIaActivity extends BaseActivity {
             @Override public void compartilharComprovante(ChatConsultaExecutor.Comprovante c) {
                 ComprovanteUtils.compartilhar(ChatIaActivity.this, c.getCaminho(), c.getLegenda());
             }
+            @Override public void tocarAudio(ChatItem item) { ChatIaActivity.this.tocarAudio(item); }
             @Override public void anexarComprovante(ChatConsultaExecutor.Comprovante c) {
                 // Abre a edição do lançamento (lá tem a seção Comprovante).
                 Class<?> alvo = Anexo.TIPO_RECEITA.equals(c.getTipo()) ? NovaReceitaActivity.class : NovaDespesaActivity.class;
@@ -146,14 +161,18 @@ public class ChatIaActivity extends BaseActivity {
         });
         atualizarBotaoAcao();
 
+        txtGravando = findViewById(R.id.txtGravando);
+        btnAcao.setOnTouchListener(this::toqueMicrofone);
         btnAcao.setOnClickListener(v -> {
-            if (!modoEnviar) { ouvir(); return; }
+            if (!modoEnviar) return; // microfone: tratado no toque (segurar pra gravar)
             String texto = textoDigitado();
             if (texto.isEmpty()) return;
             vm.enviar(texto);
             edtMensagem.setText("");
         });
         btnAnexo.setOnClickListener(v -> escolherAnexo());
+
+        if (savedInstanceState == null) limparAudiosAntigos();
 
         // Saudação inicial + atalhos (só na primeira criação, antes de qualquer mensagem).
         if (vm.temToken()) {
@@ -177,9 +196,9 @@ public class ChatIaActivity extends BaseActivity {
     private void atualizarBotaoAcao() {
         modoEnviar = !textoDigitado().isEmpty();
         btnAcao.setImageResource(modoEnviar ? R.drawable.ic_chat_enviar : R.drawable.ic_chat_mic_branco);
-        btnAcao.setContentDescription(getString(modoEnviar ? R.string.chat_enviar : R.string.chat_audio));
-        // Falar continua liberado enquanto a IA responde (só preenche o campo); enviar, não.
-        btnAcao.setEnabled(!(modoEnviar && enviando));
+        btnAcao.setContentDescription(getString(modoEnviar ? R.string.chat_enviar : R.string.chat_gravar_audio));
+        // Enquanto a IA responde, dá pra digitar, mas não enviar nem gravar outra mensagem.
+        btnAcao.setEnabled(!enviando);
     }
 
     // --- Anexos (clipe) ------------------------------------------------
@@ -212,7 +231,9 @@ public class ChatIaActivity extends BaseActivity {
             File pasta = new File(getCacheDir(), "chat");
             if (!pasta.exists()) pasta.mkdirs();
             File[] antigas = pasta.listFiles();
-            if (antigas != null) for (File f : antigas) f.delete(); // não acumula fotos no cache
+            if (antigas != null) for (File f : antigas) {
+                if (f.getName().startsWith("foto_")) f.delete(); // não acumula fotos no cache (áudios ficam: tocam no chat)
+            }
             File foto = new File(pasta, "foto_" + System.currentTimeMillis() + ".jpg");
             fotoCameraUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", foto);
             tirarFoto.launch(fotoCameraUri);
@@ -260,30 +281,152 @@ public class ChatIaActivity extends BaseActivity {
         });
     }
 
-    // --- Áudio (voz → texto no aparelho) -------------------------------
+    // --- Mensagem de voz (segurar pra gravar) -------------------------
 
-    private void ouvir() {
-        Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR");
-        i.putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.chat_audio_prompt));
-        try {
-            falar.launch(i);
-        } catch (ActivityNotFoundException e) {
-            toast(getString(R.string.chat_audio_indisponivel));
+    /** Segurar = grava; soltar = envia; deslizar pra esquerda = cancela. Com texto no campo, é o "enviar". */
+    @SuppressLint("ClickableViewAccessibility")
+    private boolean toqueMicrofone(View v, MotionEvent ev) {
+        if (modoEnviar) return false; // deixa o onClick (enviar texto) funcionar
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                xInicioToque = ev.getRawX();
+                iniciarGravacao();
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                if (gravador.gravando() && xInicioToque - ev.getRawX() > dp(90)) {
+                    cancelarGravacao();
+                    toast(getString(R.string.chat_audio_cancelado));
+                }
+                return true;
+            case MotionEvent.ACTION_UP:
+                if (gravador.gravando()) pararEEnviar();
+                return true;
+            case MotionEvent.ACTION_CANCEL:
+                if (gravador.gravando()) cancelarGravacao();
+                return true;
+            default:
+                return true;
         }
     }
 
-    /** Coloca o que foi falado no campo (o produtor confere e toca em Enviar). */
-    private void inserirTexto(String falado) {
-        if (falado == null || falado.trim().isEmpty()) return;
-        String t = falado.trim();
-        t = t.substring(0, 1).toUpperCase(new Locale("pt", "BR")) + t.substring(1);
-        String atual = textoDigitado();
-        edtMensagem.setText(atual.isEmpty() ? t : atual + " " + t);
-        edtMensagem.setSelection(edtMensagem.getText().length());
-        edtMensagem.requestFocus();
+    private void iniciarGravacao() {
+        if (vm.estaEnviando()) { toast(getString(R.string.chat_aguarde)); return; }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            pedirMicrofone.launch(Manifest.permission.RECORD_AUDIO);
+            return;
+        }
+        pararAudio();
+        try {
+            gravador.iniciar(this, (mr, what, extra) -> {
+                if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) pararEEnviar();
+            });
+        } catch (Exception e) {
+            toast(getString(R.string.chat_audio_erro_gravar));
+            return;
+        }
+        edtMensagem.setVisibility(View.INVISIBLE);
+        txtGravando.setVisibility(View.VISIBLE);
+        btnAnexo.setEnabled(false);
+        btnAnexo.setAlpha(0.4f);
+        btnAcao.setScaleX(1.2f);
+        btnAcao.setScaleY(1.2f);
+        atualizarRelogio.run();
     }
+
+    private final Runnable atualizarRelogio = new Runnable() {
+        @Override public void run() {
+            if (!gravador.gravando()) return;
+            txtGravando.setText(getString(R.string.chat_gravando, GravadorAudio.formatar(gravador.msDecorridos())));
+            relogio.postDelayed(this, 250);
+        }
+    };
+
+    private void fimDaGravacaoNaTela() {
+        relogio.removeCallbacks(atualizarRelogio);
+        txtGravando.setVisibility(View.GONE);
+        edtMensagem.setVisibility(View.VISIBLE);
+        btnAnexo.setEnabled(!enviando);
+        btnAnexo.setAlpha(enviando ? 0.4f : 1f);
+        btnAcao.setScaleX(1f);
+        btnAcao.setScaleY(1f);
+    }
+
+    private void cancelarGravacao() {
+        gravador.cancelar();
+        fimDaGravacaoNaTela();
+    }
+
+    private void pararEEnviar() {
+        GravadorAudio.Gravacao g = gravador.parar();
+        fimDaGravacaoNaTela();
+        if (g == null) { toast(getString(R.string.chat_segure_para_gravar)); return; }
+        AppDatabase.IO.execute(() -> {
+            try {
+                byte[] bytes = new byte[(int) g.getArquivo().length()]; // máx. ~500 KB (2 min)
+                try (java.io.DataInputStream in = new java.io.DataInputStream(new java.io.FileInputStream(g.getArquivo()))) {
+                    in.readFully(bytes); // java.nio.file.Files só existe a partir do Android 8 (minSdk é 7)
+                }
+                String base64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+                runOnUiThread(() -> vm.enviarAudio(g.getArquivo().getAbsolutePath(), g.getMime(),
+                        g.getDuracaoSegundos(), base64));
+            } catch (Exception e) {
+                runOnUiThread(() -> toast(getString(R.string.chat_audio_erro_gravar)));
+            }
+        });
+    }
+
+    /** Toca/pausa a mensagem de voz da bolha (uma de cada vez). */
+    private void tocarAudio(ChatItem item) {
+        String caminho = item.getCaminhoAudio();
+        if (caminho == null) return;
+        if (caminho.equals(audioTocando)) { pararAudio(); return; }
+        pararAudio();
+        if (!new File(caminho).isFile()) { toast(getString(R.string.chat_audio_nao_encontrado)); return; }
+        try {
+            player = new MediaPlayer();
+            player.setDataSource(caminho);
+            player.setOnCompletionListener(mp -> pararAudio());
+            player.prepare();
+            player.start();
+            audioTocando = caminho;
+            adapter.setAudioTocando(caminho);
+        } catch (Exception e) {
+            pararAudio();
+            toast(getString(R.string.chat_audio_nao_encontrado));
+        }
+    }
+
+    private void pararAudio() {
+        if (player != null) {
+            try { player.stop(); } catch (IllegalStateException ignored) { }
+            player.release();
+            player = null;
+        }
+        if (audioTocando != null) {
+            audioTocando = null;
+            adapter.setAudioTocando(null);
+        }
+    }
+
+    /** Áudios antigos do cache (de conversas passadas, que já não aparecem na tela). */
+    private void limparAudiosAntigos() {
+        AppDatabase.IO.execute(() -> {
+            File[] arquivos = new File(getCacheDir(), "chat").listFiles();
+            if (arquivos == null) return;
+            long limite = System.currentTimeMillis() - 24L * 60 * 60 * 1000;
+            for (File f : arquivos) if (f.getName().startsWith("audio_") && f.lastModified() < limite) f.delete();
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (gravador.gravando()) cancelarGravacao(); // app foi pro fundo no meio da gravação
+        pararAudio();
+    }
+
+    private int dp(int v) { return Math.round(v * getResources().getDisplayMetrics().density); }
 
     // -------------------------------------------------------------------
 
