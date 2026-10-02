@@ -44,6 +44,11 @@ public class ChatMensagemResponseDto {
         private String maquinaUuid;
         /** Campos que faltam pra gravar. Vazio = completo. */
         private List<String> camposFaltando = new ArrayList<>();
+        /**
+         * true = este lançamento veio da foto enviada e deve guardá-la como comprovante.
+         * null = backend antigo (não manda o campo): vale a regra anterior.
+         */
+        private Boolean doComprovante;
 
         public String getTipo() { return tipo; }
         public void setTipo(String tipo) { this.tipo = tipo; }
@@ -61,6 +66,8 @@ public class ChatMensagemResponseDto {
         public void setMaquinaUuid(String maquinaUuid) { this.maquinaUuid = maquinaUuid; }
         public List<String> getCamposFaltando() { return camposFaltando; }
         public void setCamposFaltando(List<String> camposFaltando) { this.camposFaltando = camposFaltando; }
+        public Boolean getDoComprovante() { return doComprovante; }
+        public void setDoComprovante(Boolean doComprovante) { this.doComprovante = doComprovante; }
     }
 
     /** v2: pergunta estruturada que o app executa no Room. */

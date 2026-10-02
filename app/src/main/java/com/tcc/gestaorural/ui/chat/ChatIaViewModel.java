@@ -11,6 +11,8 @@ import com.tcc.gestaorural.data.remote.dto.ChatMensagemRequestDto;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemResponseDto;
 import com.tcc.gestaorural.data.repository.ChatConsultaExecutor;
 import com.tcc.gestaorural.data.repository.ChatIaRepository;
+import com.tcc.gestaorural.util.DateUtils;
+import com.tcc.gestaorural.util.MoneyUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
 import java.util.ArrayList;
@@ -29,8 +31,9 @@ public class ChatIaViewModel extends AndroidViewModel {
     private final MutableLiveData<List<ChatItem>> lista = new MutableLiveData<>();
     private final MutableLiveData<Boolean> enviando = new MutableLiveData<>(false);
     /**
-     * Última foto mandada no chat, esperando a IA transformar em proposta (pode levar
-     * algumas mensagens se a IA perguntar algo antes). Ao confirmar, vira comprovante.
+     * Última foto mandada no chat. Fica pendente até uma proposta que a usa ser CONFIRMADA
+     * (não é "gasta" pela primeira proposta que chegar): se a IA mandar outra proposta, a foto
+     * passa pra nova. Sai quando chega foto nova ou a conversa muda de assunto (consulta/conversa).
      */
     private byte[] fotoPendente;
 
@@ -153,13 +156,14 @@ public class ChatIaViewModel extends AndroidViewModel {
             for (String a : resp.getAvisos()) if (a != null && !a.trim().isEmpty()) itens.add(ChatItem.assistente("ℹ️ " + a.trim()));
         }
         if ("PROPOSTA".equalsIgnoreCase(resp.getStatus()) && resp.getLancamentos() != null && !resp.getLancamentos().isEmpty()) {
+            substituirPropostasAbertas();
             ChatItem proposta = ChatItem.proposta(resp.getLancamentos());
-            proposta.setFotoJpeg(fotoPendente);
-            fotoPendente = null;
+            proposta.setFotoJpeg(fotoPendente); // continua pendente até alguma proposta ser confirmada
             itens.add(proposta);
         }
 
-        // A foto só segue esperando enquanto a IA ainda está montando o lançamento (PRECISA_INFORMACAO).
+        // Conversa mudou de assunto: propostas novas não recebem mais a foto (as que já estão
+        // na tela continuam com ela e ainda podem ser confirmadas).
         if ("SEM_LANCAMENTO".equalsIgnoreCase(resp.getStatus()) || "CONSULTA".equalsIgnoreCase(resp.getStatus())) {
             fotoPendente = null;
         }
@@ -195,7 +199,7 @@ public class ChatIaViewModel extends AndroidViewModel {
         repo.contarDuplicatas(item.getLancamentos(), n -> {
             if (n > 0) {
                 item.setDuplicataAvisada(true);
-                itens.add(ChatItem.assistente("⚠️ Já existe " + (n == 1 ? "um lançamento" : n + " lançamentos")
+                itens.add(ChatItem.assistente("⚠️ " + (n == 1 ? "Já existe um lançamento" : "Já existem " + n + " lançamentos")
                         + " com o mesmo valor e data nessa safra. Se não for repetido, toque em \"Confirmar e lançar\" de novo."));
                 publicar();
             } else {
@@ -205,44 +209,94 @@ public class ChatIaViewModel extends AndroidViewModel {
     }
 
     private void gravar(ChatItem item) {
-        final int total = item.getLancamentos().size();
-        final int[] ok = {0};
-        final boolean[] falhou = {false};
+        final List<ChatMensagemResponseDto.Lancamento> lancamentos = item.getLancamentos();
+        final int total = lancamentos.size();
+        final byte[] foto = item.getFotoJpeg();
+        // Backend novo marca quais lançamentos são da foto (doComprovante); o antigo não manda
+        // o campo e vale a regra anterior (todos os lançamentos da proposta recebem a foto).
+        boolean temMarcacao = false;
+        for (ChatMensagemResponseDto.Lancamento l : lancamentos) if (l.getDoComprovante() != null) temMarcacao = true;
+        final boolean usarMarcacao = temMarcacao;
+
+        // Some com os botões já (evita gravar duas vezes num toque duplo).
+        item.setResolvido(true);
+        item.setRodape("Salvando…");
+        publicar();
+
+        final int[] concluidos = {0};
+        final List<String> salvos = new ArrayList<>();
+        final String[] erro = {null};
         final boolean[] guardouFoto = {false};
-        for (ChatMensagemResponseDto.Lancamento l : item.getLancamentos()) {
-            repo.confirmar(l, item.getFotoJpeg(), new ChatIaRepository.GravarCallback() {
+        for (ChatMensagemResponseDto.Lancamento l : lancamentos) {
+            byte[] fotoDeste = (foto != null && (!usarMarcacao || Boolean.TRUE.equals(l.getDoComprovante()))) ? foto : null;
+            repo.confirmar(l, fotoDeste, new ChatIaRepository.GravarCallback() {
                 @Override
                 public void onGravado(String tipo, boolean comprovanteGuardado) {
-                    ok[0]++;
+                    salvos.add(descreverSalvo(l));
                     if (comprovanteGuardado) guardouFoto[0] = true;
-                    if (ok[0] >= total && !falhou[0]) {
-                        item.setResolvido(true);
-                        item.setFotoJpeg(null); // já está no arquivo; libera a memória
-                        item.setRodape((total == 1) ? "✓ Lançamento salvo" : "✓ " + total + " lançamentos salvos");
-                        itens.add(ChatItem.assistente(item.getRodape() + " no app. Já aparece no seu financeiro."
-                                + (guardouFoto[0] ? " Guardei a foto como comprovante." : "")));
-                        publicar();
-                    }
+                    if (++concluidos[0] == total) concluir(item, salvos, erro[0], guardouFoto[0]);
                 }
                 @Override
                 public void onErro(String mensagem) {
-                    if (falhou[0]) return;
-                    falhou[0] = true;
-                    item.setResolvido(true);
-                    item.setRodape("⚠️ " + mensagem);
-                    itens.add(ChatItem.assistente("⚠️ " + mensagem));
-                    publicar();
+                    if (erro[0] == null) erro[0] = mensagem;
+                    if (++concluidos[0] == total) concluir(item, salvos, erro[0], guardouFoto[0]);
                 }
             });
         }
     }
 
+    /** Fecha a proposta depois que todos os lançamentos foram tentados. */
+    private void concluir(ChatItem item, List<String> salvos, String erro, boolean guardouFoto) {
+        item.setResolvido(true);
+        item.setFotoJpeg(null); // já está no arquivo (ou não era pra guardar); libera a memória
+        if (!salvos.isEmpty()) {
+            // A foto foi usada por uma proposta confirmada: não vai pra mais nenhuma.
+            fotoPendente = null;
+            // Só no histórico mandado ao servidor (o servidor não guarda a conversa): assim a IA
+            // sabe o que já foi salvo e não propõe de novo.
+            historico.add(new ChatMensagemRequestDto.Mensagem("assistente",
+                    "(Salvo no app: " + android.text.TextUtils.join("; ", salvos) + ")"));
+        }
+        if (erro == null) {
+            int total = salvos.size();
+            item.setRodape((total == 1) ? "✓ Lançamento salvo" : "✓ " + total + " lançamentos salvos");
+            itens.add(ChatItem.assistente(item.getRodape() + " no app. Já aparece no seu financeiro."
+                    + (guardouFoto ? " Guardei a foto como comprovante." : "")));
+        } else {
+            item.setRodape(salvos.isEmpty() ? "⚠️ " + erro : "⚠️ " + salvos.size() + " salvo(s); " + erro);
+            itens.add(ChatItem.assistente("⚠️ " + erro));
+        }
+        publicar();
+    }
+
+    /** "despesa R$ 200,00 Compras no mercado 02/10/2026" (mesmos padrões que o repositório grava). */
+    private static String descreverSalvo(ChatMensagemResponseDto.Lancamento l) {
+        String tipo = "RECEITA".equalsIgnoreCase(l.getTipo()) ? "receita" : "despesa";
+        String descricao = (l.getDescricao() != null && !l.getDescricao().isEmpty()) ? l.getDescricao() : "Lançamento via assistente";
+        String data = (l.getData() != null && !l.getData().isEmpty()) ? l.getData() : DateUtils.hojeIso();
+        return tipo + " " + MoneyUtils.formatar(l.getValor() != null ? l.getValor() : 0d)
+                + " " + descricao + " " + DateUtils.isoParaBr(data);
+    }
+
     public void descartar(ChatItem item) {
         if (item.getTipo() != ChatItem.PROPOSTA || item.isResolvido()) return;
         item.setResolvido(true);
+        item.setFotoJpeg(null);
         item.setRodape("Descartado");
+        historico.add(new ChatMensagemRequestDto.Mensagem("assistente", "(Proposta descartada pelo produtor)"));
         itens.add(ChatItem.assistente("Ok, descartei. Pode me dizer de outro jeito se quiser."));
         publicar();
+    }
+
+    /** Proposta nova da IA: as anteriores ainda abertas deixam de valer (botões somem). */
+    private void substituirPropostasAbertas() {
+        for (ChatItem c : itens) {
+            if (c.getTipo() == ChatItem.PROPOSTA && !c.isResolvido()) {
+                c.setResolvido(true);
+                c.setFotoJpeg(null);
+                c.setRodape("Substituída pela proposta abaixo");
+            }
+        }
     }
 
     private void adicionarSugestoes(List<String> sugestoes) {

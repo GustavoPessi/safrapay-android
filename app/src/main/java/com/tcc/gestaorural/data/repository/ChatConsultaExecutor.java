@@ -219,38 +219,68 @@ public class ChatConsultaExecutor {
     private Resultado comprovantes(long u, ChatMensagemResponseDto.Consulta c) {
         // Sem datas = sem filtro de data ("a nota da ureia" procura em tudo).
         Periodo p = periodo(c, false);
-        List<LancamentoLinha> todos = new ArrayList<>(filtrar(despesaDao.listarLinhas(u, p.ini, p.fim), c));
-        todos.addAll(filtrar(receitaDao.listarLinhas(u, p.ini, p.fim), c));
-        todos.sort((a, b) -> nn(b.getData()).compareTo(nn(a.getData())));
+        List<LancamentoLinha> todos = linhasDoPeriodo(u, c, p, true);
+
+        // "texto" não achou nada (ex.: "pimenta", mas a descrição ficou "Plantas/paisagismo"):
+        // tenta de novo só com os outros filtros antes de dizer que não encontrou.
+        boolean semTexto = false;
+        if (todos.isEmpty() && notBlank(c.getTexto())) {
+            List<LancamentoLinha> outra = linhasDoPeriodo(u, c, p, false);
+            if (!outra.isEmpty()) { todos = outra; semTexto = true; }
+        }
+
+        // Só os que têm foto, do comprovante guardado mais recentemente pro mais antigo
+        // ("a nota que te enviei hoje" = a última guardada, não o lançamento de data mais nova).
+        List<Object[]> comFoto = new ArrayList<>(); // {LancamentoLinha, Anexo}
+        for (LancamentoLinha l : todos) {
+            Anexo a = anexoRepo.buscarSync(l.getTipo(), l.getUuid());
+            if (a != null) comFoto.add(new Object[]{ l, a });
+        }
+        comFoto.sort((x, y) -> {
+            Anexo ax = (Anexo) x[1], ay = (Anexo) y[1];
+            int cmp = nn(ay.getCriadoEm()).compareTo(nn(ax.getCriadoEm()));
+            return cmp != 0 ? cmp : Long.compare(ay.getId(), ax.getId());
+        });
 
         Resultado r = new Resultado();
         r.setTitulo("Comprovantes");
         List<Comprovante> achados = new ArrayList<>();
         r.setComprovantes(achados);
 
-        int comFoto = 0;
-        for (LancamentoLinha l : todos) {
-            Anexo a = anexoRepo.buscarSync(l.getTipo(), l.getUuid());
-            if (a == null) continue;
-            comFoto++;
-            if (achados.size() < MAX_COMPROVANTES) {
-                achados.add(new Comprovante(l.getTipo(), l.getId(), a.getCaminho(), legenda(l)));
-            }
-        }
-
-        if (comFoto == 0) {
-            if (todos.isEmpty()) {
+        if (comFoto.isEmpty()) {
+            if (todos.isEmpty() || semTexto) {
                 r.getLinhas().add("Não encontrei esse lançamento.");
             } else {
                 LancamentoLinha l = todos.get(0);
                 r.getLinhas().add("Achei o lançamento (" + legendaCurta(l) + "), mas ele não tem comprovante anexado.");
                 achados.add(new Comprovante(l.getTipo(), l.getId(), null, legenda(l)));
             }
-        } else if (comFoto > MAX_COMPROVANTES) {
-            r.getLinhas().add("Encontrei " + comFoto + " comprovantes. Estes são os " + MAX_COMPROVANTES
-                    + " mais recentes — diga a data ou o valor pra eu achar o certo.");
+            return r;
+        }
+
+        for (int k = 0; k < comFoto.size() && k < MAX_COMPROVANTES; k++) {
+            LancamentoLinha l = (LancamentoLinha) comFoto.get(k)[0];
+            Anexo a = (Anexo) comFoto.get(k)[1];
+            achados.add(new Comprovante(l.getTipo(), l.getId(), a.getCaminho(), legenda(l)));
+        }
+        if (semTexto) {
+            r.getLinhas().add("Não achei \"" + c.getTexto().trim() + "\" na descrição nem na categoria. "
+                    + (comFoto.size() == 1 ? "Este é o comprovante" : "Estes são os comprovantes")
+                    + " guardado" + (comFoto.size() == 1 ? "" : "s") + " mais recentemente:");
+        }
+        if (comFoto.size() > MAX_COMPROVANTES) {
+            r.getLinhas().add("Encontrei " + comFoto.size() + " comprovantes. Estes são os " + MAX_COMPROVANTES
+                    + " guardados mais recentemente — diga a data ou o valor pra eu achar o certo.");
         }
         return r;
+    }
+
+    /** Despesas + receitas do período com os filtros da consulta (com ou sem o filtro "texto"). */
+    private List<LancamentoLinha> linhasDoPeriodo(long u, ChatMensagemResponseDto.Consulta c, Periodo p, boolean usarTexto) {
+        List<LancamentoLinha> todos = new ArrayList<>(filtrar(despesaDao.listarLinhas(u, p.ini, p.fim), c, usarTexto));
+        todos.addAll(filtrar(receitaDao.listarLinhas(u, p.ini, p.fim), c, usarTexto));
+        todos.sort((a, b) -> nn(b.getData()).compareTo(nn(a.getData())));
+        return todos;
     }
 
     private static String legenda(LancamentoLinha l) {
@@ -475,6 +505,10 @@ public class ChatConsultaExecutor {
     }
 
     private List<LancamentoLinha> filtrar(List<LancamentoLinha> origem, ChatMensagemResponseDto.Consulta c) {
+        return filtrar(origem, c, true);
+    }
+
+    private List<LancamentoLinha> filtrar(List<LancamentoLinha> origem, ChatMensagemResponseDto.Consulta c, boolean usarTexto) {
         List<LancamentoLinha> out = new ArrayList<>();
         for (LancamentoLinha l : origem) {
             if (c.getSafraUuid() != null && !c.getSafraUuid().equals(l.getSafraUuid())) continue;
@@ -483,7 +517,9 @@ public class ChatConsultaExecutor {
             if (notBlank(c.getCultura()) && !mesmoTexto(c.getCultura(), l.getCultura())) continue;
             if (notBlank(c.getCategoria()) && !mesmoTexto(c.getCategoria(), l.getCategoria())) continue;
             if (c.getMaquinaUuid() != null && !c.getMaquinaUuid().equals(l.getMaquinaUuid())) continue;
-            if (notBlank(c.getTexto()) && !contemTexto(l.getDescricao(), c.getTexto())) continue;
+            // "texto" vale na descrição e também no nome da categoria ("combustível", "insumos"...).
+            if (usarTexto && notBlank(c.getTexto())
+                    && !contemTexto(l.getDescricao(), c.getTexto()) && !contemTexto(l.getCategoria(), c.getTexto())) continue;
             if (c.getValor() != null && c.getValor() > 0 && Math.abs(l.getValor() - c.getValor()) > 0.01) continue;
             out.add(l);
         }
