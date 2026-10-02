@@ -32,7 +32,6 @@ public class ChatItem {
     private String caminhoAudio;                                   // AUDIO (texto = transcrição)
     private int duracaoSegundos;                                   // AUDIO
     private int estadoTranscricao;                                 // AUDIO
-    private byte[] fotoJpeg;                                       // PROPOSTA vinda de foto → vira comprovante
 
     private ChatItem(int tipo) { this.tipo = tipo; }
 
@@ -82,6 +81,4 @@ public class ChatItem {
     public int getDuracaoSegundos() { return duracaoSegundos; }
     public int getEstadoTranscricao() { return estadoTranscricao; }
     public void setEstadoTranscricao(int estadoTranscricao) { this.estadoTranscricao = estadoTranscricao; }
-    public byte[] getFotoJpeg() { return fotoJpeg; }
-    public void setFotoJpeg(byte[] fotoJpeg) { this.fotoJpeg = fotoJpeg; }
 }

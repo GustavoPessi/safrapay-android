@@ -21,6 +21,21 @@
         android:textSize="@dimen/text_caption"
         android:visibility="gone" />
 
+    <!-- Bandeja de fotos antes de enviar (estilo WhatsApp): miniaturas com ✕; dá pra juntar
+         câmera + galeria (até 5) e escrever um texto. Enviar manda tudo junto. -->
+    <HorizontalScrollView android:id="@+id/scrollBandeja"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/surface"
+        android:paddingStart="@dimen/space_sm" android:paddingEnd="@dimen/space_sm"
+        android:paddingTop="@dimen/space_sm"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout android:id="@+id/bandeja"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
     <!-- Barra de digitação estilo WhatsApp: clipe (câmera/galeria/arquivo) à esquerda,
          campo com quase toda a largura e um botão redondo que é microfone (segurar = gravar
          mensagem de voz) com o campo vazio e vira "enviar" quando há texto.

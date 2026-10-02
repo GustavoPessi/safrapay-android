@@ -391,7 +391,6 @@
     <string name="chat_anexo_arquivo">📄 Planilha ou bloco de notas (.xlsx, .csv, .txt)</string>
     <string name="chat_foto_camera">📷 Tirar foto agora</string>
     <string name="chat_foto_galeria">🖼️ Escolher da galeria</string>
-    <string name="chat_rotulo_foto">📷 Foto</string>
     <string name="chat_rotulo_arquivo">📎 %1$s</string>
     <string name="chat_aguarde">Espere a resposta anterior terminar.</string>
     <string name="chat_preparando_anexo">Preparando o anexo…</string>
@@ -424,4 +423,10 @@
     <string name="chat_audio_tocar">Ouvir</string>
     <string name="chat_audio_pausar">Pausar</string>
     <string name="chat_audio_nao_encontrado">Não consegui tocar esse áudio.</string>
+    <!-- Várias fotos no assistente -->
+    <string name="chat_bandeja_foto">Foto para enviar</string>
+    <string name="chat_bandeja_remover">Tirar esta foto</string>
+    <string name="chat_bandeja_cheia">Máximo de 5 fotos por mensagem. Envie estas e mande as outras depois.</string>
+    <string name="chat_bandeja_grande">As fotos passaram do tamanho máximo de uma mensagem. Envie estas e mande as outras depois.</string>
+    <string name="chat_bandeja_sem_arquivo">Envie as fotos antes de mandar um arquivo.</string>
 </resources>
