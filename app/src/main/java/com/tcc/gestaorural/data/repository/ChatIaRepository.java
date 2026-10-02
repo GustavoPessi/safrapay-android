@@ -12,6 +12,7 @@ import com.tcc.gestaorural.data.local.dao.PropriedadeDao;
 import com.tcc.gestaorural.data.local.dao.ReceitaDao;
 import com.tcc.gestaorural.data.local.dao.SafraDao;
 import com.tcc.gestaorural.data.local.dao.TalhaoDao;
+import com.tcc.gestaorural.data.local.entity.Anexo;
 import com.tcc.gestaorural.data.local.entity.CategoriaDespesa;
 import com.tcc.gestaorural.data.local.entity.Despesa;
 import com.tcc.gestaorural.data.local.entity.Maquina;
@@ -49,7 +50,8 @@ public class ChatIaRepository {
     }
 
     public interface GravarCallback {
-        void onGravado(String tipo);
+        /** comprovanteGuardado = a foto enviada no chat virou comprovante do lançamento. */
+        void onGravado(String tipo, boolean comprovanteGuardado);
         void onErro(String mensagem);
     }
 
@@ -64,6 +66,7 @@ public class ChatIaRepository {
     private final PropriedadeDao propriedadeDao;
     private final TalhaoDao talhaoDao;
     private final SessionManager session;
+    private final AnexoRepository anexoRepo;
     private final Handler main = new Handler(Looper.getMainLooper());
 
     static final String MSG_SESSAO_EXPIRADA =
@@ -80,6 +83,7 @@ public class ChatIaRepository {
         this.propriedadeDao = db.propriedadeDao();
         this.talhaoDao = db.talhaoDao();
         this.session = new SessionManager(context);
+        this.anexoRepo = new AnexoRepository(context);
     }
 
     /** Datas da safra ficam em dd/MM/yyyy no Room; o contrato manda yyyy-MM-dd. */
@@ -234,8 +238,11 @@ public class ChatIaRepository {
         }
     }
 
-    /** Grava um lançamento proposto no Room local (mesmo caminho de um cadastro normal). */
-    public void confirmar(ChatMensagemResponseDto.Lancamento l, GravarCallback cb) {
+    /**
+     * Grava um lançamento proposto no Room local (mesmo caminho de um cadastro normal).
+     * Se a proposta veio de uma foto (fotoJpeg != null), a foto vira o comprovante do lançamento.
+     */
+    public void confirmar(ChatMensagemResponseDto.Lancamento l, byte[] fotoJpeg, GravarCallback cb) {
         AppDatabase.IO.execute(() -> {
             try {
                 Safra s = (l.getSafraUuid() != null) ? safraDao.buscarPorUuid(l.getSafraUuid()) : null;
@@ -258,7 +265,8 @@ public class ChatIaRepository {
                     r.atualizadoEm = agora;
                     r.sincronizado = 0;
                     receitaDao.inserir(r);
-                    post(() -> cb.onGravado("RECEITA"));
+                    boolean foto = guardarComprovante(Anexo.TIPO_RECEITA, r.uuid, fotoJpeg);
+                    post(() -> cb.onGravado("RECEITA", foto));
                 } else {
                     CategoriaDespesa c = (l.getCategoria() != null) ? categoriaDao.buscarPorNome(l.getCategoria()) : null;
                     if (c == null) { post(() -> cb.onErro("Categoria não reconhecida pra essa despesa.")); return; }
@@ -277,12 +285,24 @@ public class ChatIaRepository {
                     d.atualizadoEm = agora;
                     d.sincronizado = 0;
                     despesaDao.inserir(d);
-                    post(() -> cb.onGravado("DESPESA"));
+                    boolean foto = guardarComprovante(Anexo.TIPO_DESPESA, d.uuid, fotoJpeg);
+                    post(() -> cb.onGravado("DESPESA", foto));
                 }
             } catch (Exception e) {
                 post(() -> cb.onErro("Não consegui gravar o lançamento. Tente de novo."));
             }
         });
+    }
+
+    /** Falha ao guardar a foto não desfaz o lançamento (ele já foi gravado). */
+    private boolean guardarComprovante(String tipo, String lancamentoUuid, byte[] fotoJpeg) {
+        if (fotoJpeg == null || fotoJpeg.length == 0) return false;
+        try {
+            anexoRepo.gravarJpegSync(tipo, lancamentoUuid, fotoJpeg, Anexo.ORIGEM_CHAT_FOTO);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void post(Runnable r) { main.post(r); }

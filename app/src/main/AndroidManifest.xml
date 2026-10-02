@@ -62,6 +62,7 @@
         <activity android:name=".ui.financeiro.NovaReceitaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.NovaDespesaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.DetalheLancamentoActivity" android:exported="false" />
+        <activity android:name=".ui.comprovante.ComprovanteActivity" android:exported="false" />
 
         <!-- Compartilhar os arquivos do "Exportar relatório" (PDF/Excel/CSV) com outros apps -->
         <provider

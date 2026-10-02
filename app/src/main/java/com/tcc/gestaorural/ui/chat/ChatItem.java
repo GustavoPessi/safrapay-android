@@ -12,6 +12,7 @@ public class ChatItem {
     public static final int PROPOSTA = 2;
     public static final int RESULTADO = 3;
     public static final int SUGESTOES = 4;
+    public static final int COMPROVANTE = 5;
 
     private final int tipo;
     private String texto;                                          // USUARIO / ASSISTENTE
@@ -21,6 +22,8 @@ public class ChatItem {
     private boolean duplicataAvisada;                              // já avisou de possível lançamento repetido
     private ChatConsultaExecutor.Resultado resultado;              // RESULTADO
     private List<String> sugestoes;                                // SUGESTOES
+    private ChatConsultaExecutor.Comprovante comprovante;          // COMPROVANTE
+    private byte[] fotoJpeg;                                       // PROPOSTA vinda de foto → vira comprovante
 
     private ChatItem(int tipo) { this.tipo = tipo; }
 
@@ -35,6 +38,9 @@ public class ChatItem {
     }
     public static ChatItem resultado(ChatConsultaExecutor.Resultado r) {
         ChatItem c = new ChatItem(RESULTADO); c.resultado = r; return c;
+    }
+    public static ChatItem comprovante(ChatConsultaExecutor.Comprovante comp) {
+        ChatItem c = new ChatItem(COMPROVANTE); c.comprovante = comp; return c;
     }
     public static ChatItem sugestoes(List<String> sugestoes) {
         ChatItem c = new ChatItem(SUGESTOES); c.sugestoes = sugestoes; return c;
@@ -55,4 +61,7 @@ public class ChatItem {
     public void setResultado(ChatConsultaExecutor.Resultado resultado) { this.resultado = resultado; }
     public List<String> getSugestoes() { return sugestoes; }
     public void setSugestoes(List<String> sugestoes) { this.sugestoes = sugestoes; }
+    public ChatConsultaExecutor.Comprovante getComprovante() { return comprovante; }
+    public byte[] getFotoJpeg() { return fotoJpeg; }
+    public void setFotoJpeg(byte[] fotoJpeg) { this.fotoJpeg = fotoJpeg; }
 }

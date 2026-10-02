@@ -19,5 +19,7 @@ public class GestaoRuralApp extends Application {
         AppDatabase.getInstance(this);
         // Cliente da API com renovação automática do token (refresh token).
         com.tcc.gestaorural.data.remote.RetrofitClient.init(this);
+        // Faxina dos comprovantes cujo lançamento foi apagado (ex.: safra excluída em cascata).
+        new com.tcc.gestaorural.data.repository.AnexoRepository(this).limparOrfaos();
     }
 }

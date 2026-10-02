@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/black">
+
+    <ImageView android:id="@+id/imgComprovante"
+        android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1"
+        android:contentDescription="@string/comprovante_titulo"
+        android:scaleType="fitCenter" />
+
+    <TextView android:id="@+id/txtLegenda"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_md" android:paddingEnd="@dimen/space_md"
+        android:paddingTop="@dimen/space_sm"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_caption" />
+
+    <Button android:id="@+id/btnCompartilhar"
+        style="@style/Widget.App.Button"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_margin="@dimen/space_md"
+        android:text="@string/comprovante_compartilhar" />
+</LinearLayout>

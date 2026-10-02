@@ -13,6 +13,7 @@ import com.tcc.gestaorural.data.local.dao.PropriedadeDao;
 import com.tcc.gestaorural.data.local.dao.ReceitaDao;
 import com.tcc.gestaorural.data.local.dao.SafraDao;
 import com.tcc.gestaorural.data.local.dao.TalhaoDao;
+import com.tcc.gestaorural.data.local.entity.Anexo;
 import com.tcc.gestaorural.data.local.entity.AnotacaoMaquina;
 import com.tcc.gestaorural.data.local.entity.Maquina;
 import com.tcc.gestaorural.data.local.entity.Propriedade;
@@ -45,6 +46,8 @@ public class ChatConsultaExecutor {
         private String observacao;
         private final List<String> linhas = new ArrayList<>();
         private String total;
+        /** Só na consulta COMPROVANTE: os cards de foto a mostrar (null nas demais). */
+        private List<Comprovante> comprovantes;
 
         public String getTitulo() { return titulo; }
         public void setTitulo(String titulo) { this.titulo = titulo; }
@@ -53,6 +56,29 @@ public class ChatConsultaExecutor {
         public List<String> getLinhas() { return linhas; }
         public String getTotal() { return total; }
         public void setTotal(String total) { this.total = total; }
+        public List<Comprovante> getComprovantes() { return comprovantes; }
+        public void setComprovantes(List<Comprovante> comprovantes) { this.comprovantes = comprovantes; }
+    }
+
+    /** Comprovante achado na consulta COMPROVANTE (caminho null = lançamento sem foto). */
+    public static class Comprovante {
+        private final String tipo;          // DESPESA | RECEITA
+        private final long lancamentoId;
+        private final String caminho;
+        private final String legenda;
+
+        public Comprovante(String tipo, long lancamentoId, String caminho, String legenda) {
+            this.tipo = tipo;
+            this.lancamentoId = lancamentoId;
+            this.caminho = caminho;
+            this.legenda = legenda;
+        }
+
+        public String getTipo() { return tipo; }
+        public long getLancamentoId() { return lancamentoId; }
+        public String getCaminho() { return caminho; }
+        public String getLegenda() { return legenda; }
+        public boolean temFoto() { return caminho != null; }
     }
 
     public interface Callback { void onResultado(Resultado r); }
@@ -60,6 +86,7 @@ public class ChatConsultaExecutor {
     private static final String SEM_INICIO = "0000-01-01";
     private static final String SEM_FIM = "9999-12-31";
     private static final int MAX_ITENS = 15;
+    private static final int MAX_COMPROVANTES = 5;
     private static final Locale PT_BR = new Locale("pt", "BR");
 
     private final DespesaDao despesaDao;
@@ -70,6 +97,7 @@ public class ChatConsultaExecutor {
     private final MetaFinanceiraDao metaDao;
     private final MaquinaDao maquinaDao;
     private final AnotacaoMaquinaDao anotacaoDao;
+    private final AnexoRepository anexoRepo;
     private final Handler main = new Handler(Looper.getMainLooper());
 
     public ChatConsultaExecutor(Context context) {
@@ -82,6 +110,7 @@ public class ChatConsultaExecutor {
         metaDao = db.metaFinanceiraDao();
         maquinaDao = db.maquinaDao();
         anotacaoDao = db.anotacaoMaquinaDao();
+        anexoRepo = new AnexoRepository(context);
     }
 
     public void executar(long usuarioId, ChatMensagemResponseDto.Consulta c, Callback cb) {
@@ -112,6 +141,7 @@ public class ChatConsultaExecutor {
             case "AREA":        return area(u, c);
             case "METAS":       return metas(u, c);
             case "MAQUINAS":    return maquinas(u, c);
+            case "COMPROVANTE": return comprovantes(u, c);
             default:
                 Resultado r = new Resultado();
                 r.setTitulo("Consulta não reconhecida");
@@ -182,6 +212,58 @@ public class ChatConsultaExecutor {
         if (todos.size() > limite) r.getLinhas().add("… e mais " + (todos.size() - limite) + " lançamento(s)");
         r.setTotal(todos.size() + " lançamento" + (todos.size() == 1 ? "" : "s"));
         return r;
+    }
+
+    // --- COMPROVANTE (v3): mostrar a foto da nota/recibo -----------------
+
+    private Resultado comprovantes(long u, ChatMensagemResponseDto.Consulta c) {
+        // Sem datas = sem filtro de data ("a nota da ureia" procura em tudo).
+        Periodo p = periodo(c, false);
+        List<LancamentoLinha> todos = new ArrayList<>(filtrar(despesaDao.listarLinhas(u, p.ini, p.fim), c));
+        todos.addAll(filtrar(receitaDao.listarLinhas(u, p.ini, p.fim), c));
+        todos.sort((a, b) -> nn(b.getData()).compareTo(nn(a.getData())));
+
+        Resultado r = new Resultado();
+        r.setTitulo("Comprovantes");
+        List<Comprovante> achados = new ArrayList<>();
+        r.setComprovantes(achados);
+
+        int comFoto = 0;
+        for (LancamentoLinha l : todos) {
+            Anexo a = anexoRepo.buscarSync(l.getTipo(), l.getUuid());
+            if (a == null) continue;
+            comFoto++;
+            if (achados.size() < MAX_COMPROVANTES) {
+                achados.add(new Comprovante(l.getTipo(), l.getId(), a.getCaminho(), legenda(l)));
+            }
+        }
+
+        if (comFoto == 0) {
+            if (todos.isEmpty()) {
+                r.getLinhas().add("Não encontrei esse lançamento.");
+            } else {
+                LancamentoLinha l = todos.get(0);
+                r.getLinhas().add("Achei o lançamento (" + legendaCurta(l) + "), mas ele não tem comprovante anexado.");
+                achados.add(new Comprovante(l.getTipo(), l.getId(), null, legenda(l)));
+            }
+        } else if (comFoto > MAX_COMPROVANTES) {
+            r.getLinhas().add("Encontrei " + comFoto + " comprovantes. Estes são os " + MAX_COMPROVANTES
+                    + " mais recentes — diga a data ou o valor pra eu achar o certo.");
+        }
+        return r;
+    }
+
+    private static String legenda(LancamentoLinha l) {
+        return (notBlank(l.getDescricao()) ? l.getDescricao().trim() : "Lançamento")
+                + " • " + MoneyUtils.formatar(l.getValor())
+                + " • " + (l.getData() != null ? DateUtils.isoParaBr(l.getData()) : "sem data");
+    }
+
+    private static String legendaCurta(LancamentoLinha l) {
+        String data = l.getData() != null && l.getData().length() >= 10
+                ? l.getData().substring(8, 10) + "/" + l.getData().substring(5, 7) : "sem data";
+        return (notBlank(l.getDescricao()) ? l.getDescricao().trim() : "Lançamento")
+                + ", " + MoneyUtils.formatar(l.getValor()) + ", " + data;
     }
 
     // --- SAFRAS -------------------------------------------------------
@@ -401,6 +483,8 @@ public class ChatConsultaExecutor {
             if (notBlank(c.getCultura()) && !mesmoTexto(c.getCultura(), l.getCultura())) continue;
             if (notBlank(c.getCategoria()) && !mesmoTexto(c.getCategoria(), l.getCategoria())) continue;
             if (c.getMaquinaUuid() != null && !c.getMaquinaUuid().equals(l.getMaquinaUuid())) continue;
+            if (notBlank(c.getTexto()) && !contemTexto(l.getDescricao(), c.getTexto())) continue;
+            if (c.getValor() != null && c.getValor() > 0 && Math.abs(l.getValor() - c.getValor()) > 0.01) continue;
             out.add(l);
         }
         return out;
@@ -493,6 +577,12 @@ public class ChatConsultaExecutor {
     static boolean mesmoTexto(String a, String b) {
         if (a == null || b == null) return false;
         return normalizar(a).equals(normalizar(b));
+    }
+
+    /** "diesel" acha "Óleo Diesel S10" (sem diferenciar maiúsculas/acentos). */
+    static boolean contemTexto(String onde, String procurado) {
+        if (onde == null || procurado == null) return false;
+        return normalizar(onde).contains(normalizar(procurado));
     }
 
     private static String normalizar(String s) {

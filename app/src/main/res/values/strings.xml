@@ -386,10 +386,10 @@
     <string name="chat_sug_safras_ativas">Quais safras estão ativas?</string>
     <string name="chat_sug_lancar_gasto">Quero lançar um gasto</string>
     <string name="chat_sug_metas">Como estão minhas metas?</string>
-    <string name="chat_foto">Enviar foto (nota fiscal, cupom, recibo)</string>
-    <string name="chat_arquivo">Enviar planilha ou bloco de notas</string>
     <string name="chat_audio">Falar em vez de digitar</string>
-    <string name="chat_foto_titulo">Enviar foto</string>
+    <string name="chat_anexar">Anexar foto ou arquivo</string>
+    <string name="chat_anexar_titulo">Anexar</string>
+    <string name="chat_anexo_arquivo">📄 Planilha ou bloco de notas (.xlsx, .csv, .txt)</string>
     <string name="chat_foto_camera">📷 Tirar foto agora</string>
     <string name="chat_foto_galeria">🖼️ Escolher da galeria</string>
     <string name="chat_rotulo_foto">📷 Foto</string>
@@ -401,4 +401,17 @@
     <string name="chat_sem_login">Sua sessão com o servidor não está ativa. Saia da conta e entre de novo para usar o assistente.</string>
     <string name="msg_sessao_encerrada">Sua sessão expirou. Entre de novo para continuar — seus dados continuam salvos no aparelho.</string>
     <string name="dash_assistente_ia">💬 Falar com o assistente (IA)</string>
+    <!-- Comprovantes (foto da nota/recibo) dos lançamentos -->
+    <string name="comprovante_titulo">Comprovante (opcional)</string>
+    <string name="comprovante_anexar">📎 Anexar comprovante</string>
+    <string name="comprovante_trocar">Trocar</string>
+    <string name="comprovante_compartilhar">Compartilhar</string>
+    <string name="comprovante_remover">Remover</string>
+    <string name="comprovante_abrir">Comprovante — toque para ver inteiro</string>
+    <string name="comprovante_aviso_local">Foto da nota ou recibo. Por enquanto fica guardada só neste celular.</string>
+    <string name="comprovante_aviso_com_foto">Toque na foto para ver inteira. Por enquanto fica guardada só neste celular.</string>
+    <string name="comprovante_remover_pergunta">Remover o comprovante deste lançamento?</string>
+    <string name="comprovante_preparando">Preparando a foto…</string>
+    <string name="comprovante_tela_titulo">Comprovante</string>
+    <string name="chat_comprovante_sem_foto">Sem comprovante anexado</string>
 </resources>

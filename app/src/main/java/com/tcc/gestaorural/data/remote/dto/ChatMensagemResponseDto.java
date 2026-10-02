@@ -63,7 +63,7 @@ public class ChatMensagemResponseDto {
 
     /** v2: pergunta estruturada que o app executa no Room. */
     public static class Consulta {
-        /** GASTOS | RECEITAS | SALDO | LANCAMENTOS | SAFRAS | AREA | METAS | MAQUINAS */
+        /** GASTOS | RECEITAS | SALDO | LANCAMENTOS | SAFRAS | AREA | METAS | MAQUINAS | COMPROVANTE (v3) */
         private String tipo;
         /** yyyy-MM-dd ou null */
         private String dataInicio;
@@ -81,6 +81,10 @@ public class ChatMensagemResponseDto {
         private String situacao;
         /** CATEGORIA | SAFRA | MES | MAQUINA | null */
         private String agrupar;
+        /** v3: palavra-chave procurada na descrição do lançamento (sem diferenciar maiúsculas/acentos). */
+        private String texto;
+        /** v3: valor citado pelo produtor ("a nota de 3 mil" → 3000); comparado com tolerância de R$ 0,01. */
+        private Double valor;
 
         public String getTipo() { return tipo; }
         public void setTipo(String tipo) { this.tipo = tipo; }
@@ -104,6 +108,10 @@ public class ChatMensagemResponseDto {
         public void setSituacao(String situacao) { this.situacao = situacao; }
         public String getAgrupar() { return agrupar; }
         public void setAgrupar(String agrupar) { this.agrupar = agrupar; }
+        public String getTexto() { return texto; }
+        public void setTexto(String texto) { this.texto = texto; }
+        public Double getValor() { return valor; }
+        public void setValor(Double valor) { this.valor = valor; }
     }
 
     public String getStatus() { return status; }

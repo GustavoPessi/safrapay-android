@@ -68,6 +68,8 @@
                 android:maxLength="10" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <include layout="@layout/view_comprovante" />
+
         <Button android:id="@+id/btnSalvar" style="@style/Widget.App.Button"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_salvar_despesa" />

@@ -14,7 +14,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.entity.Receita;
 import com.tcc.gestaorural.data.local.model.SafraOpcao;
+import com.tcc.gestaorural.data.local.entity.Anexo;
 import com.tcc.gestaorural.ui.NavKeys;
+import com.tcc.gestaorural.ui.comprovante.ComprovanteCampo;
 import com.tcc.gestaorural.ui.sucesso.SucessoActivity;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MaskUtils;
@@ -34,6 +36,9 @@ public class NovaReceitaActivity extends BaseActivity {
     private long safraSelecionada = 0L;
     private long receitaId = 0L;
     private Receita existente;
+    private ComprovanteCampo comprovante;
+    /** uuid do lançamento salvo (gerado aqui no cadastro novo, pra ligar o comprovante). */
+    private String uuidSalvo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +53,7 @@ public class NovaReceitaActivity extends BaseActivity {
         Button btnSalvar = findViewById(R.id.btnSalvar);
 
         MaskUtils.aplicarData(edtData);
+        comprovante = new ComprovanteCampo(this, Anexo.TIPO_RECEITA, false);
 
         safraSelecionada = getIntent().getLongExtra(NavKeys.SAFRA_ID, 0L);
         receitaId = getIntent().getLongExtra(NavKeys.LANCAMENTO_ID, 0L);
@@ -62,6 +68,7 @@ public class NovaReceitaActivity extends BaseActivity {
             vm.obter(receitaId).observe(this, r -> {
                 if (r != null && existente == null) {
                     existente = r;
+                    comprovante.setLancamentoUuid(r.uuid);
                     safraSelecionada = r.safraId;
                     edtDescricao.setText(r.descricao);
                     edtValor.setText(String.valueOf(r.valor));
@@ -79,6 +86,7 @@ public class NovaReceitaActivity extends BaseActivity {
         btnSalvar.setOnClickListener(v -> salvar());
         vm.getSalvoComId().observe(this, id -> {
             if (id == null) return;
+            comprovante.aplicar(uuidSalvo);
             android.content.Intent i = new android.content.Intent(this, SucessoActivity.class);
             i.putExtra(NavKeys.SUCESSO_MSG, getString(R.string.sucesso_receita));
             startActivity(i);
@@ -118,6 +126,8 @@ public class NovaReceitaActivity extends BaseActivity {
         r.valor = valor;
         String iso = DateUtils.brParaIso(txt(edtData));
         r.dataRegistro = (iso != null) ? iso : DateUtils.hojeIso();
+        if (r.uuid == null || r.uuid.isEmpty()) r.uuid = java.util.UUID.randomUUID().toString();
+        uuidSalvo = r.uuid;
         vm.salvar(r);
     }
 

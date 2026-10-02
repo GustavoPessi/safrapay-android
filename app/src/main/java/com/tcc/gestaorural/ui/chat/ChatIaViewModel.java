@@ -28,6 +28,11 @@ public class ChatIaViewModel extends AndroidViewModel {
 
     private final MutableLiveData<List<ChatItem>> lista = new MutableLiveData<>();
     private final MutableLiveData<Boolean> enviando = new MutableLiveData<>(false);
+    /**
+     * Última foto mandada no chat, esperando a IA transformar em proposta (pode levar
+     * algumas mensagens se a IA perguntar algo antes). Ao confirmar, vira comprovante.
+     */
+    private byte[] fotoPendente;
 
     public ChatIaViewModel(@NonNull Application app) {
         super(app);
@@ -65,7 +70,10 @@ public class ChatIaViewModel extends AndroidViewModel {
      * histórico mandado à IA vai só texto (o servidor não reenvia anexos antigos).
      */
     public void enviarAnexo(String legenda, String rotulo,
-                            ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo) {
+                            ChatMensagemRequestDto.Imagem imagem, ChatMensagemRequestDto.Arquivo arquivo,
+                            byte[] fotoJpeg) {
+        if (estaEnviando()) return;
+        if (imagem != null) fotoPendente = fotoJpeg; // arquivo e áudio não viram comprovante
         String l = legenda == null ? "" : legenda.trim();
         String bolha = rotulo + (l.isEmpty() ? "" : "\n" + l);
         String paraIa = !l.isEmpty() ? l
@@ -105,14 +113,28 @@ public class ChatIaViewModel extends AndroidViewModel {
             for (String a : resp.getAvisos()) if (a != null && !a.trim().isEmpty()) itens.add(ChatItem.assistente("ℹ️ " + a.trim()));
         }
         if ("PROPOSTA".equalsIgnoreCase(resp.getStatus()) && resp.getLancamentos() != null && !resp.getLancamentos().isEmpty()) {
-            itens.add(ChatItem.proposta(resp.getLancamentos()));
+            ChatItem proposta = ChatItem.proposta(resp.getLancamentos());
+            proposta.setFotoJpeg(fotoPendente);
+            fotoPendente = null;
+            itens.add(proposta);
+        }
+
+        // A foto só segue esperando enquanto a IA ainda está montando o lançamento (PRECISA_INFORMACAO).
+        if ("SEM_LANCAMENTO".equalsIgnoreCase(resp.getStatus()) || "CONSULTA".equalsIgnoreCase(resp.getStatus())) {
+            fotoPendente = null;
         }
 
         if ("CONSULTA".equalsIgnoreCase(resp.getStatus()) && resp.getConsulta() != null) {
             // A IA só disse O QUE consultar; o app calcula no Room e mostra o resultado.
             publicar();
             executor.executar(usuarioId, resp.getConsulta(), r -> {
-                itens.add(ChatItem.resultado(r));
+                if (r.getComprovantes() != null) {
+                    // COMPROVANTE: mensagem (se houver) + um card por foto achada.
+                    if (!r.getLinhas().isEmpty()) itens.add(ChatItem.assistente(android.text.TextUtils.join("\n", r.getLinhas())));
+                    for (ChatConsultaExecutor.Comprovante c : r.getComprovantes()) itens.add(ChatItem.comprovante(c));
+                } else {
+                    itens.add(ChatItem.resultado(r));
+                }
                 adicionarSugestoes(resp.getSugestoes());
                 enviando.setValue(false);
                 publicar();
@@ -146,15 +168,19 @@ public class ChatIaViewModel extends AndroidViewModel {
         final int total = item.getLancamentos().size();
         final int[] ok = {0};
         final boolean[] falhou = {false};
+        final boolean[] guardouFoto = {false};
         for (ChatMensagemResponseDto.Lancamento l : item.getLancamentos()) {
-            repo.confirmar(l, new ChatIaRepository.GravarCallback() {
+            repo.confirmar(l, item.getFotoJpeg(), new ChatIaRepository.GravarCallback() {
                 @Override
-                public void onGravado(String tipo) {
+                public void onGravado(String tipo, boolean comprovanteGuardado) {
                     ok[0]++;
+                    if (comprovanteGuardado) guardouFoto[0] = true;
                     if (ok[0] >= total && !falhou[0]) {
                         item.setResolvido(true);
+                        item.setFotoJpeg(null); // já está no arquivo; libera a memória
                         item.setRodape((total == 1) ? "✓ Lançamento salvo" : "✓ " + total + " lançamentos salvos");
-                        itens.add(ChatItem.assistente(item.getRodape() + " no app. Já aparece no seu financeiro."));
+                        itens.add(ChatItem.assistente(item.getRodape() + " no app. Já aparece no seu financeiro."
+                                + (guardouFoto[0] ? " Guardei a foto como comprovante." : "")));
                         publicar();
                     }
                 }

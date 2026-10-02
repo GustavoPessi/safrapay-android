@@ -20,9 +20,9 @@ import java.util.concurrent.Executors;
     entities = {
         Usuario.class, Propriedade.class, Talhao.class, Safra.class,
         CategoriaDespesa.class, Receita.class, Despesa.class, MetaFinanceira.class,
-        Maquina.class, AnotacaoMaquina.class, Cultura.class
+        Maquina.class, AnotacaoMaquina.class, Cultura.class, Anexo.class
     },
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -38,6 +38,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CulturaDao culturaDao();
     public abstract MaquinaDao maquinaDao();
     public abstract AnotacaoMaquinaDao anotacaoMaquinaDao();
+    public abstract AnexoDao anexoDao();
     public abstract RelatorioExportDao relatorioExportDao(); // só consultas (exportação), não muda o schema
 
     private static volatile AppDatabase INSTANCE;
@@ -120,6 +121,30 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /**
+     * Migração 9 → 10: tabela de comprovantes (foto da nota/recibo) das despesas e receitas.
+     * Tabela nova, aditiva — não mexe nos dados existentes.
+     */
+    static final Migration MIGRATION_9_10 = new Migration(9, 10) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `anexo` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`uuid` TEXT NOT NULL, " +
+                    "`lancamento_tipo` TEXT NOT NULL, " +
+                    "`lancamento_uuid` TEXT NOT NULL, " +
+                    "`caminho` TEXT NOT NULL, " +
+                    "`mime` TEXT NOT NULL, " +
+                    "`tamanho_bytes` INTEGER NOT NULL, " +
+                    "`origem` TEXT NOT NULL, " +
+                    "`criado_em` TEXT NOT NULL, " +
+                    "`atualizado_em` TEXT NOT NULL, " +
+                    "`sincronizado` INTEGER NOT NULL)");
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_anexo_uuid` ON `anexo` (`uuid`)");
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_anexo_lancamento_uuid` ON `anexo` (`lancamento_uuid`)");
+        }
+    };
+
     /** Pool para operações de banco fora da main thread (Room exige). */
     public static final ExecutorService IO = Executors.newFixedThreadPool(4);
 
@@ -138,7 +163,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "gestao_rural.db")
                         .addCallback(SEED_CALLBACK)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9, MIGRATION_9_10)
                         .fallbackToDestructiveMigration()
                         .build();
                 }

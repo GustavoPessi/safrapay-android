@@ -15,7 +15,9 @@ import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.entity.Despesa;
 import com.tcc.gestaorural.data.local.entity.Receita;
 import com.tcc.gestaorural.data.local.model.Lancamento;
+import com.tcc.gestaorural.data.local.entity.Anexo;
 import com.tcc.gestaorural.ui.NavKeys;
+import com.tcc.gestaorural.ui.comprovante.ComprovanteCampo;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MoneyUtils;
 
@@ -33,6 +35,7 @@ public class DetalheLancamentoActivity extends BaseActivity {
 
     private Receita receitaAtual;
     private Despesa despesaAtual;
+    private ComprovanteCampo comprovante;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,7 @@ public class DetalheLancamentoActivity extends BaseActivity {
         lancamentoId = getIntent().getLongExtra(NavKeys.LANCAMENTO_ID, 0L);
         tipo = getIntent().getStringExtra(NavKeys.LANCAMENTO_TIPO);
         receita = Lancamento.TIPO_RECEITA.equals(tipo);
+        comprovante = new ComprovanteCampo(this, receita ? Anexo.TIPO_RECEITA : Anexo.TIPO_DESPESA, true);
 
         int cor = ContextCompat.getColor(this, receita ? R.color.receita : R.color.despesa);
         imgTipo.setImageResource(receita ? R.drawable.ic_receita : R.drawable.ic_despesa);
@@ -63,12 +67,14 @@ public class DetalheLancamentoActivity extends BaseActivity {
             receitaVM.obter(lancamentoId).observe(this, r -> {
                 if (r == null) return;
                 receitaAtual = r;
+                comprovante.setLancamentoUuid(r.uuid);
                 preencher(r.descricao, r.valor, r.dataRegistro);
             });
         } else {
             despesaVM.obter(lancamentoId).observe(this, d -> {
                 if (d == null) return;
                 despesaAtual = d;
+                comprovante.setLancamentoUuid(d.uuid);
                 preencher(d.descricao, d.valor, d.dataRegistro);
             });
         }
@@ -81,6 +87,7 @@ public class DetalheLancamentoActivity extends BaseActivity {
         txtValor.setText(MoneyUtils.comSinal(valor, receita));
         txtDescricao.setText(descricao);
         txtData.setText(getString(R.string.label_data) + ": " + DateUtils.isoParaBr(dataIso));
+        comprovante.setLegenda(descricao + " • " + MoneyUtils.formatar(valor) + " • " + DateUtils.isoParaBr(dataIso));
     }
 
     private void editar() {

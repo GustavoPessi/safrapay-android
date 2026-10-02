@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Seção "Comprovante" (foto da nota/recibo), usada em Nova/Editar despesa e receita e no
+     Detalhe do lançamento. Controlada por ui/comprovante/ComprovanteCampo. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cardComprovante"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_lg"
+    android:background="@drawable/bg_card"
+    android:orientation="vertical"
+    android:padding="@dimen/space_md">
+
+    <TextView android:id="@+id/txtComprovanteTitulo"
+        style="@style/Text.Body"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/comprovante_titulo"
+        android:textColor="@color/text_primary"
+        android:textStyle="bold" />
+
+    <ImageView android:id="@+id/imgComprovante"
+        android:layout_width="match_parent" android:layout_height="180dp"
+        android:layout_marginTop="@dimen/space_sm"
+        android:background="@color/background"
+        android:contentDescription="@string/comprovante_abrir"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <TextView android:id="@+id/txtComprovanteAviso"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        android:text="@string/comprovante_aviso_local"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_caption" />
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btnAnexarComprovante"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/comprovante_anexar" />
+
+        <Button android:id="@+id/btnCompartilharComprovante"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/comprovante_compartilhar"
+            android:visibility="gone" />
+
+        <Button android:id="@+id/btnRemoverComprovante"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/comprovante_remover"
+            android:textColor="@color/error"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>
