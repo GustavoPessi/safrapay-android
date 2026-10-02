@@ -143,7 +143,7 @@ public class SyncManager {
             List<PropriedadeSyncItemDto> confirmadas = resp.body();
             if (confirmadas != null) {
                 for (PropriedadeSyncItemDto dto : confirmadas) {
-                    Propriedade local = dao.buscarPorUuid(dto.uuid);
+                    Propriedade local = dao.buscarPorUuid(dto.getUuid());
                     if (local == null) continue;
                     aplicarDto(local, dto);
                     dao.atualizar(local);
@@ -161,24 +161,24 @@ public class SyncManager {
         String maiorAtualizadoEm = desde;
         if (doServidor != null) {
             for (PropriedadeSyncItemDto dto : doServidor) {
-                Propriedade local = dao.buscarPorUuid(dto.uuid);
+                Propriedade local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     Propriedade nova = new Propriedade();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.usuarioId = usuarioId;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
                     // só sobrescreve o local se o que veio do servidor for mais novo que o local
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maiorAtualizadoEm == null || dto.atualizadoEm.compareTo(maiorAtualizadoEm) > 0)) {
-                    maiorAtualizadoEm = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maiorAtualizadoEm == null || dto.getAtualizadoEm().compareTo(maiorAtualizadoEm) > 0)) {
+                    maiorAtualizadoEm = dto.getAtualizadoEm();
                 }
             }
         }
@@ -187,33 +187,33 @@ public class SyncManager {
 
     private PropriedadeSyncItemDto paraDto(Propriedade p) {
         PropriedadeSyncItemDto dto = new PropriedadeSyncItemDto();
-        dto.uuid = p.uuid;
-        dto.nome = p.nome;
-        dto.localidade = p.localidade;
-        dto.areaTotal = p.areaTotal;
-        dto.tipoSolo = p.tipoSolo;
-        dto.matricula = p.matricula;
-        dto.cib = p.cib;
-        dto.valor = p.valor;
-        dto.observacoes = p.observacoes;
-        dto.latitude = p.latitude;
-        dto.longitude = p.longitude;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(p.atualizadoEm);
+        dto.setUuid(p.uuid);
+        dto.setNome(p.nome);
+        dto.setLocalidade(p.localidade);
+        dto.setAreaTotal(p.areaTotal);
+        dto.setTipoSolo(p.tipoSolo);
+        dto.setMatricula(p.matricula);
+        dto.setCib(p.cib);
+        dto.setValor(p.valor);
+        dto.setObservacoes(p.observacoes);
+        dto.setLatitude(p.latitude);
+        dto.setLongitude(p.longitude);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(p.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(Propriedade p, PropriedadeSyncItemDto dto) {
-        p.nome = dto.nome;
-        p.localidade = dto.localidade;
-        p.areaTotal = dto.areaTotal;
-        p.tipoSolo = dto.tipoSolo;
-        p.matricula = dto.matricula;
-        p.cib = dto.cib;
-        p.valor = dto.valor;
-        p.observacoes = dto.observacoes;
-        p.latitude = dto.latitude;
-        p.longitude = dto.longitude;
-        p.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        p.nome = dto.getNome();
+        p.localidade = dto.getLocalidade();
+        p.areaTotal = dto.getAreaTotal();
+        p.tipoSolo = dto.getTipoSolo();
+        p.matricula = dto.getMatricula();
+        p.cib = dto.getCib();
+        p.valor = dto.getValor();
+        p.observacoes = dto.getObservacoes();
+        p.latitude = dto.getLatitude();
+        p.longitude = dto.getLongitude();
+        p.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         p.sincronizado = 1;
         if (p.uuid == null) p.uuid = UUID.randomUUID().toString();
     }
@@ -241,7 +241,7 @@ public class SyncManager {
                 List<TalhaoSyncItemDto> confirmados = resp.body();
                 if (confirmados != null) {
                     for (TalhaoSyncItemDto dto : confirmados) {
-                        Talhao local = dao.buscarPorUuid(dto.uuid);
+                        Talhao local = dao.buscarPorUuid(dto.getUuid());
                         if (local == null) continue;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
@@ -259,27 +259,27 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (TalhaoSyncItemDto dto : doServidor) {
-                Propriedade pai = propDao.buscarPorUuid(dto.propriedadeUuid);
+                Propriedade pai = propDao.buscarPorUuid(dto.getPropriedadeUuid());
                 if (pai == null) continue; // propriedade-mãe ainda não chegou localmente; tenta na próxima
 
-                Talhao local = dao.buscarPorUuid(dto.uuid);
+                Talhao local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     Talhao novo = new Talhao();
-                    novo.uuid = dto.uuid;
+                    novo.uuid = dto.getUuid();
                     novo.propriedadeId = pai.id;
-                    novo.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    novo.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(novo, dto);
                     dao.inserir(novo);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         local.propriedadeId = pai.id;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -288,24 +288,24 @@ public class SyncManager {
 
     private TalhaoSyncItemDto paraDto(Talhao t, String propriedadeUuid) {
         TalhaoSyncItemDto dto = new TalhaoSyncItemDto();
-        dto.uuid = t.uuid;
-        dto.propriedadeUuid = propriedadeUuid;
-        dto.nome = t.nome;
-        dto.areaHa = t.areaHa;
-        dto.cultura = t.cultura;
-        dto.latitude = t.latitude;
-        dto.longitude = t.longitude;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(t.atualizadoEm);
+        dto.setUuid(t.uuid);
+        dto.setPropriedadeUuid(propriedadeUuid);
+        dto.setNome(t.nome);
+        dto.setAreaHa(t.areaHa);
+        dto.setCultura(t.cultura);
+        dto.setLatitude(t.latitude);
+        dto.setLongitude(t.longitude);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(t.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(Talhao t, TalhaoSyncItemDto dto) {
-        t.nome = dto.nome;
-        t.areaHa = dto.areaHa;
-        t.cultura = dto.cultura;
-        t.latitude = dto.latitude;
-        t.longitude = dto.longitude;
-        t.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        t.nome = dto.getNome();
+        t.areaHa = dto.getAreaHa();
+        t.cultura = dto.getCultura();
+        t.latitude = dto.getLatitude();
+        t.longitude = dto.getLongitude();
+        t.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         t.sincronizado = 1;
         if (t.uuid == null) t.uuid = UUID.randomUUID().toString();
     }
@@ -333,7 +333,7 @@ public class SyncManager {
                 List<SafraSyncItemDto> confirmadas = resp.body();
                 if (confirmadas != null) {
                     for (SafraSyncItemDto dto : confirmadas) {
-                        Safra local = dao.buscarPorUuid(dto.uuid);
+                        Safra local = dao.buscarPorUuid(dto.getUuid());
                         if (local == null) continue;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
@@ -351,27 +351,27 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (SafraSyncItemDto dto : doServidor) {
-                Talhao pai = talhaoDao.buscarPorUuid(dto.talhaoUuid);
+                Talhao pai = talhaoDao.buscarPorUuid(dto.getTalhaoUuid());
                 if (pai == null) continue; // talhão-pai ainda não chegou localmente; tenta na próxima
 
-                Safra local = dao.buscarPorUuid(dto.uuid);
+                Safra local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     Safra nova = new Safra();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.talhaoId = pai.id;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         local.talhaoId = pai.id;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -380,24 +380,24 @@ public class SyncManager {
 
     private SafraSyncItemDto paraDto(Safra s, String talhaoUuid) {
         SafraSyncItemDto dto = new SafraSyncItemDto();
-        dto.uuid = s.uuid;
-        dto.talhaoUuid = talhaoUuid;
-        dto.variedade = s.variedade;
-        dto.anoSafra = s.anoSafra;
-        dto.dataInicio = DateUtils.brParaIso(s.dataInicio);
-        dto.dataFim = DateUtils.brParaIso(s.dataFim);
-        dto.atualizadoEm = DateUtils.paraIsoUtc(s.atualizadoEm);
+        dto.setUuid(s.uuid);
+        dto.setTalhaoUuid(talhaoUuid);
+        dto.setVariedade(s.variedade);
+        dto.setAnoSafra(s.anoSafra);
+        dto.setDataInicio(DateUtils.brParaIso(s.dataInicio));
+        dto.setDataFim(DateUtils.brParaIso(s.dataFim));
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(s.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(Safra s, SafraSyncItemDto dto) {
-        s.variedade = dto.variedade;
-        s.anoSafra = dto.anoSafra;
+        s.variedade = dto.getVariedade();
+        s.anoSafra = dto.getAnoSafra();
         // isoParaBr devolve "" (nao null) se a entrada for null - normaliza de volta
         // pra null, que e como o resto do app trata "sem data" (ver nullSeVazio nas telas).
-        s.dataInicio = dto.dataInicio == null ? null : DateUtils.isoParaBr(dto.dataInicio);
-        s.dataFim = dto.dataFim == null ? null : DateUtils.isoParaBr(dto.dataFim);
-        s.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        s.dataInicio = dto.getDataInicio() == null ? null : DateUtils.isoParaBr(dto.getDataInicio());
+        s.dataFim = dto.getDataFim() == null ? null : DateUtils.isoParaBr(dto.getDataFim());
+        s.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         s.sincronizado = 1;
         if (s.uuid == null) s.uuid = UUID.randomUUID().toString();
     }
@@ -424,7 +424,7 @@ public class SyncManager {
                 List<ReceitaSyncItemDto> confirmadas = resp.body();
                 if (confirmadas != null) {
                     for (ReceitaSyncItemDto dto : confirmadas) {
-                        Receita local = dao.buscarPorUuid(dto.uuid);
+                        Receita local = dao.buscarPorUuid(dto.getUuid());
                         if (local == null) continue;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
@@ -442,27 +442,27 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (ReceitaSyncItemDto dto : doServidor) {
-                Safra pai = safraDao.buscarPorUuid(dto.safraUuid);
+                Safra pai = safraDao.buscarPorUuid(dto.getSafraUuid());
                 if (pai == null) continue; // safra-mãe ainda não chegou localmente; tenta na próxima
 
-                Receita local = dao.buscarPorUuid(dto.uuid);
+                Receita local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     Receita nova = new Receita();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.safraId = pai.id;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         local.safraId = pai.id;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -471,20 +471,20 @@ public class SyncManager {
 
     private ReceitaSyncItemDto paraDto(Receita r, String safraUuid) {
         ReceitaSyncItemDto dto = new ReceitaSyncItemDto();
-        dto.uuid = r.uuid;
-        dto.safraUuid = safraUuid;
-        dto.descricao = r.descricao;
-        dto.valor = r.valor;
-        dto.dataRegistro = r.dataRegistro;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(r.atualizadoEm);
+        dto.setUuid(r.uuid);
+        dto.setSafraUuid(safraUuid);
+        dto.setDescricao(r.descricao);
+        dto.setValor(r.valor);
+        dto.setDataRegistro(r.dataRegistro);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(r.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(Receita r, ReceitaSyncItemDto dto) {
-        r.descricao = dto.descricao;
-        r.valor = dto.valor == null ? 0 : dto.valor;
-        if (dto.dataRegistro != null) r.dataRegistro = dto.dataRegistro;
-        r.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        r.descricao = dto.getDescricao();
+        r.valor = dto.getValor() == null ? 0 : dto.getValor();
+        if (dto.getDataRegistro() != null) r.dataRegistro = dto.getDataRegistro();
+        r.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         r.sincronizado = 1;
         if (r.uuid == null) r.uuid = UUID.randomUUID().toString();
     }
@@ -504,7 +504,7 @@ public class SyncManager {
                 Safra pai = safraDao.buscarPorId(d.safraId);
                 if (pai == null) continue;
                 DespesaSyncItemDto dto = paraDto(d, pai.uuid);
-                if (dto.categoriaNome == null) continue; // não deveria acontecer (FK), mas o servidor exige categoria
+                if (dto.getCategoriaNome() == null) continue; // não deveria acontecer (FK), mas o servidor exige categoria
                 itens.add(dto);
             }
             if (!itens.isEmpty()) {
@@ -513,7 +513,7 @@ public class SyncManager {
                 List<DespesaSyncItemDto> confirmadas = resp.body();
                 if (confirmadas != null) {
                     for (DespesaSyncItemDto dto : confirmadas) {
-                        Despesa local = dao.buscarPorUuid(dto.uuid);
+                        Despesa local = dao.buscarPorUuid(dto.getUuid());
                         if (local == null) continue;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
@@ -531,27 +531,27 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (DespesaSyncItemDto dto : doServidor) {
-                Safra pai = safraDao.buscarPorUuid(dto.safraUuid);
+                Safra pai = safraDao.buscarPorUuid(dto.getSafraUuid());
                 if (pai == null) continue; // safra-mãe ainda não chegou localmente; tenta na próxima
 
-                Despesa local = dao.buscarPorUuid(dto.uuid);
+                Despesa local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     Despesa nova = new Despesa();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.safraId = pai.id;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     if (!aplicarDto(nova, dto)) continue; // sem categoria resolvível: não dá pra inserir (FK)
                     dao.inserir(nova);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         local.safraId = pai.id;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -560,18 +560,18 @@ public class SyncManager {
 
     private DespesaSyncItemDto paraDto(Despesa d, String safraUuid) {
         DespesaSyncItemDto dto = new DespesaSyncItemDto();
-        dto.uuid = d.uuid;
-        dto.safraUuid = safraUuid;
+        dto.setUuid(d.uuid);
+        dto.setSafraUuid(safraUuid);
         CategoriaDespesa cat = db.categoriaDespesaDao().buscarPorId(d.categoriaId);
-        dto.categoriaNome = cat == null ? null : cat.nome;
+        dto.setCategoriaNome(cat == null ? null : cat.nome);
         if (d.maquinaId != null) {
             Maquina maq = db.maquinaDao().buscarPorId(d.maquinaId);
-            dto.maquinaUuid = maq == null ? null : maq.uuid;
+            dto.setMaquinaUuid(maq == null ? null : maq.uuid);
         }
-        dto.descricao = d.descricao;
-        dto.valor = d.valor;
-        dto.dataRegistro = d.dataRegistro;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(d.atualizadoEm);
+        dto.setDescricao(d.descricao);
+        dto.setValor(d.valor);
+        dto.setDataRegistro(d.dataRegistro);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(d.atualizadoEm));
         return dto;
     }
 
@@ -588,26 +588,26 @@ public class SyncManager {
     private boolean aplicarDto(Despesa d, DespesaSyncItemDto dto) {
         CategoriaDespesaDao catDao = db.categoriaDespesaDao();
         boolean categoriaOk = true;
-        if (dto.categoriaNome != null) {
-            CategoriaDespesa cat = catDao.buscarPorNome(dto.categoriaNome);
+        if (dto.getCategoriaNome() != null) {
+            CategoriaDespesa cat = catDao.buscarPorNome(dto.getCategoriaNome());
             if (cat == null) {
                 // categoria que só existe no servidor: cria localmente com o mesmo nome
-                catDao.inserir(new CategoriaDespesa(dto.categoriaNome));
-                cat = catDao.buscarPorNome(dto.categoriaNome);
+                catDao.inserir(new CategoriaDespesa(dto.getCategoriaNome()));
+                cat = catDao.buscarPorNome(dto.getCategoriaNome());
             }
             if (cat != null) d.categoriaId = cat.id; else categoriaOk = false;
         } else {
             categoriaOk = false;
         }
-        if (dto.maquinaUuid != null) {
+        if (dto.getMaquinaUuid() != null) {
             MaquinaDao maqDao = db.maquinaDao();
-            Maquina maq = maqDao.buscarPorUuid(dto.maquinaUuid);
+            Maquina maq = maqDao.buscarPorUuid(dto.getMaquinaUuid());
             if (maq != null) d.maquinaId = maq.id;
         }
-        d.descricao = dto.descricao;
-        d.valor = dto.valor == null ? 0 : dto.valor;
-        if (dto.dataRegistro != null) d.dataRegistro = dto.dataRegistro;
-        d.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        d.descricao = dto.getDescricao();
+        d.valor = dto.getValor() == null ? 0 : dto.getValor();
+        if (dto.getDataRegistro() != null) d.dataRegistro = dto.getDataRegistro();
+        d.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         d.sincronizado = 1;
         if (d.uuid == null) d.uuid = UUID.randomUUID().toString();
         return categoriaOk;
@@ -635,7 +635,7 @@ public class SyncManager {
                 List<MetaFinanceiraSyncItemDto> confirmadas = resp.body();
                 if (confirmadas != null) {
                     for (MetaFinanceiraSyncItemDto dto : confirmadas) {
-                        MetaFinanceira local = dao.buscarPorUuid(dto.uuid);
+                        MetaFinanceira local = dao.buscarPorUuid(dto.getUuid());
                         if (local == null) continue;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
@@ -653,27 +653,27 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (MetaFinanceiraSyncItemDto dto : doServidor) {
-                Safra pai = safraDao.buscarPorUuid(dto.safraUuid);
+                Safra pai = safraDao.buscarPorUuid(dto.getSafraUuid());
                 if (pai == null) continue; // safra-mãe ainda não chegou localmente; tenta na próxima
 
-                MetaFinanceira local = dao.buscarPorUuid(dto.uuid);
+                MetaFinanceira local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     MetaFinanceira nova = new MetaFinanceira();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.safraId = pai.id;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         local.safraId = pai.id;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -682,20 +682,20 @@ public class SyncManager {
 
     private MetaFinanceiraSyncItemDto paraDto(MetaFinanceira m, String safraUuid) {
         MetaFinanceiraSyncItemDto dto = new MetaFinanceiraSyncItemDto();
-        dto.uuid = m.uuid;
-        dto.safraUuid = safraUuid;
-        dto.descricao = m.descricao;
-        dto.valorAlvo = m.valorAlvo;
-        dto.prazo = m.prazo;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(m.atualizadoEm);
+        dto.setUuid(m.uuid);
+        dto.setSafraUuid(safraUuid);
+        dto.setDescricao(m.descricao);
+        dto.setValorAlvo(m.valorAlvo);
+        dto.setPrazo(m.prazo);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(m.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(MetaFinanceira m, MetaFinanceiraSyncItemDto dto) {
-        m.descricao = dto.descricao;
-        m.valorAlvo = dto.valorAlvo == null ? 0 : dto.valorAlvo;
-        m.prazo = dto.prazo;
-        m.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        m.descricao = dto.getDescricao();
+        m.valorAlvo = dto.getValorAlvo() == null ? 0 : dto.getValorAlvo();
+        m.prazo = dto.getPrazo();
+        m.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         m.sincronizado = 1;
         if (m.uuid == null) m.uuid = UUID.randomUUID().toString();
     }
@@ -718,7 +718,7 @@ public class SyncManager {
             List<MaquinaSyncItemDto> confirmadas = resp.body();
             if (confirmadas != null) {
                 for (MaquinaSyncItemDto dto : confirmadas) {
-                    Maquina local = dao.buscarPorUuid(dto.uuid);
+                    Maquina local = dao.buscarPorUuid(dto.getUuid());
                     if (local == null) continue;
                     aplicarDto(local, dto);
                     dao.atualizar(local);
@@ -735,23 +735,23 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (MaquinaSyncItemDto dto : doServidor) {
-                Maquina local = dao.buscarPorUuid(dto.uuid);
+                Maquina local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     Maquina nova = new Maquina();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.usuarioId = usuarioId;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -760,29 +760,29 @@ public class SyncManager {
 
     private MaquinaSyncItemDto paraDto(Maquina m) {
         MaquinaSyncItemDto dto = new MaquinaSyncItemDto();
-        dto.uuid = m.uuid;
-        dto.nome = m.nome;
-        dto.marca = m.marca;
-        dto.tipo = m.tipo;
-        dto.modelo = m.modelo;
-        dto.ano = m.ano;
-        dto.identificacao = m.identificacao;
-        dto.valor = m.valor;
-        dto.observacoes = m.observacoes;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(m.atualizadoEm);
+        dto.setUuid(m.uuid);
+        dto.setNome(m.nome);
+        dto.setMarca(m.marca);
+        dto.setTipo(m.tipo);
+        dto.setModelo(m.modelo);
+        dto.setAno(m.ano);
+        dto.setIdentificacao(m.identificacao);
+        dto.setValor(m.valor);
+        dto.setObservacoes(m.observacoes);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(m.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(Maquina m, MaquinaSyncItemDto dto) {
-        m.nome = dto.nome;
-        m.marca = dto.marca;
-        m.tipo = dto.tipo;
-        m.modelo = dto.modelo;
-        m.ano = dto.ano;
-        m.identificacao = dto.identificacao;
-        m.valor = dto.valor;
-        m.observacoes = dto.observacoes;
-        m.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        m.nome = dto.getNome();
+        m.marca = dto.getMarca();
+        m.tipo = dto.getTipo();
+        m.modelo = dto.getModelo();
+        m.ano = dto.getAno();
+        m.identificacao = dto.getIdentificacao();
+        m.valor = dto.getValor();
+        m.observacoes = dto.getObservacoes();
+        m.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         m.sincronizado = 1;
         if (m.uuid == null) m.uuid = UUID.randomUUID().toString();
     }
@@ -809,7 +809,7 @@ public class SyncManager {
                 List<AnotacaoMaquinaSyncItemDto> confirmadas = resp.body();
                 if (confirmadas != null) {
                     for (AnotacaoMaquinaSyncItemDto dto : confirmadas) {
-                        AnotacaoMaquina local = dao.buscarPorUuid(dto.uuid);
+                        AnotacaoMaquina local = dao.buscarPorUuid(dto.getUuid());
                         if (local == null) continue;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
@@ -827,27 +827,27 @@ public class SyncManager {
         String maior = desde;
         if (doServidor != null) {
             for (AnotacaoMaquinaSyncItemDto dto : doServidor) {
-                Maquina pai = maqDao.buscarPorUuid(dto.maquinaUuid);
+                Maquina pai = maqDao.buscarPorUuid(dto.getMaquinaUuid());
                 if (pai == null) continue; // máquina-mãe ainda não chegou localmente; tenta na próxima
 
-                AnotacaoMaquina local = dao.buscarPorUuid(dto.uuid);
+                AnotacaoMaquina local = dao.buscarPorUuid(dto.getUuid());
                 if (local == null) {
                     AnotacaoMaquina nova = new AnotacaoMaquina();
-                    nova.uuid = dto.uuid;
+                    nova.uuid = dto.getUuid();
                     nova.maquinaId = pai.id;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
                     String localIso = DateUtils.paraIsoUtc(local.atualizadoEm);
-                    if (dto.atualizadoEm != null && dto.atualizadoEm.compareTo(localIso) > 0) {
+                    if (dto.getAtualizadoEm() != null && dto.getAtualizadoEm().compareTo(localIso) > 0) {
                         local.maquinaId = pai.id;
                         aplicarDto(local, dto);
                         dao.atualizar(local);
                     }
                 }
-                if (dto.atualizadoEm != null && (maior == null || dto.atualizadoEm.compareTo(maior) > 0)) {
-                    maior = dto.atualizadoEm;
+                if (dto.getAtualizadoEm() != null && (maior == null || dto.getAtualizadoEm().compareTo(maior) > 0)) {
+                    maior = dto.getAtualizadoEm();
                 }
             }
         }
@@ -856,20 +856,20 @@ public class SyncManager {
 
     private AnotacaoMaquinaSyncItemDto paraDto(AnotacaoMaquina a, String maquinaUuid) {
         AnotacaoMaquinaSyncItemDto dto = new AnotacaoMaquinaSyncItemDto();
-        dto.uuid = a.uuid;
-        dto.maquinaUuid = maquinaUuid;
-        dto.texto = a.texto;
-        dto.data = (a.data == null || a.data.isEmpty()) ? null : a.data;
-        dto.concluida = a.concluida == 1;
-        dto.atualizadoEm = DateUtils.paraIsoUtc(a.atualizadoEm);
+        dto.setUuid(a.uuid);
+        dto.setMaquinaUuid(maquinaUuid);
+        dto.setTexto(a.texto);
+        dto.setData((a.data == null || a.data.isEmpty()) ? null : a.data);
+        dto.setConcluida(a.concluida == 1);
+        dto.setAtualizadoEm(DateUtils.paraIsoUtc(a.atualizadoEm));
         return dto;
     }
 
     private void aplicarDto(AnotacaoMaquina a, AnotacaoMaquinaSyncItemDto dto) {
-        a.texto = dto.texto;
-        a.data = dto.data;
-        a.concluida = Boolean.TRUE.equals(dto.concluida) ? 1 : 0;
-        a.atualizadoEm = DateUtils.deIsoUtc(dto.atualizadoEm);
+        a.texto = dto.getTexto();
+        a.data = dto.getData();
+        a.concluida = Boolean.TRUE.equals(dto.getConcluida()) ? 1 : 0;
+        a.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         a.sincronizado = 1;
         if (a.uuid == null) a.uuid = UUID.randomUUID().toString();
     }

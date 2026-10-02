@@ -7,10 +7,10 @@ import com.tcc.gestaorural.data.local.dao.UsuarioDao;
 import com.tcc.gestaorural.data.local.entity.Usuario;
 import com.tcc.gestaorural.data.remote.ApiService;
 import com.tcc.gestaorural.data.remote.RetrofitClient;
-import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
+import com.tcc.gestaorural.data.remote.dto.AutenticacaoResponseDto;
 import com.tcc.gestaorural.data.remote.dto.LoginRequestDto;
 import com.tcc.gestaorural.data.remote.dto.MensagemResponseDto;
-import com.tcc.gestaorural.data.remote.dto.RegisterRequestDto;
+import com.tcc.gestaorural.data.remote.dto.CadastroRequestDto;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MaskUtils;
 import com.tcc.gestaorural.util.SecurityUtils;
@@ -55,7 +55,7 @@ public class AuthRepository {
                           final String cpf, final String telefone, final String nascimento,
                           final Callback cb) {
         String cpfDigitos = MaskUtils.digitos(cpf);
-        RegisterRequestDto request = new RegisterRequestDto(
+        CadastroRequestDto request = new CadastroRequestDto(
                 nome.trim(),
                 email.trim().toLowerCase(),
                 senha,
@@ -101,14 +101,14 @@ public class AuthRepository {
     public void login(final String email, final String senha, final Callback cb) {
         LoginRequestDto request = new LoginRequestDto(email.trim().toLowerCase(), senha);
 
-        api.login(request).enqueue(new retrofit2.Callback<AuthResponseDto>() {
+        api.login(request).enqueue(new retrofit2.Callback<AutenticacaoResponseDto>() {
             @Override
-            public void onResponse(Call<AuthResponseDto> call, Response<AuthResponseDto> response) {
-                final AuthResponseDto body = response.body();
+            public void onResponse(Call<AutenticacaoResponseDto> call, Response<AutenticacaoResponseDto> response) {
+                final AutenticacaoResponseDto body = response.body();
                 if (response.isSuccessful() && body != null) {
                     // Guarda o token de acesso (24h) e o refresh token (90 dias) — este
                     // permite renovar a sessão sozinho, sem o produtor digitar a senha de novo.
-                    new SessionManager(appContext).salvarTokens(body.token, body.refreshToken);
+                    new SessionManager(appContext).salvarTokens(body.getToken(), body.getRefreshToken());
                     AppDatabase.IO.execute(() -> {
                         long usuarioId = garantirUsuarioLocal(body, senha);
                         cb.onSucesso(usuarioId);
@@ -123,7 +123,7 @@ public class AuthRepository {
             }
 
             @Override
-            public void onFailure(Call<AuthResponseDto> call, Throwable t) {
+            public void onFailure(Call<AutenticacaoResponseDto> call, Throwable t) {
                 cb.onErro(com.tcc.gestaorural.R.string.err_servidor);
             }
         });
@@ -141,14 +141,14 @@ public class AuthRepository {
      * vazios aqui, pra nao sobrescrever nada que o usuario tenha digitado em
      * "Editar perfil" e que ainda nao tenha ido pro servidor.
      */
-    private long garantirUsuarioLocal(AuthResponseDto body, String senha) {
-        Usuario existente = usuarioDao.buscarPorEmail(body.email);
+    private long garantirUsuarioLocal(AutenticacaoResponseDto body, String senha) {
+        Usuario existente = usuarioDao.buscarPorEmail(body.getEmail());
         if (existente != null) {
             boolean mudou = false;
-            if (existente.cpf == null && body.cpf != null) { existente.cpf = body.cpf; mudou = true; }
-            if (existente.telefone == null && body.telefone != null) { existente.telefone = body.telefone; mudou = true; }
-            if (existente.nascimento == null && body.nascimento != null) {
-                existente.nascimento = DateUtils.isoParaBr(body.nascimento);
+            if (existente.cpf == null && body.getCpf() != null) { existente.cpf = body.getCpf(); mudou = true; }
+            if (existente.telefone == null && body.getTelefone() != null) { existente.telefone = body.getTelefone(); mudou = true; }
+            if (existente.nascimento == null && body.getNascimento() != null) {
+                existente.nascimento = DateUtils.isoParaBr(body.getNascimento());
                 mudou = true;
             }
             if (mudou) {
@@ -160,12 +160,12 @@ public class AuthRepository {
 
         Usuario u = new Usuario();
         u.uuid = UUID.randomUUID().toString();
-        u.nome = body.nome;
-        u.email = body.email;
+        u.nome = body.getNome();
+        u.email = body.getEmail();
         u.senhaHash = SecurityUtils.hashSenha(senha);
-        u.cpf = body.cpf;
-        u.telefone = body.telefone;
-        u.nascimento = body.nascimento == null ? null : DateUtils.isoParaBr(body.nascimento);
+        u.cpf = body.getCpf();
+        u.telefone = body.getTelefone();
+        u.nascimento = body.getNascimento() == null ? null : DateUtils.isoParaBr(body.getNascimento());
         u.criadoEm = DateUtils.agora();
         u.atualizadoEm = u.criadoEm;
         u.sincronizado = 0;

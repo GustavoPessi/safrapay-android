@@ -99,13 +99,13 @@ public class ChatIaRepository {
             int total = 0;
             try {
                 for (ChatMensagemResponseDto.Lancamento l : lancamentos) {
-                    if (l.safraUuid == null || l.valor == null) continue;
-                    Safra s = safraDao.buscarPorUuid(l.safraUuid);
+                    if (l.getSafraUuid() == null || l.getValor() == null) continue;
+                    Safra s = safraDao.buscarPorUuid(l.getSafraUuid());
                     if (s == null) continue;
-                    String data = (l.data != null && !l.data.isEmpty()) ? l.data : DateUtils.hojeIso();
-                    total += "RECEITA".equalsIgnoreCase(l.tipo)
-                            ? receitaDao.contarIguais(s.id, l.valor, data)
-                            : despesaDao.contarIguais(s.id, l.valor, data);
+                    String data = (l.getData() != null && !l.getData().isEmpty()) ? l.getData() : DateUtils.hojeIso();
+                    total += "RECEITA".equalsIgnoreCase(l.getTipo())
+                            ? receitaDao.contarIguais(s.id, l.getValor(), data)
+                            : despesaDao.contarIguais(s.id, l.getValor(), data);
                 }
             } catch (Exception ignored) {
                 total = 0; // na dúvida, não bloqueia o lançamento
@@ -144,39 +144,39 @@ public class ChatIaRepository {
         final String token = session.getToken();
         AppDatabase.IO.execute(() -> {
             ChatMensagemRequestDto req = new ChatMensagemRequestDto();
-            req.mensagens = historico;
-            req.hoje = DateUtils.hojeIso();
-            req.imagem = imagem;
-            req.arquivo = arquivo;
+            req.setMensagens(historico);
+            req.setHoje(DateUtils.hojeIso());
+            req.setImagem(imagem);
+            req.setArquivo(arquivo);
 
             ChatMensagemRequestDto.Contexto ctx = new ChatMensagemRequestDto.Contexto();
-            ctx.categorias = categoriaDao.listarNomes();
+            ctx.setCategorias(categoriaDao.listarNomes());
 
             // Safras (contrato v2: + cultura, talhão, ano, datas em ISO e propriedade)
             List<ChatMensagemRequestDto.Safra> safras = new ArrayList<>();
             for (SafraContexto s : safraDao.listarContexto(usuarioId)) {
-                String cultura = (s.cultura == null || s.cultura.trim().isEmpty()) ? "Sem cultura" : s.cultura;
-                String desc = cultura + " • " + s.anoSafra;
-                if (s.talhaoNome != null && !s.talhaoNome.isEmpty()) desc += " • Talhão " + s.talhaoNome;
+                String cultura = (s.getCultura() == null || s.getCultura().trim().isEmpty()) ? "Sem cultura" : s.getCultura();
+                String desc = cultura + " • " + s.getAnoSafra();
+                if (s.getTalhaoNome() != null && !s.getTalhaoNome().isEmpty()) desc += " • Talhão " + s.getTalhaoNome();
                 ChatMensagemRequestDto.Safra dto = new ChatMensagemRequestDto.Safra();
-                dto.uuid = s.uuid;
-                dto.descricao = desc;
-                dto.ativa = s.ativa();
-                dto.cultura = s.cultura;
-                dto.talhao = s.talhaoNome;
-                dto.anoSafra = s.anoSafra;
-                dto.dataInicio = paraIso(s.dataInicio);   // no Room a safra guarda dd/MM/yyyy
-                dto.dataFim = paraIso(s.dataFim);
-                dto.propriedadeUuid = s.propriedadeUuid;
+                dto.setUuid(s.getUuid());
+                dto.setDescricao(desc);
+                dto.setAtiva(s.ativa());
+                dto.setCultura(s.getCultura());
+                dto.setTalhao(s.getTalhaoNome());
+                dto.setAnoSafra(s.getAnoSafra());
+                dto.setDataInicio(paraIso(s.getDataInicio()));   // no Room a safra guarda dd/MM/yyyy
+                dto.setDataFim(paraIso(s.getDataFim()));
+                dto.setPropriedadeUuid(s.getPropriedadeUuid());
                 safras.add(dto);
             }
-            ctx.safras = safras;
+            ctx.setSafras(safras);
 
             List<ChatMensagemRequestDto.Maquina> maqs = new ArrayList<>();
             for (Maquina m : maquinaDao.listarPorUsuarioSync(usuarioId)) {
                 maqs.add(new ChatMensagemRequestDto.Maquina(m.uuid, m.nome));
             }
-            ctx.maquinas = maqs;
+            ctx.setMaquinas(maqs);
 
             // Propriedades e talhões (contrato v2) — sem nenhum valor financeiro
             java.util.Map<Long, String> uuidPropriedade = new java.util.HashMap<>();
@@ -184,24 +184,24 @@ public class ChatIaRepository {
             for (Propriedade p : propriedadeDao.listarPorUsuarioSync(usuarioId)) {
                 uuidPropriedade.put(p.id, p.uuid);
                 ChatMensagemRequestDto.PropriedadeCtx dto = new ChatMensagemRequestDto.PropriedadeCtx();
-                dto.uuid = p.uuid;
-                dto.nome = p.nome;
-                dto.areaTotal = p.areaTotal;
+                dto.setUuid(p.uuid);
+                dto.setNome(p.nome);
+                dto.setAreaTotal(p.areaTotal);
                 props.add(dto);
             }
-            ctx.propriedades = props;
+            ctx.setPropriedades(props);
             List<ChatMensagemRequestDto.TalhaoCtx> tals = new ArrayList<>();
             for (Talhao t : talhaoDao.listarPorUsuarioSync(usuarioId)) {
                 ChatMensagemRequestDto.TalhaoCtx dto = new ChatMensagemRequestDto.TalhaoCtx();
-                dto.uuid = t.uuid;
-                dto.nome = t.nome;
-                dto.propriedadeUuid = uuidPropriedade.get(t.propriedadeId);
-                dto.cultura = t.cultura;
-                dto.areaHa = t.areaHa;
+                dto.setUuid(t.uuid);
+                dto.setNome(t.nome);
+                dto.setPropriedadeUuid(uuidPropriedade.get(t.propriedadeId));
+                dto.setCultura(t.cultura);
+                dto.setAreaHa(t.areaHa);
                 tals.add(dto);
             }
-            ctx.talhoes = tals;
-            req.contexto = ctx;
+            ctx.setTalhoes(tals);
+            req.setContexto(ctx);
 
             api.enviarMensagemChat("Bearer " + token, req).enqueue(new Callback<ChatMensagemResponseDto>() {
                 @Override
@@ -238,16 +238,16 @@ public class ChatIaRepository {
     public void confirmar(ChatMensagemResponseDto.Lancamento l, GravarCallback cb) {
         AppDatabase.IO.execute(() -> {
             try {
-                Safra s = (l.safraUuid != null) ? safraDao.buscarPorUuid(l.safraUuid) : null;
+                Safra s = (l.getSafraUuid() != null) ? safraDao.buscarPorUuid(l.getSafraUuid()) : null;
                 if (s == null) { post(() -> cb.onErro("Safra do lançamento não encontrada.")); return; }
 
                 String agora = DateUtils.agora();
-                String data = (l.data != null && !l.data.isEmpty()) ? l.data : DateUtils.hojeIso();
-                double valor = (l.valor != null) ? l.valor : 0d;
-                String descricao = (l.descricao != null && !l.descricao.isEmpty())
-                        ? l.descricao : "Lançamento via assistente";
+                String data = (l.getData() != null && !l.getData().isEmpty()) ? l.getData() : DateUtils.hojeIso();
+                double valor = (l.getValor() != null) ? l.getValor() : 0d;
+                String descricao = (l.getDescricao() != null && !l.getDescricao().isEmpty())
+                        ? l.getDescricao() : "Lançamento via assistente";
 
-                if ("RECEITA".equalsIgnoreCase(l.tipo)) {
+                if ("RECEITA".equalsIgnoreCase(l.getTipo())) {
                     Receita r = new Receita();
                     r.uuid = UUID.randomUUID().toString();
                     r.safraId = s.id;
@@ -260,14 +260,14 @@ public class ChatIaRepository {
                     receitaDao.inserir(r);
                     post(() -> cb.onGravado("RECEITA"));
                 } else {
-                    CategoriaDespesa c = (l.categoria != null) ? categoriaDao.buscarPorNome(l.categoria) : null;
+                    CategoriaDespesa c = (l.getCategoria() != null) ? categoriaDao.buscarPorNome(l.getCategoria()) : null;
                     if (c == null) { post(() -> cb.onErro("Categoria não reconhecida pra essa despesa.")); return; }
                     Despesa d = new Despesa();
                     d.uuid = UUID.randomUUID().toString();
                     d.safraId = s.id;
                     d.categoriaId = c.id;
-                    if (l.maquinaUuid != null && !l.maquinaUuid.isEmpty()) {
-                        Maquina m = maquinaDao.buscarPorUuid(l.maquinaUuid);
+                    if (l.getMaquinaUuid() != null && !l.getMaquinaUuid().isEmpty()) {
+                        Maquina m = maquinaDao.buscarPorUuid(l.getMaquinaUuid());
                         d.maquinaId = (m != null) ? m.id : null;
                     }
                     d.descricao = descricao;

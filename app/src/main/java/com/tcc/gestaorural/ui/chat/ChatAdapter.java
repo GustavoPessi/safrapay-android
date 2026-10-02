@@ -41,7 +41,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    @Override public int getItemViewType(int position) { return itens.get(position).tipo; }
+    @Override public int getItemViewType(int position) { return itens.get(position).getTipo(); }
     @Override public int getItemCount() { return itens.size(); }
 
     @NonNull @Override
@@ -59,10 +59,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatItem item = itens.get(position);
-        if (holder instanceof VHTexto) ((VHTexto) holder).txt.setText(item.texto);
+        if (holder instanceof VHTexto) ((VHTexto) holder).txt.setText(item.getTexto());
         else if (holder instanceof VHProposta) ((VHProposta) holder).bind(item);
-        else if (holder instanceof VHResultado) ((VHResultado) holder).bind(item.resultado);
-        else if (holder instanceof VHSugestoes) ((VHSugestoes) holder).bind(item.sugestoes);
+        else if (holder instanceof VHResultado) ((VHResultado) holder).bind(item.getResultado());
+        else if (holder instanceof VHSugestoes) ((VHSugestoes) holder).bind(item.getSugestoes());
     }
 
     static class VHTexto extends RecyclerView.ViewHolder {
@@ -85,11 +85,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         void bind(ChatItem item) {
-            resumo.setText(montarResumo(item.lancamentos));
-            if (item.resolvido) {
+            resumo.setText(montarResumo(item.getLancamentos()));
+            if (item.isResolvido()) {
                 rowBotoes.setVisibility(View.GONE);
                 rodape.setVisibility(View.VISIBLE);
-                rodape.setText(item.rodape);
+                rodape.setText(item.getRodape());
             } else {
                 rowBotoes.setVisibility(View.VISIBLE);
                 rodape.setVisibility(View.GONE);
@@ -112,12 +112,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         void bind(ChatConsultaExecutor.Resultado r) {
             if (r == null) return;
-            titulo.setText(r.titulo);
-            observacao.setVisibility(r.observacao == null ? View.GONE : View.VISIBLE);
-            observacao.setText(r.observacao);
-            linhas.setText(android.text.TextUtils.join("\n", r.linhas));
-            total.setVisibility(r.total == null ? View.GONE : View.VISIBLE);
-            total.setText(r.total);
+            titulo.setText(r.getTitulo());
+            observacao.setVisibility(r.getObservacao() == null ? View.GONE : View.VISIBLE);
+            observacao.setText(r.getObservacao());
+            linhas.setText(android.text.TextUtils.join("\n", r.getLinhas()));
+            total.setVisibility(r.getTotal() == null ? View.GONE : View.VISIBLE);
+            total.setText(r.getTotal());
         }
     }
 
@@ -148,12 +148,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (lancamentos == null) return "";
         for (int i = 0; i < lancamentos.size(); i++) {
             ChatMensagemResponseDto.Lancamento l = lancamentos.get(i);
-            boolean receita = "RECEITA".equalsIgnoreCase(l.tipo);
+            boolean receita = "RECEITA".equalsIgnoreCase(l.getTipo());
             sb.append("• ").append(receita ? "Receita" : "Despesa");
-            sb.append(" — ").append(l.valor != null ? MoneyUtils.formatar(l.valor) : "—");
-            if (l.descricao != null && !l.descricao.isEmpty()) sb.append(" — ").append(l.descricao);
-            if (!receita && l.categoria != null && !l.categoria.isEmpty()) sb.append(" — ").append(l.categoria);
-            if (l.data != null && !l.data.isEmpty()) sb.append(" — ").append(DateUtils.isoParaBr(l.data));
+            sb.append(" — ").append(l.getValor() != null ? MoneyUtils.formatar(l.getValor()) : "—");
+            if (l.getDescricao() != null && !l.getDescricao().isEmpty()) sb.append(" — ").append(l.getDescricao());
+            if (!receita && l.getCategoria() != null && !l.getCategoria().isEmpty()) sb.append(" — ").append(l.getCategoria());
+            if (l.getData() != null && !l.getData().isEmpty()) sb.append(" — ").append(DateUtils.isoParaBr(l.getData()));
             if (i < lancamentos.size() - 1) sb.append("\n");
         }
         return sb.toString();

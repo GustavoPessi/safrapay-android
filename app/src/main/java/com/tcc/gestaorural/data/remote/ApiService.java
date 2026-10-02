@@ -2,7 +2,7 @@ package com.tcc.gestaorural.data.remote;
 
 import com.tcc.gestaorural.data.remote.dto.AlterarSenhaRequestDto;
 import com.tcc.gestaorural.data.remote.dto.AnotacaoMaquinaSyncItemDto;
-import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
+import com.tcc.gestaorural.data.remote.dto.AutenticacaoResponseDto;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemRequestDto;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemResponseDto;
 import com.tcc.gestaorural.data.remote.dto.DespesaSyncItemDto;
@@ -15,7 +15,7 @@ import com.tcc.gestaorural.data.remote.dto.PerfilRequestDto;
 import com.tcc.gestaorural.data.remote.dto.PerfilResponseDto;
 import com.tcc.gestaorural.data.remote.dto.PropriedadeSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.ReceitaSyncItemDto;
-import com.tcc.gestaorural.data.remote.dto.RegisterRequestDto;
+import com.tcc.gestaorural.data.remote.dto.CadastroRequestDto;
 import com.tcc.gestaorural.data.remote.dto.SafraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.TalhaoSyncItemDto;
 
@@ -33,16 +33,16 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     @POST("api/auth/registrar")
-    Call<MensagemResponseDto> registrar(@Body RegisterRequestDto request);
+    Call<MensagemResponseDto> registrar(@Body CadastroRequestDto request);
 
     @POST("api/auth/login")
-    Call<AuthResponseDto> login(@Body LoginRequestDto request);
+    Call<AutenticacaoResponseDto> login(@Body LoginRequestDto request);
 
     // Refresh token (01/10/2026). Rotas públicas (sem header Authorization).
     // /refresh devolve o mesmo formato do login, com token E refreshToken novos;
     // 401 = sessão encerrada de verdade. /logout revoga o refresh token (sempre 200).
     @POST("api/auth/refresh")
-    Call<AuthResponseDto> refresh(@Body com.tcc.gestaorural.data.remote.dto.RefreshRequestDto request);
+    Call<AutenticacaoResponseDto> refresh(@Body com.tcc.gestaorural.data.remote.dto.RefreshRequestDto request);
 
     @POST("api/auth/logout")
     Call<MensagemResponseDto> logout(@Body com.tcc.gestaorural.data.remote.dto.RefreshRequestDto request);
