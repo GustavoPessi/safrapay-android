@@ -4,7 +4,9 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.graphics.Bitmap;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.tcc.gestaorural.R;
+import com.tcc.gestaorural.data.local.AppDatabase;
+import com.tcc.gestaorural.util.ComprovanteUtils;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemResponseDto;
 import com.tcc.gestaorural.data.repository.ChatConsultaExecutor;
 import com.tcc.gestaorural.util.DateUtils;
@@ -28,6 +32,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void confirmar(ChatItem item);
         void descartar(ChatItem item);
         void sugestao(String texto);
+        void abrirComprovante(ChatConsultaExecutor.Comprovante c);
+        void compartilharComprovante(ChatConsultaExecutor.Comprovante c);
+        void anexarComprovante(ChatConsultaExecutor.Comprovante c);
     }
 
     private final List<ChatItem> itens = new ArrayList<>();
@@ -52,6 +59,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case ChatItem.PROPOSTA:  return new VHProposta(inf.inflate(R.layout.item_chat_proposta, parent, false));
             case ChatItem.RESULTADO: return new VHResultado(inf.inflate(R.layout.item_chat_resultado, parent, false));
             case ChatItem.SUGESTOES: return new VHSugestoes(inf.inflate(R.layout.item_chat_sugestoes, parent, false));
+            case ChatItem.COMPROVANTE: return new VHComprovante(inf.inflate(R.layout.item_chat_comprovante, parent, false));
             default:                 return new VHTexto(inf.inflate(R.layout.item_chat_assistente, parent, false));
         }
     }
@@ -63,6 +71,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         else if (holder instanceof VHProposta) ((VHProposta) holder).bind(item);
         else if (holder instanceof VHResultado) ((VHResultado) holder).bind(item.getResultado());
         else if (holder instanceof VHSugestoes) ((VHSugestoes) holder).bind(item.getSugestoes());
+        else if (holder instanceof VHComprovante) ((VHComprovante) holder).bind(item.getComprovante());
     }
 
     static class VHTexto extends RecyclerView.ViewHolder {
@@ -140,6 +149,47 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 chip.setOnClickListener(v -> acao.sugestao(s));
                 grupo.addView(chip);
             }
+        }
+    }
+
+    class VHComprovante extends RecyclerView.ViewHolder {
+        final ImageView img;
+        final TextView legenda, semFoto;
+        final Button btn;
+        String carregando;
+
+        VHComprovante(@NonNull View v) {
+            super(v);
+            img = v.findViewById(R.id.imgComprovante);
+            legenda = v.findViewById(R.id.txtLegenda);
+            semFoto = v.findViewById(R.id.txtSemFoto);
+            btn = v.findViewById(R.id.btnComprovanteAcao);
+        }
+
+        void bind(ChatConsultaExecutor.Comprovante c) {
+            if (c == null) return;
+            legenda.setText(c.getLegenda());
+            if (!c.temFoto()) {
+                img.setVisibility(View.GONE);
+                semFoto.setVisibility(View.VISIBLE);
+                btn.setText(R.string.comprovante_anexar);
+                btn.setOnClickListener(v -> acao.anexarComprovante(c));
+                carregando = null;
+                return;
+            }
+            img.setVisibility(View.VISIBLE);
+            semFoto.setVisibility(View.GONE);
+            btn.setText(R.string.comprovante_compartilhar);
+            btn.setOnClickListener(v -> acao.compartilharComprovante(c));
+            img.setOnClickListener(v -> acao.abrirComprovante(c));
+            if (c.getCaminho().equals(carregando)) return;
+            carregando = c.getCaminho();
+            img.setImageDrawable(null);
+            final String alvo = carregando;
+            AppDatabase.IO.execute(() -> {
+                Bitmap b = ComprovanteUtils.miniatura(alvo, 800);
+                img.post(() -> { if (alvo.equals(carregando) && b != null) img.setImageBitmap(b); });
+            });
         }
     }
 

@@ -36,6 +36,14 @@ public final class AnexoUtils {
 
     /** Foto (câmera ou galeria) → JPEG em base64, pronta pro campo "imagem". */
     public static String fotoJpegBase64(Context ctx, Uri uri) throws AnexoInvalido {
+        return Base64.encodeToString(fotoJpeg(ctx, uri), Base64.NO_WRAP);
+    }
+
+    /**
+     * Foto (câmera ou galeria) → bytes JPEG já reduzidos (lado maior até 1600 px) e com a
+     * rotação corrigida. Usado no chat e nos comprovantes (mesma compressão nos dois).
+     */
+    public static byte[] fotoJpeg(Context ctx, Uri uri) throws AnexoInvalido {
         ContentResolver cr = ctx.getContentResolver();
         try {
             BitmapFactory.Options limites = new BitmapFactory.Options();
@@ -72,7 +80,7 @@ public final class AnexoUtils {
             } while (jpeg.length > MAX_BYTES_FOTO && qualidade >= 40);
             bmp.recycle();
             if (jpeg.length > MAX_BYTES_FOTO) throw new AnexoInvalido("A foto ficou grande demais. Tente outra.");
-            return Base64.encodeToString(jpeg, Base64.NO_WRAP);
+            return jpeg;
         } catch (IOException | OutOfMemoryError e) {
             throw new AnexoInvalido("Não consegui ler essa imagem.");
         }

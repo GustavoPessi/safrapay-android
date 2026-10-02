@@ -3,6 +3,8 @@ package com.tcc.gestaorural.data.local.model;
 /** Despesa ou receita com os dados de safra/talhão/máquina, para as consultas do assistente de IA. */
 public class LancamentoLinha {
     private String tipo;             // "DESPESA" ou "RECEITA"
+    private long id;                 // id local do lançamento (abrir a edição)
+    private String uuid;             // uuid do lançamento (liga com o comprovante)
     private String data;             // yyyy-MM-dd
     private double valor;
     private String descricao;
@@ -18,6 +20,10 @@ public class LancamentoLinha {
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
     public String getData() { return data; }
     public void setData(String data) { this.data = data; }
     public double getValor() { return valor; }

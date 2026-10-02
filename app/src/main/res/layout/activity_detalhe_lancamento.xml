@@ -28,6 +28,8 @@
                 android:layout_marginTop="@dimen/space_sm" />
         </LinearLayout>
 
+        <include layout="@layout/view_comprovante" />
+
         <Button android:id="@+id/btnEditar" style="@style/Widget.App.Button"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_lg" android:text="@string/acao_editar" />

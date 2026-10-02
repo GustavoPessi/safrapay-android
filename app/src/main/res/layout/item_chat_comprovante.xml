@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Card de comprovante no chat (consulta COMPROVANTE): foto + legenda + compartilhar,
+     ou, se o lançamento não tem foto, o aviso + "Anexar comprovante". -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/space_xs" android:paddingBottom="@dimen/space_xs">
+
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card"
+        android:padding="@dimen/space_sm">
+
+        <ImageView android:id="@+id/imgComprovante"
+            android:layout_width="match_parent" android:layout_height="200dp"
+            android:background="@color/background"
+            android:contentDescription="@string/comprovante_abrir"
+            android:scaleType="centerCrop" />
+
+        <TextView android:id="@+id/txtLegenda"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:paddingStart="@dimen/space_xs" android:paddingEnd="@dimen/space_xs"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_body" />
+
+        <TextView android:id="@+id/txtSemFoto"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingStart="@dimen/space_xs" android:paddingEnd="@dimen/space_xs"
+            android:text="@string/chat_comprovante_sem_foto"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_caption"
+            android:visibility="gone" />
+
+        <Button android:id="@+id/btnComprovanteAcao"
+            style="@style/Widget.App.Button.Text"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/comprovante_compartilhar" />
+    </LinearLayout>
+</LinearLayout>

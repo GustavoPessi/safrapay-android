@@ -5,8 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -22,7 +23,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.AppDatabase;
+import com.tcc.gestaorural.data.local.entity.Anexo;
 import com.tcc.gestaorural.data.remote.dto.ChatMensagemRequestDto;
+import com.tcc.gestaorural.data.repository.ChatConsultaExecutor;
+import com.tcc.gestaorural.ui.NavKeys;
+import com.tcc.gestaorural.ui.comprovante.ComprovanteActivity;
+import com.tcc.gestaorural.ui.financeiro.NovaDespesaActivity;
+import com.tcc.gestaorural.ui.financeiro.NovaReceitaActivity;
+import com.tcc.gestaorural.util.ComprovanteUtils;
 import com.tcc.gestaorural.ui.BaseActivity;
 import com.tcc.gestaorural.util.AnexoUtils;
 
@@ -52,8 +60,10 @@ public class ChatIaActivity extends BaseActivity {
     private RecyclerView recycler;
     private EditText edtMensagem;
     private TextView txtPensando;
-    private Button btnEnviar;
-    private ImageButton btnFoto, btnArquivo, btnAudio;
+    private ImageButton btnAnexo, btnAcao;
+    /** true = botão redondo está como "enviar" (há texto); false = microfone. */
+    private boolean modoEnviar;
+    private boolean enviando;
     private Uri fotoCameraUri;
 
     private final ActivityResultLauncher<Uri> tirarFoto = registerForActivityResult(
@@ -90,10 +100,8 @@ public class ChatIaActivity extends BaseActivity {
         recycler = findViewById(R.id.recycler);
         edtMensagem = findViewById(R.id.edtMensagem);
         txtPensando = findViewById(R.id.txtPensando);
-        btnEnviar = findViewById(R.id.btnEnviar);
-        btnFoto = findViewById(R.id.btnFoto);
-        btnArquivo = findViewById(R.id.btnArquivo);
-        btnAudio = findViewById(R.id.btnAudio);
+        btnAnexo = findViewById(R.id.btnAnexo);
+        btnAcao = findViewById(R.id.btnAcao);
 
         LinearLayoutManager lm = new LinearLayoutManager(this);
         lm.setStackFromEnd(true);
@@ -102,6 +110,19 @@ public class ChatIaActivity extends BaseActivity {
             @Override public void confirmar(ChatItem item) { vm.confirmar(item); }
             @Override public void descartar(ChatItem item) { vm.descartar(item); }
             @Override public void sugestao(String texto) { vm.sugestao(texto); }
+            @Override public void abrirComprovante(ChatConsultaExecutor.Comprovante c) {
+                ComprovanteActivity.abrir(ChatIaActivity.this, c.getCaminho(), c.getLegenda());
+            }
+            @Override public void compartilharComprovante(ChatConsultaExecutor.Comprovante c) {
+                ComprovanteUtils.compartilhar(ChatIaActivity.this, c.getCaminho(), c.getLegenda());
+            }
+            @Override public void anexarComprovante(ChatConsultaExecutor.Comprovante c) {
+                // Abre a edição do lançamento (lá tem a seção Comprovante).
+                Class<?> alvo = Anexo.TIPO_RECEITA.equals(c.getTipo()) ? NovaReceitaActivity.class : NovaDespesaActivity.class;
+                Intent i = new Intent(ChatIaActivity.this, alvo);
+                i.putExtra(NavKeys.LANCAMENTO_ID, c.getLancamentoId());
+                startActivity(i);
+            }
         });
         recycler.setAdapter(adapter);
 
@@ -111,28 +132,28 @@ public class ChatIaActivity extends BaseActivity {
         });
 
         vm.getEnviando().observe(this, enviando -> {
-            boolean e = Boolean.TRUE.equals(enviando);
-            txtPensando.setVisibility(e ? View.VISIBLE : View.GONE);
-            btnEnviar.setEnabled(!e);
-            btnFoto.setEnabled(!e);
-            btnArquivo.setEnabled(!e);
-            btnFoto.setAlpha(e ? 0.4f : 1f);
-            btnArquivo.setAlpha(e ? 0.4f : 1f);
+            this.enviando = Boolean.TRUE.equals(enviando);
+            txtPensando.setVisibility(this.enviando ? View.VISIBLE : View.GONE);
+            btnAnexo.setEnabled(!this.enviando);
+            btnAnexo.setAlpha(this.enviando ? 0.4f : 1f);
+            atualizarBotaoAcao();
         });
 
-        btnEnviar.setOnClickListener(v -> {
+        edtMensagem.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void afterTextChanged(Editable s) { atualizarBotaoAcao(); }
+        });
+        atualizarBotaoAcao();
+
+        btnAcao.setOnClickListener(v -> {
+            if (!modoEnviar) { ouvir(); return; }
             String texto = textoDigitado();
             if (texto.isEmpty()) return;
             vm.enviar(texto);
             edtMensagem.setText("");
         });
-        btnFoto.setOnClickListener(v -> escolherOrigemFoto());
-        btnArquivo.setOnClickListener(v -> {
-            if (vm.estaEnviando()) { toast(getString(R.string.chat_aguarde)); return; }
-            try { escolherArquivo.launch(TIPOS_ARQUIVO); }
-            catch (ActivityNotFoundException e) { toast("Nenhum app de arquivos disponível."); }
-        });
-        btnAudio.setOnClickListener(v -> ouvir());
+        btnAnexo.setOnClickListener(v -> escolherAnexo());
 
         // Saudação inicial + atalhos (só na primeira criação, antes de qualquer mensagem).
         if (vm.temToken()) {
@@ -152,16 +173,39 @@ public class ChatIaActivity extends BaseActivity {
         if (fotoCameraUri != null) outState.putString(ESTADO_FOTO_URI, fotoCameraUri.toString());
     }
 
-    // --- Foto ----------------------------------------------------------
+    /** Microfone com o campo vazio; seta de enviar quando há texto (igual ao WhatsApp). */
+    private void atualizarBotaoAcao() {
+        modoEnviar = !textoDigitado().isEmpty();
+        btnAcao.setImageResource(modoEnviar ? R.drawable.ic_chat_enviar : R.drawable.ic_chat_mic_branco);
+        btnAcao.setContentDescription(getString(modoEnviar ? R.string.chat_enviar : R.string.chat_audio));
+        // Falar continua liberado enquanto a IA responde (só preenche o campo); enviar, não.
+        btnAcao.setEnabled(!(modoEnviar && enviando));
+    }
 
-    private void escolherOrigemFoto() {
+    // --- Anexos (clipe) ------------------------------------------------
+
+    private void escolherAnexo() {
         if (vm.estaEnviando()) { toast(getString(R.string.chat_aguarde)); return; }
-        String[] opcoes = { getString(R.string.chat_foto_camera), getString(R.string.chat_foto_galeria) };
+        String[] opcoes = {
+                getString(R.string.chat_foto_camera),
+                getString(R.string.chat_foto_galeria),
+                getString(R.string.chat_anexo_arquivo) };
         new AlertDialog.Builder(this)
-                .setTitle(R.string.chat_foto_titulo)
-                .setItems(opcoes, (d, qual) -> { if (qual == 0) abrirCamera(); else escolherFoto.launch("image/*"); })
+                .setTitle(R.string.chat_anexar_titulo)
+                .setItems(opcoes, (d, qual) -> {
+                    if (qual == 0) abrirCamera();
+                    else if (qual == 1) escolherFoto.launch("image/*");
+                    else abrirSeletorArquivo();
+                })
                 .show();
     }
+
+    private void abrirSeletorArquivo() {
+        try { escolherArquivo.launch(TIPOS_ARQUIVO); }
+        catch (ActivityNotFoundException e) { toast("Nenhum app de arquivos disponível."); }
+    }
+
+    // --- Foto ----------------------------------------------------------
 
     private void abrirCamera() {
         try {
@@ -184,11 +228,12 @@ public class ChatIaActivity extends BaseActivity {
         toast(getString(R.string.chat_preparando_anexo));
         AppDatabase.IO.execute(() -> {
             try {
-                String base64 = AnexoUtils.fotoJpegBase64(this, uri);
+                byte[] jpeg = AnexoUtils.fotoJpeg(this, uri);
+                String base64 = android.util.Base64.encodeToString(jpeg, android.util.Base64.NO_WRAP);
                 runOnUiThread(() -> {
                     edtMensagem.setText("");
                     vm.enviarAnexo(legenda, getString(R.string.chat_rotulo_foto),
-                            new ChatMensagemRequestDto.Imagem("image/jpeg", base64), null);
+                            new ChatMensagemRequestDto.Imagem("image/jpeg", base64), null, jpeg);
                 });
             } catch (AnexoUtils.AnexoInvalido e) {
                 runOnUiThread(() -> toast(e.getMessage()));
@@ -207,7 +252,7 @@ public class ChatIaActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     edtMensagem.setText("");
                     vm.enviarAnexo(legenda, getString(R.string.chat_rotulo_arquivo, nomeEConteudo[0]), null,
-                            new ChatMensagemRequestDto.Arquivo(nomeEConteudo[0], nomeEConteudo[1]));
+                            new ChatMensagemRequestDto.Arquivo(nomeEConteudo[0], nomeEConteudo[1]), null);
                 });
             } catch (AnexoUtils.AnexoInvalido e) {
                 runOnUiThread(() -> toast(e.getMessage()));

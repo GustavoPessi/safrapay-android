@@ -20,7 +20,9 @@ import com.tcc.gestaorural.data.local.entity.Despesa;
 import com.tcc.gestaorural.data.local.entity.Maquina;
 import com.tcc.gestaorural.data.repository.MaquinaRepository;
 import com.tcc.gestaorural.data.local.model.SafraOpcao;
+import com.tcc.gestaorural.data.local.entity.Anexo;
 import com.tcc.gestaorural.ui.NavKeys;
+import com.tcc.gestaorural.ui.comprovante.ComprovanteCampo;
 import com.tcc.gestaorural.ui.sucesso.SucessoActivity;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MaskUtils;
@@ -51,6 +53,9 @@ public class NovaDespesaActivity extends BaseActivity {
     private long despesaId = 0L;
     private long categoriaPendente = 0L; // para marcar no modo edição após carregar chips
     private Despesa existente;
+    private ComprovanteCampo comprovante;
+    /** uuid do lançamento salvo (gerado aqui no cadastro novo, pra ligar o comprovante). */
+    private String uuidSalvo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +73,7 @@ public class NovaDespesaActivity extends BaseActivity {
         Button btnSalvar = findViewById(R.id.btnSalvar);
 
         MaskUtils.aplicarData(edtData);
+        comprovante = new ComprovanteCampo(this, Anexo.TIPO_DESPESA, false);
         tilMaquina.setVisibility(View.GONE);
 
         safraSelecionada = getIntent().getLongExtra(NavKeys.SAFRA_ID, 0L);
@@ -85,6 +91,7 @@ public class NovaDespesaActivity extends BaseActivity {
             vm.obter(despesaId).observe(this, d -> {
                 if (d != null && existente == null) {
                     existente = d;
+                    comprovante.setLancamentoUuid(d.uuid);
                     safraSelecionada = d.safraId;
                     categoriaPendente = d.categoriaId;
                     maquinaPendente = d.maquinaId;
@@ -113,6 +120,7 @@ public class NovaDespesaActivity extends BaseActivity {
         btnSalvar.setOnClickListener(v -> salvar());
         vm.getSalvoComId().observe(this, id -> {
             if (id == null) return;
+            comprovante.aplicar(uuidSalvo);
             android.content.Intent i = new android.content.Intent(this, SucessoActivity.class);
             i.putExtra(NavKeys.SUCESSO_MSG, getString(R.string.sucesso_despesa));
             startActivity(i);
@@ -211,6 +219,8 @@ public class NovaDespesaActivity extends BaseActivity {
         d.valor = valor;
         String iso = DateUtils.brParaIso(txt(edtData));
         d.dataRegistro = (iso != null) ? iso : DateUtils.hojeIso();
+        if (d.uuid == null || d.uuid.isEmpty()) d.uuid = java.util.UUID.randomUUID().toString();
+        uuidSalvo = d.uuid;
         vm.salvar(d);
     }
 

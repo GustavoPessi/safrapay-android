@@ -93,7 +93,7 @@ public interface ReceitaDao {
 
     // --- Assistente de IA: consultas (o app calcula; a IA so interpreta a pergunta) ---
 
-    @Query("SELECT 'RECEITA' AS tipo, receita.data_registro AS data, receita.valor AS valor, " +
+    @Query("SELECT 'RECEITA' AS tipo, receita.id AS id, receita.uuid AS uuid, receita.data_registro AS data, receita.valor AS valor, " +
            "receita.descricao AS descricao, CAST(NULL AS TEXT) AS categoria, safra.uuid AS safraUuid, " +
            "talhao.cultura AS cultura, safra.ano_safra AS anoSafra, talhao.nome AS talhaoNome, " +
            "talhao.uuid AS talhaoUuid, propriedade.uuid AS propriedadeUuid, " +

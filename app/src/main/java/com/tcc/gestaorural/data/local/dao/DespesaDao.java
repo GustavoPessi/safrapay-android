@@ -133,7 +133,7 @@ public interface DespesaDao {
 
     // --- Assistente de IA: consultas (o app calcula; a IA so interpreta a pergunta) ---
 
-    @Query("SELECT 'DESPESA' AS tipo, despesa.data_registro AS data, despesa.valor AS valor, " +
+    @Query("SELECT 'DESPESA' AS tipo, despesa.id AS id, despesa.uuid AS uuid, despesa.data_registro AS data, despesa.valor AS valor, " +
            "despesa.descricao AS descricao, categoria_despesa.nome AS categoria, safra.uuid AS safraUuid, " +
            "talhao.cultura AS cultura, safra.ano_safra AS anoSafra, talhao.nome AS talhaoNome, " +
            "talhao.uuid AS talhaoUuid, propriedade.uuid AS propriedadeUuid, " +

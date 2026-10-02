@@ -18,7 +18,10 @@ public class ReceitaRepository {
 
     private final ReceitaDao dao;
 
+    private final AnexoRepository anexoRepo;
+
     public ReceitaRepository(Context context) {
+        this.anexoRepo = new AnexoRepository(context);
         this.dao = AppDatabase.getInstance(context).receitaDao();
     }
 
@@ -35,7 +38,8 @@ public class ReceitaRepository {
             long id;
             if (r.dataRegistro == null || r.dataRegistro.isEmpty()) r.dataRegistro = DateUtils.hojeIso();
             if (r.id == 0L) {
-                r.uuid = UUID.randomUUID().toString();
+                // A tela pode gerar o uuid antes (pra ligar o comprovante escolhido no formulário).
+                if (r.uuid == null || r.uuid.isEmpty()) r.uuid = UUID.randomUUID().toString();
                 r.criadoEm = DateUtils.agora();
                 r.atualizadoEm = r.criadoEm;
                 r.sincronizado = 0;
@@ -50,5 +54,11 @@ public class ReceitaRepository {
         });
     }
 
-    public void excluir(final Receita r) { AppDatabase.IO.execute(() -> dao.deletar(r)); }
+    /** Excluir o lançamento apaga também o comprovante (linha + arquivo). */
+    public void excluir(final Receita r) {
+        AppDatabase.IO.execute(() -> {
+            dao.deletar(r);
+            anexoRepo.removerDoLancamentoSync(com.tcc.gestaorural.data.local.entity.Anexo.TIPO_RECEITA, r.uuid);
+        });
+    }
 }

@@ -21,7 +21,10 @@ public class DespesaRepository {
     private final DespesaDao dao;
     private final CategoriaDespesaDao categoriaDao;
 
+    private final AnexoRepository anexoRepo;
+
     public DespesaRepository(Context context) {
+        this.anexoRepo = new AnexoRepository(context);
         AppDatabase db = AppDatabase.getInstance(context);
         this.dao = db.despesaDao();
         this.categoriaDao = db.categoriaDespesaDao();
@@ -41,7 +44,8 @@ public class DespesaRepository {
             long id;
             if (d.dataRegistro == null || d.dataRegistro.isEmpty()) d.dataRegistro = DateUtils.hojeIso();
             if (d.id == 0L) {
-                d.uuid = UUID.randomUUID().toString();
+                // A tela pode gerar o uuid antes (pra ligar o comprovante escolhido no formulário).
+                if (d.uuid == null || d.uuid.isEmpty()) d.uuid = UUID.randomUUID().toString();
                 d.criadoEm = DateUtils.agora();
                 d.atualizadoEm = d.criadoEm;
                 d.sincronizado = 0;
@@ -56,5 +60,11 @@ public class DespesaRepository {
         });
     }
 
-    public void excluir(final Despesa d) { AppDatabase.IO.execute(() -> dao.deletar(d)); }
+    /** Excluir o lançamento apaga também o comprovante (linha + arquivo). */
+    public void excluir(final Despesa d) {
+        AppDatabase.IO.execute(() -> {
+            dao.deletar(d);
+            anexoRepo.removerDoLancamentoSync(com.tcc.gestaorural.data.local.entity.Anexo.TIPO_DESPESA, d.uuid);
+        });
+    }
 }

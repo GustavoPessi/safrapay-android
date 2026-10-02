@@ -21,48 +21,41 @@
         android:textSize="@dimen/text_caption"
         android:visibility="gone" />
 
+    <!-- Barra de digitação estilo WhatsApp: clipe (câmera/galeria/arquivo) à esquerda,
+         campo com quase toda a largura e um botão redondo que é microfone com o campo
+         vazio e vira "enviar" quando há texto. -->
     <LinearLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:background="@color/surface"
-        android:padding="@dimen/space_sm"
-        android:gravity="center_vertical">
+        android:paddingStart="@dimen/space_xs" android:paddingEnd="@dimen/space_sm"
+        android:paddingTop="@dimen/space_sm" android:paddingBottom="@dimen/space_sm"
+        android:gravity="bottom">
 
-        <ImageButton android:id="@+id/btnFoto"
-            android:layout_width="40dp" android:layout_height="40dp"
+        <ImageButton android:id="@+id/btnAnexo"
+            android:layout_width="44dp" android:layout_height="44dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/chat_foto"
-            android:src="@drawable/ic_chat_foto" />
-
-        <ImageButton android:id="@+id/btnArquivo"
-            android:layout_width="40dp" android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/chat_arquivo"
+            android:contentDescription="@string/chat_anexar"
             android:src="@drawable/ic_chat_anexo" />
-
-        <ImageButton android:id="@+id/btnAudio"
-            android:layout_width="40dp" android:layout_height="40dp"
-            android:layout_marginEnd="@dimen/space_xs"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/chat_audio"
-            android:src="@drawable/ic_chat_mic" />
 
         <EditText android:id="@+id/edtMensagem"
             android:layout_width="0dp" android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:minHeight="44dp"
             android:background="@drawable/bg_input"
             android:paddingStart="@dimen/space_md" android:paddingEnd="@dimen/space_md"
             android:paddingTop="10dp" android:paddingBottom="10dp"
             android:hint="@string/chat_hint"
             android:inputType="textCapSentences|textMultiLine"
-            android:maxLines="4"
+            android:maxLines="5"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_hint" />
 
-        <Button android:id="@+id/btnEnviar"
-            style="@style/Widget.App.Button"
-            android:layout_width="wrap_content" android:layout_height="wrap_content"
+        <ImageButton android:id="@+id/btnAcao"
+            android:layout_width="44dp" android:layout_height="44dp"
             android:layout_marginStart="@dimen/space_sm"
-            android:text="@string/chat_enviar" />
+            android:background="@drawable/bg_chat_acao"
+            android:contentDescription="@string/chat_audio"
+            android:src="@drawable/ic_chat_mic_branco" />
     </LinearLayout>
 </LinearLayout>
