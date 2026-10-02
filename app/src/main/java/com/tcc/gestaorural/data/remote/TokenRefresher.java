@@ -2,7 +2,7 @@ package com.tcc.gestaorural.data.remote;
 
 import android.content.Context;
 
-import com.tcc.gestaorural.data.remote.dto.AuthResponseDto;
+import com.tcc.gestaorural.data.remote.dto.AutenticacaoResponseDto;
 import com.tcc.gestaorural.data.remote.dto.RefreshRequestDto;
 import com.tcc.gestaorural.util.SessionManager;
 
@@ -42,12 +42,12 @@ public final class TokenRefresher {
                 return null;
             }
             try {
-                Response<AuthResponseDto> r = RetrofitClient.getApi()
+                Response<AutenticacaoResponseDto> r = RetrofitClient.getApi()
                         .refresh(new RefreshRequestDto(refresh)).execute();
-                AuthResponseDto body = r.body();
-                if (r.isSuccessful() && body != null && body.token != null) {
-                    session.salvarTokens(body.token, body.refreshToken);
-                    return body.token;
+                AutenticacaoResponseDto body = r.body();
+                if (r.isSuccessful() && body != null && body.getToken() != null) {
+                    session.salvarTokens(body.getToken(), body.getRefreshToken());
+                    return body.getToken();
                 }
                 if (r.code() == 401) session.marcarSessaoEncerrada();
             } catch (IOException ignored) {

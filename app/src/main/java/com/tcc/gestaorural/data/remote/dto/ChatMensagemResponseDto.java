@@ -14,55 +14,110 @@ import java.util.List;
 public class ChatMensagemResponseDto {
 
     /** PROPOSTA | PRECISA_INFORMACAO | SEM_LANCAMENTO | CONSULTA (v2) */
-    public String status;
+    private String status;
     /** Texto pra mostrar na bolha da IA (na CONSULTA, só uma introdução sem números). */
-    public String resposta;
-    public List<Lancamento> lancamentos = new ArrayList<>();
+    private String resposta;
+    private List<Lancamento> lancamentos = new ArrayList<>();
     /** Quantas mensagens o usuário ainda pode mandar hoje (limite diário de custo). */
-    public Integer mensagensRestantesHoje;
+    private Integer mensagensRestantesHoje;
     /** v2: só quando status = CONSULTA. */
-    public Consulta consulta;
+    private Consulta consulta;
     /** v2: respostas rápidas (o app mostra como botões; tocar envia o texto). */
-    public List<String> sugestoes;
+    private List<String> sugestoes;
     /** Avisos do servidor (ex.: arquivo grande cortado). */
-    public List<String> avisos;
+    private List<String> avisos;
 
     public static class Lancamento {
         /** "DESPESA" ou "RECEITA". */
-        public String tipo;
-        public Double valor;
+        private String tipo;
+        private Double valor;
         /** yyyy-MM-dd */
-        public String data;
-        public String descricao;
+        private String data;
+        private String descricao;
         /** Nome exato de uma categoria do contexto (só despesa). */
-        public String categoria;
+        private String categoria;
         /** uuid de uma safra do contexto. */
-        public String safraUuid;
+        private String safraUuid;
         /** uuid de uma máquina do contexto (opcional, só despesa). */
-        public String maquinaUuid;
+        private String maquinaUuid;
         /** Campos que faltam pra gravar. Vazio = completo. */
-        public List<String> camposFaltando = new ArrayList<>();
+        private List<String> camposFaltando = new ArrayList<>();
+
+        public String getTipo() { return tipo; }
+        public void setTipo(String tipo) { this.tipo = tipo; }
+        public Double getValor() { return valor; }
+        public void setValor(Double valor) { this.valor = valor; }
+        public String getData() { return data; }
+        public void setData(String data) { this.data = data; }
+        public String getDescricao() { return descricao; }
+        public void setDescricao(String descricao) { this.descricao = descricao; }
+        public String getCategoria() { return categoria; }
+        public void setCategoria(String categoria) { this.categoria = categoria; }
+        public String getSafraUuid() { return safraUuid; }
+        public void setSafraUuid(String safraUuid) { this.safraUuid = safraUuid; }
+        public String getMaquinaUuid() { return maquinaUuid; }
+        public void setMaquinaUuid(String maquinaUuid) { this.maquinaUuid = maquinaUuid; }
+        public List<String> getCamposFaltando() { return camposFaltando; }
+        public void setCamposFaltando(List<String> camposFaltando) { this.camposFaltando = camposFaltando; }
     }
 
     /** v2: pergunta estruturada que o app executa no Room. */
     public static class Consulta {
         /** GASTOS | RECEITAS | SALDO | LANCAMENTOS | SAFRAS | AREA | METAS | MAQUINAS */
-        public String tipo;
+        private String tipo;
         /** yyyy-MM-dd ou null */
-        public String dataInicio;
+        private String dataInicio;
         /** yyyy-MM-dd ou null */
-        public String dataFim;
-        public String safraUuid;
-        public String propriedadeUuid;
-        public String talhaoUuid;
-        public String maquinaUuid;
+        private String dataFim;
+        private String safraUuid;
+        private String propriedadeUuid;
+        private String talhaoUuid;
+        private String maquinaUuid;
         /** Nome exato da categoria, ou null. */
-        public String categoria;
+        private String categoria;
         /** Ex.: "Soja" — filtra todas as safras/talhões dessa cultura. */
-        public String cultura;
+        private String cultura;
         /** SAFRAS: ATIVAS | ENCERRADAS | TODAS (null = ATIVAS) */
-        public String situacao;
+        private String situacao;
         /** CATEGORIA | SAFRA | MES | MAQUINA | null */
-        public String agrupar;
+        private String agrupar;
+
+        public String getTipo() { return tipo; }
+        public void setTipo(String tipo) { this.tipo = tipo; }
+        public String getDataInicio() { return dataInicio; }
+        public void setDataInicio(String dataInicio) { this.dataInicio = dataInicio; }
+        public String getDataFim() { return dataFim; }
+        public void setDataFim(String dataFim) { this.dataFim = dataFim; }
+        public String getSafraUuid() { return safraUuid; }
+        public void setSafraUuid(String safraUuid) { this.safraUuid = safraUuid; }
+        public String getPropriedadeUuid() { return propriedadeUuid; }
+        public void setPropriedadeUuid(String propriedadeUuid) { this.propriedadeUuid = propriedadeUuid; }
+        public String getTalhaoUuid() { return talhaoUuid; }
+        public void setTalhaoUuid(String talhaoUuid) { this.talhaoUuid = talhaoUuid; }
+        public String getMaquinaUuid() { return maquinaUuid; }
+        public void setMaquinaUuid(String maquinaUuid) { this.maquinaUuid = maquinaUuid; }
+        public String getCategoria() { return categoria; }
+        public void setCategoria(String categoria) { this.categoria = categoria; }
+        public String getCultura() { return cultura; }
+        public void setCultura(String cultura) { this.cultura = cultura; }
+        public String getSituacao() { return situacao; }
+        public void setSituacao(String situacao) { this.situacao = situacao; }
+        public String getAgrupar() { return agrupar; }
+        public void setAgrupar(String agrupar) { this.agrupar = agrupar; }
     }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    public String getResposta() { return resposta; }
+    public void setResposta(String resposta) { this.resposta = resposta; }
+    public List<Lancamento> getLancamentos() { return lancamentos; }
+    public void setLancamentos(List<Lancamento> lancamentos) { this.lancamentos = lancamentos; }
+    public Integer getMensagensRestantesHoje() { return mensagensRestantesHoje; }
+    public void setMensagensRestantesHoje(Integer mensagensRestantesHoje) { this.mensagensRestantesHoje = mensagensRestantesHoje; }
+    public Consulta getConsulta() { return consulta; }
+    public void setConsulta(Consulta consulta) { this.consulta = consulta; }
+    public List<String> getSugestoes() { return sugestoes; }
+    public void setSugestoes(List<String> sugestoes) { this.sugestoes = sugestoes; }
+    public List<String> getAvisos() { return avisos; }
+    public void setAvisos(List<String> avisos) { this.avisos = avisos; }
 }

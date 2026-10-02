@@ -51,10 +51,10 @@ public class UsuarioRepository {
         }
 
         PerfilRequestDto request = new PerfilRequestDto();
-        request.nome = u.nome;
-        request.cpf = u.cpf;
-        request.telefone = u.telefone;
-        request.nascimento = DateUtils.brParaIso(u.nascimento);
+        request.setNome(u.nome);
+        request.setCpf(u.cpf);
+        request.setTelefone(u.telefone);
+        request.setNascimento(DateUtils.brParaIso(u.nascimento));
 
         api.atualizarPerfil("Bearer " + token, request).enqueue(new retrofit2.Callback<PerfilResponseDto>() {
             @Override
@@ -62,10 +62,10 @@ public class UsuarioRepository {
                 PerfilResponseDto body = response.body();
                 if (response.isSuccessful() && body != null) {
                     AppDatabase.IO.execute(() -> {
-                        u.nome = body.nome;
-                        u.cpf = body.cpf;
-                        u.telefone = body.telefone;
-                        u.nascimento = body.nascimento == null ? null : DateUtils.isoParaBr(body.nascimento);
+                        u.nome = body.getNome();
+                        u.cpf = body.getCpf();
+                        u.telefone = body.getTelefone();
+                        u.nascimento = body.getNascimento() == null ? null : DateUtils.isoParaBr(body.getNascimento());
                         u.atualizadoEm = DateUtils.agora();
                         u.sincronizado = 1;
                         dao.atualizar(u);
@@ -132,10 +132,10 @@ public class UsuarioRepository {
         try {
             Usuario u = dao.buscarPorId(id);
             if (u == null || u.email == null) return;
-            Response<com.tcc.gestaorural.data.remote.dto.AuthResponseDto> r = api.login(
+            Response<com.tcc.gestaorural.data.remote.dto.AutenticacaoResponseDto> r = api.login(
                     new com.tcc.gestaorural.data.remote.dto.LoginRequestDto(u.email, novaSenha)).execute();
-            if (r.isSuccessful() && r.body() != null && r.body().token != null) {
-                new SessionManager(appContext).salvarTokens(r.body().token, r.body().refreshToken);
+            if (r.isSuccessful() && r.body() != null && r.body().getToken() != null) {
+                new SessionManager(appContext).salvarTokens(r.body().getToken(), r.body().getRefreshToken());
             }
         } catch (Exception ignored) {
             // sem rede: o produtor vai precisar entrar de novo depois

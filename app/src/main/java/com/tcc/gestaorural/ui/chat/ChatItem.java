@@ -13,14 +13,14 @@ public class ChatItem {
     public static final int RESULTADO = 3;
     public static final int SUGESTOES = 4;
 
-    public final int tipo;
-    public String texto;                                          // USUARIO / ASSISTENTE
-    public List<ChatMensagemResponseDto.Lancamento> lancamentos;  // PROPOSTA
-    public boolean resolvido;                                     // proposta já confirmada/descartada
-    public String rodape;                                         // texto pós-resolução (ex.: "✓ Lançado")
-    public boolean duplicataAvisada;                              // já avisou de possível lançamento repetido
-    public ChatConsultaExecutor.Resultado resultado;              // RESULTADO
-    public List<String> sugestoes;                                // SUGESTOES
+    private final int tipo;
+    private String texto;                                          // USUARIO / ASSISTENTE
+    private List<ChatMensagemResponseDto.Lancamento> lancamentos;  // PROPOSTA
+    private boolean resolvido;                                     // proposta já confirmada/descartada
+    private String rodape;                                         // texto pós-resolução (ex.: "✓ Lançado")
+    private boolean duplicataAvisada;                              // já avisou de possível lançamento repetido
+    private ChatConsultaExecutor.Resultado resultado;              // RESULTADO
+    private List<String> sugestoes;                                // SUGESTOES
 
     private ChatItem(int tipo) { this.tipo = tipo; }
 
@@ -39,4 +39,20 @@ public class ChatItem {
     public static ChatItem sugestoes(List<String> sugestoes) {
         ChatItem c = new ChatItem(SUGESTOES); c.sugestoes = sugestoes; return c;
     }
+
+    public int getTipo() { return tipo; }
+    public String getTexto() { return texto; }
+    public void setTexto(String texto) { this.texto = texto; }
+    public List<ChatMensagemResponseDto.Lancamento> getLancamentos() { return lancamentos; }
+    public void setLancamentos(List<ChatMensagemResponseDto.Lancamento> lancamentos) { this.lancamentos = lancamentos; }
+    public boolean isResolvido() { return resolvido; }
+    public void setResolvido(boolean resolvido) { this.resolvido = resolvido; }
+    public String getRodape() { return rodape; }
+    public void setRodape(String rodape) { this.rodape = rodape; }
+    public boolean isDuplicataAvisada() { return duplicataAvisada; }
+    public void setDuplicataAvisada(boolean duplicataAvisada) { this.duplicataAvisada = duplicataAvisada; }
+    public ChatConsultaExecutor.Resultado getResultado() { return resultado; }
+    public void setResultado(ChatConsultaExecutor.Resultado resultado) { this.resultado = resultado; }
+    public List<String> getSugestoes() { return sugestoes; }
+    public void setSugestoes(List<String> sugestoes) { this.sugestoes = sugestoes; }
 }

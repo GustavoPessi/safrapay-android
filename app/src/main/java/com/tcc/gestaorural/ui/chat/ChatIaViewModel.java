@@ -69,7 +69,7 @@ public class ChatIaViewModel extends AndroidViewModel {
         String l = legenda == null ? "" : legenda.trim();
         String bolha = rotulo + (l.isEmpty() ? "" : "\n" + l);
         String paraIa = !l.isEmpty() ? l
-                : (imagem != null ? "Enviei uma foto." : "Enviei o arquivo " + (arquivo != null ? arquivo.nome : "") + ".");
+                : (imagem != null ? "Enviei uma foto." : "Enviei o arquivo " + (arquivo != null ? arquivo.getNome() : "") + ".");
         enviarInterno(bolha, paraIa, imagem, arquivo);
     }
 
@@ -96,43 +96,43 @@ public class ChatIaViewModel extends AndroidViewModel {
     }
 
     private void tratarResposta(ChatMensagemResponseDto resp) {
-        String botTexto = (resp.resposta != null) ? resp.resposta.trim() : "";
+        String botTexto = (resp.getResposta() != null) ? resp.getResposta().trim() : "";
         if (!botTexto.isEmpty()) {
             itens.add(ChatItem.assistente(botTexto));
             historico.add(new ChatMensagemRequestDto.Mensagem("assistente", botTexto));
         }
-        if (resp.avisos != null) {
-            for (String a : resp.avisos) if (a != null && !a.trim().isEmpty()) itens.add(ChatItem.assistente("ℹ️ " + a.trim()));
+        if (resp.getAvisos() != null) {
+            for (String a : resp.getAvisos()) if (a != null && !a.trim().isEmpty()) itens.add(ChatItem.assistente("ℹ️ " + a.trim()));
         }
-        if ("PROPOSTA".equalsIgnoreCase(resp.status) && resp.lancamentos != null && !resp.lancamentos.isEmpty()) {
-            itens.add(ChatItem.proposta(resp.lancamentos));
+        if ("PROPOSTA".equalsIgnoreCase(resp.getStatus()) && resp.getLancamentos() != null && !resp.getLancamentos().isEmpty()) {
+            itens.add(ChatItem.proposta(resp.getLancamentos()));
         }
 
-        if ("CONSULTA".equalsIgnoreCase(resp.status) && resp.consulta != null) {
+        if ("CONSULTA".equalsIgnoreCase(resp.getStatus()) && resp.getConsulta() != null) {
             // A IA só disse O QUE consultar; o app calcula no Room e mostra o resultado.
             publicar();
-            executor.executar(usuarioId, resp.consulta, r -> {
+            executor.executar(usuarioId, resp.getConsulta(), r -> {
                 itens.add(ChatItem.resultado(r));
-                adicionarSugestoes(resp.sugestoes);
+                adicionarSugestoes(resp.getSugestoes());
                 enviando.setValue(false);
                 publicar();
             });
             return;
         }
 
-        adicionarSugestoes(resp.sugestoes);
+        adicionarSugestoes(resp.getSugestoes());
         enviando.setValue(false);
         publicar();
     }
 
     public void confirmar(ChatItem item) {
-        if (item.tipo != ChatItem.PROPOSTA || item.resolvido || item.lancamentos == null) return;
-        if (item.duplicataAvisada) { gravar(item); return; }
+        if (item.getTipo() != ChatItem.PROPOSTA || item.isResolvido() || item.getLancamentos() == null) return;
+        if (item.isDuplicataAvisada()) { gravar(item); return; }
 
         // Antes de gravar: já existe lançamento igual (mesma safra, valor e data)?
-        repo.contarDuplicatas(item.lancamentos, n -> {
+        repo.contarDuplicatas(item.getLancamentos(), n -> {
             if (n > 0) {
-                item.duplicataAvisada = true;
+                item.setDuplicataAvisada(true);
                 itens.add(ChatItem.assistente("⚠️ Já existe " + (n == 1 ? "um lançamento" : n + " lançamentos")
                         + " com o mesmo valor e data nessa safra. Se não for repetido, toque em \"Confirmar e lançar\" de novo."));
                 publicar();
@@ -143,18 +143,18 @@ public class ChatIaViewModel extends AndroidViewModel {
     }
 
     private void gravar(ChatItem item) {
-        final int total = item.lancamentos.size();
+        final int total = item.getLancamentos().size();
         final int[] ok = {0};
         final boolean[] falhou = {false};
-        for (ChatMensagemResponseDto.Lancamento l : item.lancamentos) {
+        for (ChatMensagemResponseDto.Lancamento l : item.getLancamentos()) {
             repo.confirmar(l, new ChatIaRepository.GravarCallback() {
                 @Override
                 public void onGravado(String tipo) {
                     ok[0]++;
                     if (ok[0] >= total && !falhou[0]) {
-                        item.resolvido = true;
-                        item.rodape = (total == 1) ? "✓ Lançamento salvo" : "✓ " + total + " lançamentos salvos";
-                        itens.add(ChatItem.assistente(item.rodape + " no app. Já aparece no seu financeiro."));
+                        item.setResolvido(true);
+                        item.setRodape((total == 1) ? "✓ Lançamento salvo" : "✓ " + total + " lançamentos salvos");
+                        itens.add(ChatItem.assistente(item.getRodape() + " no app. Já aparece no seu financeiro."));
                         publicar();
                     }
                 }
@@ -162,8 +162,8 @@ public class ChatIaViewModel extends AndroidViewModel {
                 public void onErro(String mensagem) {
                     if (falhou[0]) return;
                     falhou[0] = true;
-                    item.resolvido = true;
-                    item.rodape = "⚠️ " + mensagem;
+                    item.setResolvido(true);
+                    item.setRodape("⚠️ " + mensagem);
                     itens.add(ChatItem.assistente("⚠️ " + mensagem));
                     publicar();
                 }
@@ -172,9 +172,9 @@ public class ChatIaViewModel extends AndroidViewModel {
     }
 
     public void descartar(ChatItem item) {
-        if (item.tipo != ChatItem.PROPOSTA || item.resolvido) return;
-        item.resolvido = true;
-        item.rodape = "Descartado";
+        if (item.getTipo() != ChatItem.PROPOSTA || item.isResolvido()) return;
+        item.setResolvido(true);
+        item.setRodape("Descartado");
         itens.add(ChatItem.assistente("Ok, descartei. Pode me dizer de outro jeito se quiser."));
         publicar();
     }
@@ -190,7 +190,7 @@ public class ChatIaViewModel extends AndroidViewModel {
 
     private void removerSugestoes() {
         Iterator<ChatItem> it = itens.iterator();
-        while (it.hasNext()) if (it.next().tipo == ChatItem.SUGESTOES) it.remove();
+        while (it.hasNext()) if (it.next().getTipo() == ChatItem.SUGESTOES) it.remove();
     }
 
     private void publicar() { lista.setValue(new ArrayList<>(itens)); }

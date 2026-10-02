@@ -9,12 +9,29 @@ package com.tcc.gestaorural.data.remote.dto;
  *   preserva o vinculo local nesse caso.
  */
 public class DespesaSyncItemDto {
-    public String uuid;
-    public String safraUuid;
-    public String categoriaNome;
-    public String maquinaUuid;
-    public String descricao;
-    public Double valor;
-    public String dataRegistro;
-    public String atualizadoEm;
+    private String uuid;
+    private String safraUuid;
+    private String categoriaNome;
+    private String maquinaUuid;
+    private String descricao;
+    private Double valor;
+    private String dataRegistro;
+    private String atualizadoEm;
+
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
+    public String getSafraUuid() { return safraUuid; }
+    public void setSafraUuid(String safraUuid) { this.safraUuid = safraUuid; }
+    public String getCategoriaNome() { return categoriaNome; }
+    public void setCategoriaNome(String categoriaNome) { this.categoriaNome = categoriaNome; }
+    public String getMaquinaUuid() { return maquinaUuid; }
+    public void setMaquinaUuid(String maquinaUuid) { this.maquinaUuid = maquinaUuid; }
+    public String getDescricao() { return descricao; }
+    public void setDescricao(String descricao) { this.descricao = descricao; }
+    public Double getValor() { return valor; }
+    public void setValor(Double valor) { this.valor = valor; }
+    public String getDataRegistro() { return dataRegistro; }
+    public void setDataRegistro(String dataRegistro) { this.dataRegistro = dataRegistro; }
+    public String getAtualizadoEm() { return atualizadoEm; }
+    public void setAtualizadoEm(String atualizadoEm) { this.atualizadoEm = atualizadoEm; }
 }
