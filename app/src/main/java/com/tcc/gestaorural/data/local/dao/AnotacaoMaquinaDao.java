@@ -17,14 +17,17 @@ public interface AnotacaoMaquinaDao {
            "CASE WHEN data IS NULL THEN 1 ELSE 0 END, data DESC, criado_em DESC")
     LiveData<List<AnotacaoMaquina>> observarPorMaquina(long maquinaId);
 
-    /** Avisos de manutenção: pendentes, com data definida, vencidas ou até :limite. */
-    @Query("SELECT a.id AS id, a.maquina_id AS maquinaId, a.texto AS texto, a.data AS data, " +
-           "maquina.nome AS maquinaNome " +
+    /**
+     * Avisos de manutenção: pendentes vencidas ou até :limite. Usa o prazo da tarefa
+     * (multiusuário); anotações antigas sem prazo seguem usando a data.
+     */
+    @Query("SELECT a.id AS id, a.maquina_id AS maquinaId, a.texto AS texto, " +
+           "COALESCE(a.prazo, a.data) AS data, maquina.nome AS maquinaNome " +
            "FROM anotacao_maquina a " +
            "JOIN maquina ON maquina.id = a.maquina_id " +
            "WHERE maquina.usuario_id = :usuarioId AND a.concluida = 0 " +
-           "AND a.data IS NOT NULL AND a.data <= :limite " +
-           "ORDER BY a.data ASC")
+           "AND COALESCE(a.prazo, a.data) IS NOT NULL AND COALESCE(a.prazo, a.data) <= :limite " +
+           "ORDER BY COALESCE(a.prazo, a.data) ASC")
     LiveData<List<AvisoManutencao>> avisos(long usuarioId, String limite);
 
     // --- Consultas sincronas usadas pelo SyncManager (Fase 4, roda em background) ---

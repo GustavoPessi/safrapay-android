@@ -13,7 +13,7 @@ import com.tcc.gestaorural.ui.BaseActivity;
 import com.tcc.gestaorural.util.MaskUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
-public class EditarPerfilActivity extends BaseActivity {
+public class EditarPerfilActivity extends BaseActivity implements com.tcc.gestaorural.ui.equipe.EquipeSincronizador.TelaComum {
 
     private UsuarioViewModel vm;
     private TextInputEditText edtNome, edtCpf, edtTelefone, edtNascimento, edtEmail;

@@ -20,7 +20,7 @@ import com.tcc.gestaorural.util.SettingsManager;
 
 import androidx.lifecycle.ViewModelProvider;
 
-public class ConfiguracoesActivity extends BaseActivity {
+public class ConfiguracoesActivity extends BaseActivity implements com.tcc.gestaorural.ui.equipe.EquipeSincronizador.TelaComum {
 
     private SettingsManager settings;
     private UsuarioViewModel vm;

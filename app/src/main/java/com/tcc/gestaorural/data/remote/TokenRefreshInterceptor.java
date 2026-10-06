@@ -30,7 +30,18 @@ public class TokenRefreshInterceptor implements Interceptor {
         boolean negado = resposta.code() == 401 || resposta.code() == 403;
         if (!negado || auth == null || !auth.startsWith("Bearer ")) return resposta;
 
-        String novo = TokenRefresher.renovar(appContext, auth.substring("Bearer ".length()));
+        // 403 com o token ainda válido = falta de permissão do papel (ex.: colaborador tentando
+        // uma rota de dono), não token vencido: não adianta renovar. Quem chamou trata.
+        String usado = auth.substring("Bearer ".length());
+        if (resposta.code() == 403) {
+            com.tcc.gestaorural.util.SessionManager s = new com.tcc.gestaorural.util.SessionManager(appContext);
+            if (usado.equals(s.getToken()) && s.tokenValido()) {
+                s.marcarPapelDesatualizado(); // a tela confere /api/equipe/minha e se ajusta
+                return resposta;
+            }
+        }
+
+        String novo = TokenRefresher.renovar(appContext, usado);
         if (novo == null) return resposta; // não renovou: quem chamou trata o 401/403
 
         resposta.close();

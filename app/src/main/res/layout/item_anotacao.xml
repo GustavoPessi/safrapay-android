@@ -16,6 +16,10 @@
         <TextView android:id="@+id/txtData" style="@style/Text.Body"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:textSize="@dimen/text_caption" />
+        <!-- Multiusuário: prazo, responsável e quem concluiu/criou. -->
+        <TextView android:id="@+id/txtInfo" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="@dimen/text_caption" android:visibility="gone" />
     </LinearLayout>
 
     <TextView android:id="@+id/txtStatus" style="@style/Text.Body"

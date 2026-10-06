@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/space_lg" android:paddingEnd="@dimen/space_lg"
+    android:paddingTop="@dimen/space_sm">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilEmail"
+        style="@style/Widget.App.TextInputLayout"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:hint="@string/equipe_convidar_email">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtEmail"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="textEmailAddress" android:maxLength="120" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <RadioGroup android:id="@+id/grupoPapel"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_md">
+        <RadioButton android:id="@+id/rbGerente"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/equipe_papel_gerente_desc" />
+        <RadioButton android:id="@+id/rbColaborador"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm"
+            android:checked="true"
+            android:text="@string/equipe_papel_colaborador_desc" />
+    </RadioGroup>
+</LinearLayout>

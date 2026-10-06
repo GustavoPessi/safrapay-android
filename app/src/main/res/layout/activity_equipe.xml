@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tela 33 • Equipe (só o dono): convidar, lista com status, trocar papel, remover. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="@dimen/space_lg">
+
+        <TextView style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/equipe_explicacao" />
+
+        <Button android:id="@+id/btnConvidar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md" android:text="@string/equipe_convidar" />
+
+        <TextView android:id="@+id/txtEstado" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_lg" android:gravity="center"
+            android:text="@string/equipe_carregando" />
+
+        <LinearLayout android:id="@+id/listaMembros"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:background="@drawable/bg_card"
+            android:orientation="vertical"
+            android:visibility="gone" />
+    </LinearLayout>
+</ScrollView>

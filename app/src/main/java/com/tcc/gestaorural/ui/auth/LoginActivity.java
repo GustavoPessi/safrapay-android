@@ -45,15 +45,29 @@ public class LoginActivity extends AppCompatActivity {
         vm.getResultado().observe(this, res -> {
             if (res == null) return;
             if (res.sucesso) {
-                new SessionManager(this).salvarLogin(res.usuarioId);
-                Intent i = new Intent(this, DashboardActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-                finish();
+                SessionManager session = new SessionManager(this);
+                session.salvarLogin(res.usuarioId);
+                // Multiusuário: confere o papel (dono/gerente/colaborador) antes de abrir a tela inicial.
+                new com.tcc.gestaorural.data.repository.EquipeRepository(this).atualizarPapel(
+                        new com.tcc.gestaorural.data.repository.EquipeRepository.SituacaoCallback() {
+                            @Override public void onSituacao(com.tcc.gestaorural.data.repository.EquipeRepository.Situacao s) {
+                                if (s.getMensagemTroca() != null) Toast.makeText(LoginActivity.this, s.getMensagemTroca(), Toast.LENGTH_LONG).show();
+                                abrirTelaInicial(session);
+                            }
+                            @Override public void onErro(String mensagem) { abrirTelaInicial(session); }
+                        });
             } else {
                 Toast.makeText(this, res.erroResId, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void abrirTelaInicial(SessionManager session) {
+        if (isFinishing()) return;
+        Intent i = new Intent(this, com.tcc.gestaorural.ui.equipe.EquipeSincronizador.telaInicial(session));
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
     }
 
     private void tentarLogin() {

@@ -18,11 +18,22 @@ import com.tcc.gestaorural.data.remote.dto.ReceitaSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.CadastroRequestDto;
 import com.tcc.gestaorural.data.remote.dto.SafraSyncItemDto;
 import com.tcc.gestaorural.data.remote.dto.TalhaoSyncItemDto;
+import com.tcc.gestaorural.data.remote.dto.ConviteRecebidoDto;
+import com.tcc.gestaorural.data.remote.dto.ConviteRequestDto;
+import com.tcc.gestaorural.data.remote.dto.EquipeMinhaResponseDto;
+import com.tcc.gestaorural.data.remote.dto.MaquinaColaboradorDto;
+import com.tcc.gestaorural.data.remote.dto.MembroEquipeDto;
+import com.tcc.gestaorural.data.remote.dto.PapelRequestDto;
+import com.tcc.gestaorural.data.remote.dto.TarefaDto;
+import com.tcc.gestaorural.data.remote.dto.TarefaRequestDto;
 
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.PATCH;
+import retrofit2.http.Path;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -145,4 +156,62 @@ public interface ApiService {
     @GET("api/anotacoes-maquina/sync")
     Call<List<AnotacaoMaquinaSyncItemDto>> sincronizarPullAnotacoes(
             @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
+    // --- Multiusuário (06/10/2026): equipe, convites e papéis ---
+    // Qualquer papel:
+
+    @GET("api/equipe/minha")
+    Call<EquipeMinhaResponseDto> minhaEquipe(@Header("Authorization") String bearerToken);
+
+    @GET("api/equipe/convites/recebidos")
+    Call<List<ConviteRecebidoDto>> convitesRecebidos(@Header("Authorization") String bearerToken);
+
+    /** 409: já é de outra equipe ou é dono com membros (mensagem pronta no corpo). */
+    @POST("api/equipe/convites/{uuid}/aceitar")
+    Call<EquipeMinhaResponseDto> aceitarConvite(@Header("Authorization") String bearerToken, @Path("uuid") String uuid);
+
+    @POST("api/equipe/convites/{uuid}/recusar")
+    Call<Void> recusarConvite(@Header("Authorization") String bearerToken, @Path("uuid") String uuid);
+
+    @POST("api/equipe/sair")
+    Call<EquipeMinhaResponseDto> sairDaEquipe(@Header("Authorization") String bearerToken);
+
+    // Só o DONO (gerente/colaborador → 403):
+
+    @GET("api/equipe")
+    Call<List<MembroEquipeDto>> listarEquipe(@Header("Authorization") String bearerToken);
+
+    /** 409: já existe convite ativo pra esse e-mail; 400: e-mail próprio ou papel inválido. */
+    @POST("api/equipe/convites")
+    Call<MembroEquipeDto> convidar(@Header("Authorization") String bearerToken, @Body ConviteRequestDto request);
+
+    @PATCH("api/equipe/membros/{uuid}")
+    Call<MembroEquipeDto> trocarPapel(@Header("Authorization") String bearerToken, @Path("uuid") String uuid,
+                                      @Body PapelRequestDto request);
+
+    /** Pendente vira CANCELADO; aceito vira REMOVIDO. */
+    @DELETE("api/equipe/membros/{uuid}")
+    Call<Void> removerMembro(@Header("Authorization") String bearerToken, @Path("uuid") String uuid);
+
+    // --- Colaborador (online): máquinas + tarefas ---
+
+    @GET("api/colaborador/maquinas")
+    Call<List<MaquinaColaboradorDto>> maquinasDoColaborador(@Header("Authorization") String bearerToken);
+
+    /** filtro: TODAS | PENDENTES | ATRASADAS | FEITAS; maquinaUuid opcional. */
+    @GET("api/colaborador/tarefas")
+    Call<List<TarefaDto>> tarefasDoColaborador(@Header("Authorization") String bearerToken,
+                                               @Query("filtro") String filtro, @Query("maquinaUuid") String maquinaUuid);
+
+    @POST("api/colaborador/tarefas/{uuid}/concluir")
+    Call<TarefaDto> concluirTarefa(@Header("Authorization") String bearerToken, @Path("uuid") String uuid);
+
+    /** Só quem concluiu pode reabrir. */
+    @POST("api/colaborador/tarefas/{uuid}/reabrir")
+    Call<TarefaDto> reabrirTarefa(@Header("Authorization") String bearerToken, @Path("uuid") String uuid);
+
+    /** Reportar problema: cria tarefa pendente, sem responsável, data = hoje. */
+    @POST("api/colaborador/maquinas/{uuid}/tarefas")
+    Call<TarefaDto> reportarProblema(@Header("Authorization") String bearerToken, @Path("uuid") String maquinaUuid,
+                                     @Body TarefaRequestDto request);
 }

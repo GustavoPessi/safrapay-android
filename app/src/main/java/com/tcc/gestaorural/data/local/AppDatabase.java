@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
         CategoriaDespesa.class, Receita.class, Despesa.class, MetaFinanceira.class,
         Maquina.class, AnotacaoMaquina.class, Cultura.class, Anexo.class
     },
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -145,6 +145,40 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    /**
+     * Migração 10 → 11 (multiusuário): a anotação de máquina vira tarefa — prazo, responsável
+     * e quem criou/concluiu (nomes vindos do servidor). Colunas opcionais, aditivas.
+     */
+    static final Migration MIGRATION_10_11 = new Migration(10, 11) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE `anotacao_maquina` ADD COLUMN `prazo` TEXT");
+            db.execSQL("ALTER TABLE `anotacao_maquina` ADD COLUMN `responsavel_uuid` TEXT");
+            db.execSQL("ALTER TABLE `anotacao_maquina` ADD COLUMN `responsavel_nome` TEXT");
+            db.execSQL("ALTER TABLE `anotacao_maquina` ADD COLUMN `concluido_em` TEXT");
+            db.execSQL("ALTER TABLE `anotacao_maquina` ADD COLUMN `concluido_por_nome` TEXT");
+            db.execSQL("ALTER TABLE `anotacao_maquina` ADD COLUMN `criado_por_nome` TEXT");
+        }
+    };
+
+    /**
+     * Troca de "conta" no multiusuário (entrou numa equipe, saiu, foi removido): apaga os dados
+     * da fazenda no aparelho pra baixar os da outra conta. Mantém o usuário logado e as
+     * categorias. Os comprovantes (anexo) ficam: ligam pelo uuid do lançamento e voltam a
+     * aparecer quando os dados dele voltarem (ex.: saiu da equipe → os próprios dados voltam).
+     * Rodar fora da main thread.
+     */
+    public void limparDadosDaFazenda(long usuarioId) {
+        runInTransaction(() -> {
+            SupportSQLiteDatabase db = getOpenHelper().getWritableDatabase();
+            // Só os dados do usuário logado (se outra conta já usou este celular, os dados dela
+            // ficam). As FKs com CASCADE levam junto talhões, culturas, safras, receitas,
+            // despesas, metas e anotações.
+            db.execSQL("DELETE FROM `propriedade` WHERE `usuario_id` = ?", new Object[]{ usuarioId });
+            db.execSQL("DELETE FROM `maquina` WHERE `usuario_id` = ?", new Object[]{ usuarioId });
+        });
+    }
+
     /** Pool para operações de banco fora da main thread (Room exige). */
     public static final ExecutorService IO = Executors.newFixedThreadPool(4);
 
@@ -163,7 +197,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "gestao_rural.db")
                         .addCallback(SEED_CALLBACK)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9, MIGRATION_9_10)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                         .fallbackToDestructiveMigration()
                         .build();
                 }

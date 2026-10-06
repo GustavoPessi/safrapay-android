@@ -8,6 +8,15 @@
         <TextView android:id="@+id/txtOla" style="@style/Text.H1"
             android:layout_width="match_parent" android:layout_height="wrap_content" />
 
+        <!-- Gerente: de quem é a fazenda que está vendo (multiusuário). -->
+        <TextView android:id="@+id/txtFazenda" style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:textSize="@dimen/text_caption"
+            android:visibility="gone" />
+
+        <include layout="@layout/view_banner_convite" />
+
         <!-- Saldo geral -->
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_lg" android:background="@drawable/bg_card"

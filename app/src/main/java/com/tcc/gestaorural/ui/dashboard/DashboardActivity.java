@@ -60,6 +60,27 @@ public class DashboardActivity extends BaseActivity {
                 startActivity(new Intent(this, com.tcc.gestaorural.ui.chat.ChatIaActivity.class)));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        atualizarEquipe();
+        // Confere o papel no servidor ao abrir o app (troca de conta, convites novos...).
+        com.tcc.gestaorural.ui.equipe.EquipeSincronizador.verificarAoAbrir(this, s -> atualizarEquipe());
+    }
+
+    /** Gerente vê de quem é a fazenda; qualquer um vê o aviso de convite pendente. */
+    private void atualizarEquipe() {
+        SessionManager s = new SessionManager(this);
+        TextView txtFazenda = findViewById(R.id.txtFazenda);
+        if (s.ehGerente() && s.getDonoNome() != null) {
+            txtFazenda.setText(getString(R.string.equipe_fazenda_de, s.getDonoNome()));
+            txtFazenda.setVisibility(android.view.View.VISIBLE);
+        } else {
+            txtFazenda.setVisibility(android.view.View.GONE);
+        }
+        com.tcc.gestaorural.ui.equipe.BannerConvite.atualizar(this);
+    }
+
     @Override protected boolean isTopLevel() { return true; }
     @Override protected int bottomNavItemId() { return R.id.nav_inicio; }
 }

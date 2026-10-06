@@ -78,12 +78,41 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_lg" android:text="@string/perfil_editar" />
 
+        <!-- Multiusuário: equipe (dono gerencia; gerente/colaborador veem de quem é e podem sair). -->
         <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_lg"
+            android:text="@string/equipe_secao" android:textColor="@color/text_hint"
+            android:textSize="@dimen/text_caption" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_sm" android:background="@drawable/bg_card"
+            android:orientation="vertical">
+            <TextView android:id="@+id/txtEquipeInfo" style="@style/Text.Body" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="@dimen/space_md"
+                android:textColor="@color/text_primary" android:visibility="gone" />
+            <TextView android:id="@+id/rowMinhaEquipe" style="@style/Text.Body" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="@dimen/space_md"
+                android:text="@string/equipe_minha" android:textColor="@color/text_primary"
+                android:background="?attr/selectableItemBackground" />
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline" />
+            <TextView android:id="@+id/rowConvites" style="@style/Text.Body" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="@dimen/space_md"
+                android:text="@string/equipe_convites_recebidos" android:textColor="@color/text_primary"
+                android:background="?attr/selectableItemBackground" />
+            <View android:id="@+id/divSairEquipe" android:layout_width="match_parent" android:layout_height="1dp"
+                android:background="@color/outline" android:visibility="gone" />
+            <TextView android:id="@+id/rowSairEquipe" style="@style/Text.Body" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:padding="@dimen/space_md"
+                android:text="@string/equipe_sair" android:textColor="@color/error"
+                android:background="?attr/selectableItemBackground" android:visibility="gone" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/txtLabelCadastros" style="@style/Text.Body" android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:layout_marginTop="@dimen/space_lg"
             android:text="@string/perfil_cadastros" android:textColor="@color/text_hint"
             android:textSize="@dimen/text_caption" />
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        <LinearLayout android:id="@+id/cardCadastros" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_sm" android:background="@drawable/bg_card"
             android:orientation="vertical">
             <TextView android:id="@+id/rowPropriedades" style="@style/Text.Body" android:layout_width="match_parent"
@@ -109,7 +138,7 @@
                 android:layout_height="wrap_content" android:padding="@dimen/space_md"
                 android:text="@string/perfil_configuracoes" android:textColor="@color/text_primary"
                 android:background="?attr/selectableItemBackground" />
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline" />
+            <View android:id="@+id/divNotif" android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline" />
             <TextView android:id="@+id/rowNotif" style="@style/Text.Body" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:padding="@dimen/space_md"
                 android:text="@string/perfil_notificacoes" android:textColor="@color/text_primary"
