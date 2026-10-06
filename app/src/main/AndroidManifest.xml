@@ -65,6 +65,10 @@
         <activity android:name=".ui.financeiro.NovaDespesaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.DetalheLancamentoActivity" android:exported="false" />
         <activity android:name=".ui.comprovante.ComprovanteActivity" android:exported="false" />
+        <!-- Multiusuário (06/10/2026) -->
+        <activity android:name=".ui.equipe.EquipeActivity" android:exported="false" />
+        <activity android:name=".ui.equipe.ConvitesActivity" android:exported="false" />
+        <activity android:name=".ui.colaborador.ColaboradorActivity" android:exported="false" />
 
         <!-- Compartilhar os arquivos do "Exportar relatório" (PDF/Excel/CSV) com outros apps -->
         <provider

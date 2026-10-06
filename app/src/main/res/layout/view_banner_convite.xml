@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aviso de convite pra equipe (aparece quando /api/equipe/minha diz convitesPendentes > 0). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bannerConvite"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/space_md"
+    android:background="@drawable/bg_banner_convite"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="@dimen/space_md" android:paddingEnd="@dimen/space_xs"
+    android:paddingTop="@dimen/space_sm" android:paddingBottom="@dimen/space_sm"
+    android:visibility="gone">
+
+    <TextView android:id="@+id/txtBannerConvite"
+        android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="@color/green_900"
+        android:textSize="@dimen/text_body" />
+
+    <Button android:id="@+id/btnVerConvite"
+        style="@style/Widget.App.Button.Text"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/equipe_ver_convite" />
+</LinearLayout>

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Tela 37 • Nova tarefa de manutenção (anotação da máquina): texto, data, prazo e responsável. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content">
+<LinearLayout
     android:layout_width="match_parent" android:layout_height="wrap_content"
     android:orientation="vertical" android:padding="@dimen/space_lg">
     <com.google.android.material.textfield.TextInputLayout
@@ -19,4 +23,24 @@
             android:id="@+id/edtData" android:layout_width="match_parent"
             android:layout_height="wrap_content" android:inputType="number" android:maxLength="10" />
     </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.App.TextInputLayout"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_md" android:hint="@string/tarefa_prazo">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtPrazo" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:inputType="number" android:maxLength="10" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <!-- Só aparece com equipe (lista "pessoas" de /api/equipe/minha). -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilResponsavel"
+        style="@style/Widget.App.TextInputLayout"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_md" android:hint="@string/tarefa_responsavel"
+        app:endIconMode="dropdown_menu">
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/dropResponsavel" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>
+</ScrollView>

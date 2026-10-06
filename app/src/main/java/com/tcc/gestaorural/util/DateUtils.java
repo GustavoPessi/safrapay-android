@@ -74,4 +74,20 @@ public final class DateUtils {
         try { return DT.format(ISO_UTC.parse(isoUtc)); }
         catch (Exception e) { return agora(); }
     }
+
+    /**
+     * Instante vindo do servidor (ex.: "2026-10-06T14:03:00Z", com ou sem milissegundos) →
+     * "06/10/2026" no fuso do aparelho. Se não der pra ler, usa só a parte da data.
+     */
+    public static synchronized String dataBrDeInstante(String iso) {
+        if (iso == null || iso.length() < 10) return "";
+        try {
+            String t = iso.trim();
+            // ISO_UTC espera milissegundos (".SSS") e "Z": completa quando o servidor não manda.
+            if (t.endsWith("Z") && !t.contains(".")) t = t.substring(0, t.length() - 1) + ".000Z";
+            return BR.format(ISO_UTC.parse(t));
+        } catch (Exception e) {
+            return isoParaBr(iso.substring(0, 10));
+        }
+    }
 }

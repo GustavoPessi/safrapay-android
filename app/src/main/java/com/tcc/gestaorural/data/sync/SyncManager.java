@@ -94,6 +94,20 @@ public class SyncManager {
         this.settings = new SettingsManager(appContext);
     }
 
+    /** Chaves de "última sincronização" de cada entidade (por usuário). */
+    private static final String[] ENTIDADES = {
+            "propriedade", "talhao", "safra", "receita", "despesa", "meta", "maquina", "anotacao_maquina"
+    };
+
+    /**
+     * Esquece os marcadores de "desde" do usuário: a próxima sincronização baixa tudo de novo
+     * (pull completo). Usado na troca de conta do multiusuário, depois de limpar o Room.
+     */
+    public void esquecerMarcadores() {
+        long usuarioId = session.getUsuarioId();
+        for (String e : ENTIDADES) settings.remover("ultima_sync_" + e + "_" + usuarioId);
+    }
+
     /** Sincroniza tudo que as Fases 1-4 cobrem, nesta ordem (pais antes dos filhos). */
     public void sincronizarTudo(Callback cb) {
         String token = session.getToken();
@@ -862,6 +876,8 @@ public class SyncManager {
         dto.setData((a.data == null || a.data.isEmpty()) ? null : a.data);
         dto.setConcluida(a.concluida == 1);
         dto.setAtualizadoEm(DateUtils.paraIsoUtc(a.atualizadoEm));
+        dto.setPrazo((a.prazo == null || a.prazo.isEmpty()) ? null : a.prazo);
+        dto.setResponsavelUuid((a.responsavelUuid == null || a.responsavelUuid.isEmpty()) ? null : a.responsavelUuid);
         return dto;
     }
 
@@ -869,6 +885,12 @@ public class SyncManager {
         a.texto = dto.getTexto();
         a.data = dto.getData();
         a.concluida = Boolean.TRUE.equals(dto.getConcluida()) ? 1 : 0;
+        a.prazo = dto.getPrazo();
+        a.responsavelUuid = dto.getResponsavelUuid();
+        a.responsavelNome = dto.getResponsavelNome();
+        a.concluidoEm = dto.getConcluidoEm();
+        a.concluidoPorNome = dto.getConcluidoPorNome();
+        a.criadoPorNome = dto.getCriadoPorNome();
         a.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         a.sincronizado = 1;
         if (a.uuid == null) a.uuid = UUID.randomUUID().toString();

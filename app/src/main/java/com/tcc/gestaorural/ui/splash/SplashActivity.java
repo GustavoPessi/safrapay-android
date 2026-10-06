@@ -29,7 +29,8 @@ public class SplashActivity extends AppCompatActivity {
         SessionManager session = new SessionManager(this);
         Intent destino;
         if (session.estaLogado()) {
-            destino = new Intent(this, DashboardActivity.class);
+            // Colaborador abre direto no app dele (papel guardado; o Início/tela dele confere de novo online).
+            destino = new Intent(this, com.tcc.gestaorural.ui.equipe.EquipeSincronizador.telaInicial(session));
         } else if (!session.onboardingVisto()) {
             destino = new Intent(this, OnboardingActivity.class);
         } else {

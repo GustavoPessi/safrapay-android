@@ -19,6 +19,8 @@ import com.tcc.gestaorural.data.local.entity.AnotacaoMaquina;
 import com.tcc.gestaorural.data.local.entity.Despesa;
 import com.tcc.gestaorural.data.local.entity.Maquina;
 import com.tcc.gestaorural.data.local.model.Lancamento;
+import com.tcc.gestaorural.data.remote.dto.EquipeMinhaResponseDto;
+import com.tcc.gestaorural.data.repository.EquipeRepository;
 import com.tcc.gestaorural.ui.BaseActivity;
 import com.tcc.gestaorural.ui.NavKeys;
 import com.tcc.gestaorural.ui.financeiro.DetalheLancamentoActivity;
@@ -26,6 +28,7 @@ import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MaskUtils;
 import com.tcc.gestaorural.util.MoneyUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DetalheMaquinaActivity extends BaseActivity {
@@ -60,7 +63,7 @@ public class DetalheMaquinaActivity extends BaseActivity {
         vm.despesas(maquinaId).observe(this, this::renderDespesas);
         vm.anotacoes(maquinaId).observe(this, this::renderAnotacoes);
 
-        findViewById(R.id.btnNovaAnotacao).setOnClickListener(v -> dialogNovaAnotacao());
+        findViewById(R.id.btnNovaAnotacao).setOnClickListener(v -> dialogAnotacao(null));
         findViewById(R.id.btnEditar).setOnClickListener(v -> {
             Intent i = new Intent(this, NovaMaquinaActivity.class);
             i.putExtra(NavKeys.MAQUINA_ID, maquinaId);
@@ -138,32 +141,66 @@ public class DetalheMaquinaActivity extends BaseActivity {
                 data.setVisibility(View.GONE);
             }
 
-            // Status: verde (concluída) / vermelho (atrasada) / amarelo (no prazo) / neutro (sem prazo)
+            // Status: verde (realizada) / vermelho (atrasada) / amarelo (pendente no prazo) / neutro (sem prazo).
+            // "Atrasada" é calculada: pendente com prazo vencido. Sem prazo, vale a data (regra antiga).
+            String limite = prazoEfetivo(a);
             int corRes; int labelRes;
-            if (a.concluida == 1) { corRes = R.color.receita; labelRes = R.string.anotacao_status_concluida; }
-            else if (a.data == null || a.data.isEmpty()) { corRes = R.color.text_hint; labelRes = R.string.anotacao_status_sem_prazo; }
-            else if (a.data.compareTo(hoje) < 0) { corRes = R.color.despesa; labelRes = R.string.anotacao_status_atrasada; }
-            else { corRes = R.color.amber_500; labelRes = R.string.anotacao_status_no_prazo; }
+            if (a.concluida == 1) { corRes = R.color.receita; labelRes = R.string.tarefa_status_realizada; }
+            else if (limite == null) { corRes = R.color.text_hint; labelRes = R.string.tarefa_status_pendente; }
+            else if (limite.compareTo(hoje) < 0) { corRes = R.color.despesa; labelRes = R.string.tarefa_status_atrasada; }
+            else { corRes = R.color.amber_500; labelRes = R.string.tarefa_status_pendente; }
             int cor = ContextCompat.getColor(this, corRes);
             row.findViewById(R.id.dotStatus).setBackgroundTintList(ColorStateList.valueOf(cor));
             TextView status = row.findViewById(R.id.txtStatus);
             status.setText(labelRes);
             status.setTextColor(cor);
 
+            TextView info = row.findViewById(R.id.txtInfo);
+            String textoInfo = infoTarefa(a);
+            info.setText(textoInfo);
+            info.setVisibility(textoInfo.isEmpty() ? View.GONE : View.VISIBLE);
+
             row.setOnClickListener(v -> menuAnotacao(a));
             containerAnotacoes.addView(row);
         }
+    }
+
+    /** Prazo da tarefa; anotações antigas (sem prazo) usam a data como antes. */
+    private static String prazoEfetivo(AnotacaoMaquina a) {
+        if (a.prazo != null && !a.prazo.isEmpty()) return a.prazo;
+        return (a.data != null && !a.data.isEmpty()) ? a.data : null;
+    }
+
+    /** "Prazo: 10/10/2026 • Responsável: João" + "Feita por Maria em 05/10/2026" (o que existir). */
+    private String infoTarefa(AnotacaoMaquina a) {
+        StringBuilder sb = new StringBuilder();
+        if (a.prazo != null && !a.prazo.isEmpty()) sb.append(getString(R.string.tarefa_prazo_x, DateUtils.isoParaBr(a.prazo)));
+        if (a.responsavelNome != null && !a.responsavelNome.isEmpty()) {
+            if (sb.length() > 0) sb.append(" • ");
+            sb.append(getString(R.string.tarefa_responsavel_x, a.responsavelNome));
+        }
+        if (a.concluida == 1 && a.concluidoPorNome != null && !a.concluidoPorNome.isEmpty()) {
+            if (sb.length() > 0) sb.append("\n");
+            sb.append(getString(R.string.tarefa_concluida_por, a.concluidoPorNome));
+            if (a.concluidoEm != null && !a.concluidoEm.isEmpty()) sb.append(" em ").append(DateUtils.dataBrDeInstante(a.concluidoEm));
+        } else if (a.criadoPorNome != null && !a.criadoPorNome.isEmpty()) {
+            if (sb.length() > 0) sb.append("\n");
+            sb.append(getString(R.string.tarefa_criada_por, a.criadoPorNome));
+        }
+        return sb.toString();
     }
 
     private void menuAnotacao(AnotacaoMaquina a) {
         boolean concluida = a.concluida == 1;
         String[] opcoes = {
                 getString(concluida ? R.string.anotacao_marcar_pendente : R.string.anotacao_marcar_realizada),
+                getString(R.string.acao_editar),
                 getString(R.string.acao_excluir)
         };
         new AlertDialog.Builder(this)
                 .setTitle(a.texto)
                 .setItems(opcoes, (d, which) -> {
+                    if (which == 1) { dialogAnotacao(a); return; }
                     if (which == 0) {
                         vm.marcarAnotacao(a, !concluida);
                         Toast.makeText(this, R.string.msg_anotacao_atualizada, Toast.LENGTH_SHORT).show();
@@ -179,22 +216,67 @@ public class DetalheMaquinaActivity extends BaseActivity {
                 .show();
     }
 
-    private void dialogNovaAnotacao() {
+    /**
+     * Nova tarefa (existente == null) ou edição. Tela 37: texto, data, prazo e responsável
+     * (lista "pessoas" da equipe; sem equipe, o campo some).
+     */
+    private void dialogAnotacao(AnotacaoMaquina existente) {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_nova_anotacao, null);
         TextInputEditText edtTexto = view.findViewById(R.id.edtTexto);
         TextInputEditText edtData = view.findViewById(R.id.edtData);
+        TextInputEditText edtPrazo = view.findViewById(R.id.edtPrazo);
         MaskUtils.aplicarData(edtData);
+        MaskUtils.aplicarData(edtPrazo);
+
+        // Responsável: "Sem responsável" + pessoas da equipe (dono + membros aceitos).
+        List<EquipeMinhaResponseDto.Pessoa> pessoas = EquipeRepository.pessoas(this);
+        boolean temEquipe = pessoas.size() > 1;
+        com.google.android.material.textfield.MaterialAutoCompleteTextView drop = view.findViewById(R.id.dropResponsavel);
+        view.findViewById(R.id.tilResponsavel).setVisibility(temEquipe ? View.VISIBLE : View.GONE);
+        List<String> nomes = new ArrayList<>();
+        nomes.add(getString(R.string.tarefa_sem_responsavel));
+        for (EquipeMinhaResponseDto.Pessoa p : pessoas) nomes.add(p.getNome() != null ? p.getNome() : p.getUsuarioUuid());
+        drop.setAdapter(new android.widget.ArrayAdapter<>(this, android.R.layout.simple_list_item_1, nomes));
+        final int[] escolhido = {0}; // 0 = sem responsável; i = pessoas.get(i - 1)
+        drop.setOnItemClickListener((parent, v, pos, id) -> escolhido[0] = pos > pessoas.size() ? -1 : pos);
+
+        if (existente != null) {
+            edtTexto.setText(existente.texto);
+            if (existente.data != null && !existente.data.isEmpty()) edtData.setText(DateUtils.isoParaBr(existente.data));
+            if (existente.prazo != null && !existente.prazo.isEmpty()) edtPrazo.setText(DateUtils.isoParaBr(existente.prazo));
+            for (int i = 0; i < pessoas.size(); i++) {
+                if (pessoas.get(i).getUsuarioUuid().equals(existente.responsavelUuid)) escolhido[0] = i + 1;
+            }
+            if (escolhido[0] == 0 && existente.responsavelNome != null && existente.responsavelUuid != null) {
+                // Responsável que não está mais na lista (ex.: saiu da equipe): mantém enquanto não trocar.
+                nomes.add(existente.responsavelNome);
+                escolhido[0] = -1;
+                drop.setText(existente.responsavelNome, false);
+            }
+        }
+        if (escolhido[0] >= 0) drop.setText(nomes.get(escolhido[0]), false);
+
         new AlertDialog.Builder(this)
-                .setTitle(R.string.maq_nova_anotacao)
+                .setTitle(existente == null ? R.string.maq_nova_anotacao : R.string.acao_editar)
                 .setView(view)
                 .setPositiveButton(R.string.acao_salvar, (d, w) -> {
                     String texto = edtTexto.getText() == null ? "" : edtTexto.getText().toString().trim();
                     if (texto.isEmpty()) { Toast.makeText(this, R.string.err_anotacao_texto, Toast.LENGTH_LONG).show(); return; }
-                    AnotacaoMaquina a = new AnotacaoMaquina();
+                    AnotacaoMaquina a = existente != null ? existente : new AnotacaoMaquina();
                     a.maquinaId = maquinaId;
                     a.texto = texto;
                     String dataBr = edtData.getText() == null ? "" : edtData.getText().toString().trim();
                     a.data = dataBr.isEmpty() ? null : DateUtils.brParaIso(dataBr);
+                    String prazoBr = edtPrazo.getText() == null ? "" : edtPrazo.getText().toString().trim();
+                    a.prazo = prazoBr.isEmpty() ? null : DateUtils.brParaIso(prazoBr);
+                    if (escolhido[0] == 0) {
+                        a.responsavelUuid = null;
+                        a.responsavelNome = null;
+                    } else if (escolhido[0] > 0) {
+                        EquipeMinhaResponseDto.Pessoa p = pessoas.get(escolhido[0] - 1);
+                        a.responsavelUuid = p.getUsuarioUuid();
+                        a.responsavelNome = p.getNome();
+                    } // -1: mantém o responsável antigo
                     vm.salvarAnotacao(a);
                     Toast.makeText(this, R.string.msg_anotacao_salva, Toast.LENGTH_SHORT).show();
                 })

@@ -18,4 +18,6 @@ public class SettingsManager {
 
     public String get(String chave, String padrao) { return prefs.getString(chave, padrao); }
     public void set(String chave, String valor) { prefs.edit().putString(chave, valor).apply(); }
+
+    public void remover(String chave) { prefs.edit().remove(chave).commit(); }
 }

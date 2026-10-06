@@ -7,7 +7,7 @@ import android.widget.Toast;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.ui.BaseActivity;
 
-public class SobreActivity extends BaseActivity {
+public class SobreActivity extends BaseActivity implements com.tcc.gestaorural.ui.equipe.EquipeSincronizador.TelaComum {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

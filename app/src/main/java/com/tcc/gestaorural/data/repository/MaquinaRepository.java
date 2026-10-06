@@ -71,13 +71,22 @@ public class MaquinaRepository {
     // ---- Anotações ----
     public LiveData<List<AnotacaoMaquina>> anotacoes(long maquinaId) { return anotacaoDao.observarPorMaquina(maquinaId); }
 
+    /** Cria (id = 0) ou edita a anotação/tarefa; sobe no próximo sync. */
     public void salvarAnotacao(final AnotacaoMaquina a, final Callback cb) {
         AppDatabase.IO.execute(() -> {
-            a.uuid = UUID.randomUUID().toString();
-            a.criadoEm = DateUtils.agora();
-            a.atualizadoEm = a.criadoEm;
-            a.sincronizado = 0;
-            long id = anotacaoDao.inserir(a);
+            long id;
+            if (a.id == 0L) {
+                a.uuid = UUID.randomUUID().toString();
+                a.criadoEm = DateUtils.agora();
+                a.atualizadoEm = a.criadoEm;
+                a.sincronizado = 0;
+                id = anotacaoDao.inserir(a);
+            } else {
+                a.atualizadoEm = DateUtils.agora();
+                a.sincronizado = 0;
+                anotacaoDao.atualizar(a);
+                id = a.id;
+            }
             if (cb != null) cb.onConcluido(id);
         });
     }
