@@ -16,7 +16,8 @@ public class SobreActivity extends BaseActivity implements com.tcc.gestaorural.u
 
         View.OnClickListener emBreve = v ->
                 Toast.makeText(this, R.string.msg_em_breve, Toast.LENGTH_SHORT).show();
-        findViewById(R.id.rowFaq).setOnClickListener(emBreve);
+        findViewById(R.id.rowFaq).setOnClickListener(v ->
+                startActivity(new android.content.Intent(this, AjudaActivity.class)));
         findViewById(R.id.rowSuporte).setOnClickListener(emBreve);
         findViewById(R.id.rowTermos).setOnClickListener(emBreve);
         findViewById(R.id.rowPrivacidade).setOnClickListener(emBreve);

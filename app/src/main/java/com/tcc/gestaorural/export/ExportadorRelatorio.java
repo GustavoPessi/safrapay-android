@@ -106,6 +106,8 @@ public final class ExportadorRelatorio {
         envio.setType(formato.mime);
         envio.putExtra(Intent.EXTRA_STREAM, uri);
         envio.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.exp_assunto));
+        // CSV não leva o aviso dentro do arquivo (quebraria a importação): vai no texto que acompanha.
+        if (formato == Formato.CSV) envio.putExtra(Intent.EXTRA_TEXT, Formatos.AVISO_GERENCIAL);
         envio.setClipData(ClipData.newRawUri(arquivo.getName(), uri));
         envio.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         activity.startActivity(Intent.createChooser(envio, activity.getString(R.string.exp_compartilhar)));

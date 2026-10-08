@@ -67,6 +67,7 @@
         <activity android:name=".ui.financeiro.NovaDespesaActivity" android:exported="false" />
         <activity android:name=".ui.financeiro.DetalheLancamentoActivity" android:exported="false" />
         <activity android:name=".ui.comprovante.ComprovanteActivity" android:exported="false" />
+        <activity android:name=".ui.sobre.AjudaActivity" android:exported="false" />
         <!-- Multiusuário (06/10/2026) -->
         <activity android:name=".ui.equipe.EquipeActivity" android:exported="false" />
         <activity android:name=".ui.equipe.ConvitesActivity" android:exported="false" />

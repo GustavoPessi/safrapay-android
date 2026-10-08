@@ -48,8 +48,7 @@ public class ConfiguracoesActivity extends BaseActivity implements com.tcc.gesta
                     checked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         });
 
-        findViewById(R.id.rowExportar).setOnClickListener(v ->
-                Toast.makeText(this, R.string.msg_export_dados_em_breve, Toast.LENGTH_SHORT).show());
+        findViewById(R.id.rowExportar).setOnClickListener(v -> exportarMeusDados());
         findViewById(R.id.rowAlterarSenha).setOnClickListener(v -> dialogAlterarSenha());
         findViewById(R.id.rowExcluir).setOnClickListener(v -> dialogExcluir());
         findViewById(R.id.rowSobre).setOnClickListener(v ->
@@ -75,6 +74,42 @@ public class ConfiguracoesActivity extends BaseActivity implements com.tcc.gesta
         MaterialSwitch sw = findViewById(id);
         sw.setChecked(settings.get(chave, padrao));
         sw.setOnCheckedChangeListener((b, checked) -> settings.set(chave, checked));
+    }
+
+    private boolean exportando;
+
+    /**
+     * Exportar meus dados (LGPD, portabilidade): planilha com tudo da conta que está no aparelho.
+     * Em equipe os dados do aparelho são da fazenda do dono — aí só explica.
+     */
+    private void exportarMeusDados() {
+        com.tcc.gestaorural.util.SessionManager s = new com.tcc.gestaorural.util.SessionManager(this);
+        if (!s.ehDono()) {
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.export_dados_titulo)
+                    .setMessage(getString(R.string.export_dados_em_equipe, s.getDonoNome() != null ? s.getDonoNome() : "—"))
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+            return;
+        }
+        if (exportando) return;
+        exportando = true;
+        Toast.makeText(this, R.string.export_dados_gerando, Toast.LENGTH_SHORT).show();
+        final long usuarioId = s.getUsuarioId();
+        com.tcc.gestaorural.data.local.AppDatabase.IO.execute(() -> {
+            try {
+                java.io.File arquivo = com.tcc.gestaorural.export.ExportadorDados.gerar(getApplicationContext(), usuarioId);
+                runOnUiThread(() -> {
+                    exportando = false;
+                    if (!isFinishing()) com.tcc.gestaorural.export.ExportadorDados.compartilhar(this, arquivo);
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    exportando = false;
+                    Toast.makeText(this, R.string.exp_erro, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
     private void dialogAlterarSenha() {
