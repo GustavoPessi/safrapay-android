@@ -151,7 +151,12 @@ public class SyncManager {
                 session.setPullCompletoPendente(false);
                 mainHandler.post(cb::onSucesso);
             } catch (SyncException e) {
-                mainHandler.post(() -> cb.onErro(e.getMessage()));
+                // 409 FAZENDA (FazendaInterceptor): a equipe mudou e os dados do aparelho são de
+                // outra fazenda — o servidor não gravou nada; a próxima tela troca os dados.
+                String msg = session.papelDesatualizado()
+                        ? "Sua participação na equipe mudou. O app vai atualizar os dados da fazenda; depois sincronize de novo."
+                        : e.getMessage();
+                mainHandler.post(() -> cb.onErro(msg));
             } catch (Exception e) {
                 mainHandler.post(() -> cb.onErro("Não foi possível sincronizar. Verifique sua internet e tente novamente."));
             } finally {
