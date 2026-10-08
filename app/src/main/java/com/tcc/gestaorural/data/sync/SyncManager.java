@@ -108,6 +108,22 @@ public class SyncManager {
         for (String e : ENTIDADES) settings.remover("ultima_sync_" + e + "_" + usuarioId);
     }
 
+    /**
+     * Trava única de sincronização (07/10/2026: com os gatilhos automáticos + o botão manual,
+     * duas sincronizações não podem rodar ao mesmo tempo). A troca de conta do multiusuário
+     * (apagar dados locais) também passa por ela.
+     */
+    private static final java.util.concurrent.locks.ReentrantLock TRAVA = new java.util.concurrent.locks.ReentrantLock();
+
+    /** true enquanto alguma sincronização (ou troca de conta) está rodando. */
+    public static boolean emAndamento() { return TRAVA.isLocked(); }
+
+    /** Roda o trecho com a trava de sincronização (espera a sincronização atual terminar). Fora da main thread. */
+    public static void comTrava(Runnable r) {
+        TRAVA.lock();
+        try { r.run(); } finally { TRAVA.unlock(); }
+    }
+
     /** Sincroniza tudo que as Fases 1-4 cobrem, nesta ordem (pais antes dos filhos). */
     public void sincronizarTudo(Callback cb) {
         String token = session.getToken();
@@ -119,6 +135,8 @@ public class SyncManager {
         final String bearer = "Bearer " + token;
 
         AppDatabase.IO.execute(() -> {
+            // Se outra sincronização estiver rodando (gatilho automático), espera ela terminar.
+            TRAVA.lock();
             try {
                 sincronizarPropriedades(bearer, usuarioId);
                 sincronizarTalhoes(bearer, usuarioId);
@@ -129,11 +147,15 @@ public class SyncManager {
                 sincronizarReceitas(bearer, usuarioId);
                 sincronizarDespesas(bearer, usuarioId);
                 sincronizarMetas(bearer, usuarioId);
+                // Depois de uma troca de conta os marcadores foram zerados: esta passada já foi o pull completo.
+                session.setPullCompletoPendente(false);
                 mainHandler.post(cb::onSucesso);
             } catch (SyncException e) {
                 mainHandler.post(() -> cb.onErro(e.getMessage()));
             } catch (Exception e) {
                 mainHandler.post(() -> cb.onErro("Não foi possível sincronizar. Verifique sua internet e tente novamente."));
+            } finally {
+                TRAVA.unlock();
             }
         });
     }

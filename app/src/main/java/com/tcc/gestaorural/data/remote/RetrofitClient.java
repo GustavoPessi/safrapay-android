@@ -49,7 +49,9 @@ public final class RetrofitClient {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .client(builder.build())
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(new com.google.gson.GsonBuilder()
+                            .registerTypeAdapterFactory(new NulosExplicitosFactory())
+                            .create()))
                     .build();
 
             instance = retrofit.create(ApiService.class);

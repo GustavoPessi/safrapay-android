@@ -8,6 +8,14 @@ import java.util.Locale;
  * minSdk 24 e java.time só existe a partir da API 26.
  */
 public final class Formatos {
+
+    /**
+     * Aviso de relatório gerencial (pedido do Gustavo em 08/10/2026): vai no PDF e no Excel
+     * exportados e na tela DRE. Não vai no CSV (dado puro pra importar em outra ferramenta).
+     */
+    public static final String AVISO_GERENCIAL = "Este é um relatório gerencial gerado automaticamente pelo SafraPay, destinado ao acompanhamento interno da propriedade. Não constitui documento contábil oficial e não substitui a contabilidade formal exigida por lei. Os valores refletem exclusivamente os lançamentos informados pelo usuário no aplicativo — o SafraPay não se responsabiliza pela exatidão, completude ou adequação fiscal desses dados.";
+    public static final String AVISO_GERENCIAL_CURTO = "Relatório gerencial — não é documento contábil oficial.";
+
     private Formatos() {}
 
     private static final Locale BR = new Locale("pt", "BR");

@@ -115,6 +115,11 @@ public final class XlsxExporter {
             }
         }
 
+        // Aviso de relatório gerencial (08/10/2026): uma frase por linha pra ficar legível sem quebra de texto.
+        l += 2;
+        a.linha(l++).texto(0, "Aviso", S_NEGRITO);
+        for (String frase : Formatos.AVISO_GERENCIAL.split("(?<=\\.) ")) a.linha(l++).texto(0, frase, S_CINZA);
+
         return a.xml(null, "<col min=\"1\" max=\"1\" width=\"30\" customWidth=\"1\"/>"
                 + "<col min=\"2\" max=\"4\" width=\"18\" customWidth=\"1\"/>", null);
     }

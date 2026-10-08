@@ -23,6 +23,8 @@ public class GestaoRuralApp extends Application {
         // Só com os dados da própria conta completos no aparelho: em equipe (ou no meio de uma
         // troca de conta) os lançamentos próprios não estão no Room e os comprovantes deles
         // precisam ficar guardados pra quando os dados voltarem.
+        // Sincronização automática: ao abrir, ao reconectar e depois de alterações (07/10/2026).
+        com.tcc.gestaorural.data.sync.SincronizacaoAutomatica.iniciar(this);
         com.tcc.gestaorural.util.SessionManager sessao = new com.tcc.gestaorural.util.SessionManager(this);
         if (sessao.ehDono() && !sessao.pullCompletoPendente()) {
             new com.tcc.gestaorural.data.repository.AnexoRepository(this).limparOrfaos();

@@ -113,5 +113,13 @@
                     android:textSize="@dimen/text_h2" />
             </LinearLayout>
         </LinearLayout>
+
+        <!-- Aviso de relatório gerencial (08/10/2026): a DRE é a tela que mais parece peça contábil. -->
+        <TextView style="@style/Text.Body"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_md"
+            android:text="@string/aviso_relatorio_gerencial"
+            android:textColor="@color/text_hint"
+            android:textSize="11sp" />
     </LinearLayout>
 </ScrollView>

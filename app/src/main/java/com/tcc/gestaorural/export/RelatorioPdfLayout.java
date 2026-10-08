@@ -67,6 +67,7 @@ public final class RelatorioPdfLayout {
         resumoMensal();
         despesasPorCategoria();
         lancamentos();
+        avisoGerencial();
         t.finalizarPagina();
     }
 
@@ -117,7 +118,7 @@ public final class RelatorioPdfLayout {
     private void rodape() {
         float yl = ALTURA - 40f;
         t.linha(M, yl, LARGURA - M, yl, 0.8f, CONTORNO);
-        t.texto("SafraPay • gestão financeira rural", M, yl + 16, 8, false, TEXTO_2, Tela.ESQUERDA);
+        t.texto("SafraPay • " + Formatos.AVISO_GERENCIAL_CURTO, M, yl + 16, 8, false, TEXTO_2, Tela.ESQUERDA);
         String pg = totalPaginas > 0 ? "Página " + pagina + " de " + totalPaginas : "Página " + pagina;
         t.texto(pg, LARGURA - M, yl + 16, 8, false, TEXTO_2, Tela.DIREITA);
     }
@@ -299,6 +300,45 @@ public final class RelatorioPdfLayout {
         t.texto("Receita", M + 7, y, 7.5f, false, TEXTO_2, Tela.ESQUERDA);
         t.retangulo(M + 50, y - 7, 2.5f, 8, VERMELHO_CLARO);
         t.texto("Despesa", M + 57, y, 7.5f, false, TEXTO_2, Tela.ESQUERDA);
+    }
+
+    // --- Aviso de relatório gerencial (08/10/2026) ----------------------
+
+    /** Caixa no fim do relatório com o aviso completo (o rodapé de toda página traz a versão curta). */
+    private void avisoGerencial() {
+        float tam = 8f, entre = 11f, pad = 10f;
+        java.util.List<String> linhas = quebrar(Formatos.AVISO_GERENCIAL, UTIL - 2 * pad - 6, tam);
+        float alt = pad * 2 + 12f + linhas.size() * entre;
+        garantir(alt + 18f);
+        y += 18f;
+        t.retangulo(M, y, UTIL, alt, FUNDO);
+        t.retangulo(M, y, 3f, alt, TEXTO_2);
+        float yt = y + pad + 8f;
+        t.texto("Aviso", M + pad + 6, yt, 8.5f, true, TEXTO, Tela.ESQUERDA);
+        for (String l : linhas) {
+            yt += entre;
+            t.texto(l, M + pad + 6, yt, tam, false, TEXTO_2, Tela.ESQUERDA);
+        }
+        y += alt;
+    }
+
+    /** Quebra o texto em linhas que cabem na largura (por palavra). */
+    private java.util.List<String> quebrar(String texto, float max, float tam) {
+        java.util.List<String> linhas = new java.util.ArrayList<>();
+        StringBuilder atual = new StringBuilder();
+        for (String palavra : texto.split(" ")) {
+            String teste = atual.length() == 0 ? palavra : atual + " " + palavra;
+            if (t.larguraTexto(teste, tam, false) <= max || atual.length() == 0) {
+                atual.setLength(0);
+                atual.append(teste);
+            } else {
+                linhas.add(atual.toString());
+                atual.setLength(0);
+                atual.append(palavra);
+            }
+        }
+        if (atual.length() > 0) linhas.add(atual.toString());
+        return linhas;
     }
 
     // ------------------------------------------------------------------

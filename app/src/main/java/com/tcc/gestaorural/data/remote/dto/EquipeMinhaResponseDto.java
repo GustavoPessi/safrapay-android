@@ -9,13 +9,21 @@ public class EquipeMinhaResponseDto {
     private List<Pessoa> pessoas;
     private Integer convitesPendentes;
 
-    /** Dono da fazenda (null quando quem está logado é o próprio dono). */
+    /** Dono da fazenda (null quando quem está logado é o próprio dono). Contrato: {usuarioUuid, nome, papel}. */
     public static class Dono {
+        private String usuarioUuid;
+        /** Nome antigo do campo (versão inicial do contrato); lido só por compatibilidade. */
         private String uuid;
         private String nome;
+        private String papel;
 
-        public String getUuid() { return uuid; }
+        /** uuid do usuário dono (aceita os dois nomes do campo). */
+        public String getUuid() { return usuarioUuid != null ? usuarioUuid : uuid; }
         public void setUuid(String uuid) { this.uuid = uuid; }
+        public String getUsuarioUuid() { return usuarioUuid; }
+        public void setUsuarioUuid(String usuarioUuid) { this.usuarioUuid = usuarioUuid; }
+        public String getPapel() { return papel; }
+        public void setPapel(String papel) { this.papel = papel; }
         public String getNome() { return nome; }
         public void setNome(String nome) { this.nome = nome; }
     }
