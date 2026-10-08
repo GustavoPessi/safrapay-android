@@ -139,7 +139,7 @@ public final class SincronizacaoAutomatica {
         if (!podeSincronizar()) return;
         AppDatabase.IO.execute(() -> {
             boolean pendente;
-            try { pendente = AppDatabase.getInstance(ctx).temAlteracoesPendentes(); }
+            try { pendente = AppDatabase.getInstance(ctx).temAlteracoesPendentes(session.getUsuarioId()); }
             catch (Exception e) { pendente = false; }
             if (pendente) main.post(() -> disparar(false));
         });
