@@ -169,14 +169,16 @@ public class EquipeRepository {
                 + "; seus dados voltaram.";
 
         final boolean baixar = !SessionManager.PAPEL_COLABORADOR.equals(papel);
-        final boolean jaEstavaCarregada = fazendaNova.equals(fazendaAtual);
         AppDatabase.IO.execute(() -> {
-            if (!jaEstavaCarregada) {
-                AppDatabase.getInstance(ctx).limparDadosDaFazenda(session.getUsuarioId());
-                new SyncManager(ctx).esquecerMarcadores();
-                session.setFazendaCarregada(fazendaNova);
-            }
-            session.setPullCompletoPendente(baixar);
+            // Com a trava de sincronização: não apaga no meio de uma sincronização automática.
+            SyncManager.comTrava(() -> {
+                if (!fazendaNova.equals(session.getFazendaCarregada())) {
+                    AppDatabase.getInstance(ctx).limparDadosDaFazenda(session.getUsuarioId());
+                    new SyncManager(ctx).esquecerMarcadores();
+                    session.setFazendaCarregada(fazendaNova);
+                }
+                session.setPullCompletoPendente(baixar);
+            });
             main.post(() -> {
                 cb.onSituacao(new Situacao(papel, aviso, convites));
                 if (baixar) baixarTudo();

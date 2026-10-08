@@ -513,4 +513,6 @@
     <string name="colab_tarefa_minha">Sua tarefa</string>
     <string name="colab_tarefa_livre">Sem responsável — qualquer um pode fazer</string>
     <string name="colab_perfil">Perfil</string>
+    <!-- Aviso de relatório gerencial (08/10/2026) -->
+    <string name="aviso_relatorio_gerencial">Este é um relatório gerencial gerado automaticamente pelo SafraPay, destinado ao acompanhamento interno da propriedade. Não constitui documento contábil oficial e não substitui a contabilidade formal exigida por lei. Os valores refletem exclusivamente os lançamentos informados pelo usuário no aplicativo — o SafraPay não se responsabiliza pela exatidão, completude ou adequação fiscal desses dados.</string>
 </resources>

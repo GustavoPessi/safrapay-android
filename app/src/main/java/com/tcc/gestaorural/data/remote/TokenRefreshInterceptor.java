@@ -30,12 +30,15 @@ public class TokenRefreshInterceptor implements Interceptor {
         boolean negado = resposta.code() == 401 || resposta.code() == 403;
         if (!negado || auth == null || !auth.startsWith("Bearer ")) return resposta;
 
-        // 403 com o token ainda válido = falta de permissão do papel (ex.: colaborador tentando
-        // uma rota de dono), não token vencido: não adianta renovar. Quem chamou trata.
+        // 403 de PAPEL (o servidor marca com o cabeçalho X-SafraPay-Erro: PAPEL — ex.: colaborador
+        // numa rota de dono): não é token vencido, não adianta renovar. Quem chamou trata e a
+        // próxima tela confere o papel de novo. Sem o cabeçalho, 403 continua sendo sessão vencida;
+        // por segurança, 403 com token ainda válido também não renova.
         String usado = auth.substring("Bearer ".length());
         if (resposta.code() == 403) {
             com.tcc.gestaorural.util.SessionManager s = new com.tcc.gestaorural.util.SessionManager(appContext);
-            if (usado.equals(s.getToken()) && s.tokenValido()) {
+            boolean erroDePapel = "PAPEL".equalsIgnoreCase(resposta.header("X-SafraPay-Erro"));
+            if (erroDePapel || (usado.equals(s.getToken()) && s.tokenValido())) {
                 s.marcarPapelDesatualizado(); // a tela confere /api/equipe/minha e se ajusta
                 return resposta;
             }

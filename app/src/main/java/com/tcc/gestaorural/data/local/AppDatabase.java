@@ -179,6 +179,23 @@ public abstract class AppDatabase extends RoomDatabase {
         });
     }
 
+    /** Tabelas que sobem no sync (todas têm a coluna "sincronizado"). */
+    public static final String[] TABELAS_SINCRONIZADAS = {
+        "propriedade", "talhao", "safra", "receita", "despesa", "meta_financeira", "maquina", "anotacao_maquina"
+    };
+
+    /** true se tem alguma alteração local ainda não enviada ao servidor. Fora da main thread. */
+    public boolean temAlteracoesPendentes() {
+        StringBuilder sql = new StringBuilder("SELECT ");
+        for (int i = 0; i < TABELAS_SINCRONIZADAS.length; i++) {
+            if (i > 0) sql.append(" + ");
+            sql.append("(SELECT COUNT(*) FROM `").append(TABELAS_SINCRONIZADAS[i]).append("` WHERE `sincronizado` = 0)");
+        }
+        try (android.database.Cursor c = getOpenHelper().getReadableDatabase().query(sql.toString())) {
+            return c.moveToFirst() && c.getLong(0) > 0;
+        }
+    }
+
     /** Pool para operações de banco fora da main thread (Room exige). */
     public static final ExecutorService IO = Executors.newFixedThreadPool(4);
 
