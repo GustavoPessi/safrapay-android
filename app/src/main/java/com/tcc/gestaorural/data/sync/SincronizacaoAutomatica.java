@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.room.InvalidationTracker;
 
 import com.tcc.gestaorural.data.local.AppDatabase;
-import com.tcc.gestaorural.data.repository.EquipeRepository;
 import com.tcc.gestaorural.util.SessionManager;
 
 import java.util.Set;
@@ -43,6 +42,8 @@ public final class SincronizacaoAutomatica {
     private final SessionManager session;
     private final Handler main = new Handler(Looper.getMainLooper());
     private int telasVisiveis = 0;
+    /** O app acabou de abrir/voltar: conferir a equipe assim que uma tela do app ficar visível. */
+    private boolean conferirEquipeNaProximaTela = false;
     private boolean pedidoDuranteSync = false;
 
     private final Runnable sincronizarSeTiverAlteracao = this::sincronizarSeTiverAlteracao;
@@ -74,7 +75,14 @@ public final class SincronizacaoAutomatica {
                 if (telasVisiveis > 0) telasVisiveis--;
             }
             @Override public void onActivityCreated(@NonNull Activity a, Bundle b) { }
-            @Override public void onActivityResumed(@NonNull Activity a) { }
+            @Override public void onActivityResumed(@NonNull Activity a) {
+                // Splash/login não contam (não são BaseActivity): espera a primeira tela de verdade,
+                // pra o aviso de troca de conta aparecer e a navegação ir pra tela certa.
+                if (conferirEquipeNaProximaTela && a instanceof com.tcc.gestaorural.ui.BaseActivity) {
+                    conferirEquipeNaProximaTela = false;
+                    conferirEquipeESincronizar(a);
+                }
+            }
             @Override public void onActivityPaused(@NonNull Activity a) { }
             @Override public void onActivitySaveInstanceState(@NonNull Activity a, @NonNull Bundle b) { }
             @Override public void onActivityDestroyed(@NonNull Activity a) { }
@@ -82,13 +90,16 @@ public final class SincronizacaoAutomatica {
     }
 
     private void aoAbrir() {
-        if (!podeSincronizar()) return;
-        // Primeiro o papel: se trocou de conta, a própria troca já apaga e baixa tudo.
-        new EquipeRepository(ctx).atualizarPapel(new EquipeRepository.SituacaoCallback() {
-            @Override public void onSituacao(EquipeRepository.Situacao s) {
-                if (s.getMensagemTroca() == null) disparar(true);
-            }
-            @Override public void onErro(String mensagem) { /* sem internet: o gatilho da rede cuida */ }
+        if (logado()) conferirEquipeNaProximaTela = true;
+    }
+
+    /**
+     * Primeiro o papel (com tela: mostra "Você agora está na fazenda de…" e leva pra tela certa);
+     * se não trocou de conta, sincroniza. Se trocou, a própria troca já apaga e baixa tudo.
+     */
+    private void conferirEquipeESincronizar(Activity a) {
+        com.tcc.gestaorural.ui.equipe.EquipeSincronizador.verificar(a, s -> {
+            if (s.getMensagemTroca() == null) disparar(true);
         });
     }
 
@@ -158,10 +169,17 @@ public final class SincronizacaoAutomatica {
         sincronizarSeTiverAlteracao();
     }
 
-    /** Logado, sessão válida e não é colaborador (o app do colaborador é online, sem sync). */
+    private boolean logado() {
+        return session.estaLogado() && session.getToken() != null && !session.sessaoEncerrada();
+    }
+
+    /**
+     * Logado, não é colaborador (o app dele é online, sem sync) e o papel não está pendente de
+     * conferência (depois de um 403 PAPEL / 409 FAZENDA, só volta a sincronizar quando a tela
+     * conferir /api/equipe/minha — senão seriam chamadas inúteis recusadas pelo servidor).
+     */
     private boolean podeSincronizar() {
-        return session.estaLogado() && session.getToken() != null && !session.sessaoEncerrada()
-                && !session.ehColaborador();
+        return logado() && !session.ehColaborador() && !session.papelDesatualizado();
     }
 
     private boolean temInternet() {
