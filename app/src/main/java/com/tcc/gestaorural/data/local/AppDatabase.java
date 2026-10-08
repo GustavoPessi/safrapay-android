@@ -211,15 +211,32 @@ public abstract class AppDatabase extends RoomDatabase {
         "exclusao_pendente"
     };
 
-    /** true se tem alguma alteração local ainda não enviada ao servidor. Fora da main thread. */
-    public boolean temAlteracoesPendentes() {
-        StringBuilder sql = new StringBuilder("SELECT ");
-        for (int i = 0; i < TABELAS_SINCRONIZADAS.length; i++) {
-            if (i > 0) sql.append(" + ");
-            sql.append("(SELECT COUNT(*) FROM `").append(TABELAS_SINCRONIZADAS[i]).append("` WHERE `sincronizado` = 0)");
-        }
-        sql.append(" + (SELECT COUNT(*) FROM `exclusao_pendente`)");
-        try (android.database.Cursor c = getOpenHelper().getReadableDatabase().query(sql.toString())) {
+    /**
+     * true se o usuário logado tem alguma alteração local ainda não enviada ao servidor (mesmo
+     * escopo do push: só as linhas dele). Antes contava todas as linhas do aparelho — pendências
+     * de outra conta que já usou este celular (que o push nunca envia) mantinham o gatilho
+     * automático sincronizando a cada poucos segundos (laço visto no log do Nginx em 08/10/2026).
+     * Fora da main thread.
+     */
+    public boolean temAlteracoesPendentes(long usuarioId) {
+        String props = "(SELECT id FROM propriedade WHERE usuario_id = ?)";
+        String talhoes = "(SELECT id FROM talhao WHERE propriedade_id IN " + props + ")";
+        String safras = "(SELECT id FROM safra WHERE talhao_id IN " + talhoes + ")";
+        String maqs = "(SELECT id FROM maquina WHERE usuario_id = ?)";
+        String sql = "SELECT "
+                + "(SELECT COUNT(*) FROM propriedade WHERE sincronizado = 0 AND usuario_id = ?)"
+                + " + (SELECT COUNT(*) FROM talhao WHERE sincronizado = 0 AND propriedade_id IN " + props + ")"
+                + " + (SELECT COUNT(*) FROM safra WHERE sincronizado = 0 AND talhao_id IN " + talhoes + ")"
+                + " + (SELECT COUNT(*) FROM receita WHERE sincronizado = 0 AND safra_id IN " + safras + ")"
+                + " + (SELECT COUNT(*) FROM despesa WHERE sincronizado = 0 AND safra_id IN " + safras + ")"
+                + " + (SELECT COUNT(*) FROM meta_financeira WHERE sincronizado = 0 AND safra_id IN " + safras + ")"
+                + " + (SELECT COUNT(*) FROM maquina WHERE sincronizado = 0 AND usuario_id = ?)"
+                + " + (SELECT COUNT(*) FROM anotacao_maquina WHERE sincronizado = 0 AND maquina_id IN " + maqs + ")"
+                + " + (SELECT COUNT(*) FROM exclusao_pendente WHERE usuario_id = ?)";
+        int n = sql.length() - sql.replace("?", "").length();
+        Object[] args = new Object[n];
+        java.util.Arrays.fill(args, usuarioId);
+        try (android.database.Cursor c = getOpenHelper().getReadableDatabase().query(sql, args)) {
             return c.moveToFirst() && c.getLong(0) > 0;
         }
     }
