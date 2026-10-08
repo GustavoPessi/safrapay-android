@@ -43,6 +43,8 @@ public final class RetrofitClient {
                     .connectTimeout(15, TimeUnit.SECONDS)
                     .readTimeout(90, TimeUnit.SECONDS)
                     .writeTimeout(60, TimeUnit.SECONDS);
+            // Antes do refresh: a repetição com o token novo já leva o cabeçalho da fazenda.
+            if (appContext != null) builder.addInterceptor(new FazendaInterceptor(appContext));
             if (appContext != null) builder.addInterceptor(new TokenRefreshInterceptor(appContext));
             builder.addInterceptor(logging);
 
