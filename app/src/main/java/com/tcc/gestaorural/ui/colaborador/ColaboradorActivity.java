@@ -38,7 +38,7 @@ import java.util.List;
  * - Tarefas: filtros (Pendentes, Atrasadas, Feitas, Todas), "Marcar como realizado" e "Reabrir".
  * O colaborador só vê as tarefas dele e as sem responsável (regra do servidor).
  */
-public class ColaboradorActivity extends BaseActivity implements EquipeSincronizador.TelaDoColaborador {
+public class ColaboradorActivity extends BaseActivity implements EquipeSincronizador.TelaDoColaborador, EquipeSincronizador.AtualizaComEquipe {
 
     private static final int ABA_MAQUINAS = 0;
     private static final int ABA_TAREFAS = 1;
@@ -113,9 +113,10 @@ public class ColaboradorActivity extends BaseActivity implements EquipeSincroniz
         super.onResume();
         cabecalho();
         carregar();
-        // Confere o papel ao abrir (se virou gerente/dono, vai pro Início).
-        EquipeSincronizador.verificarAoAbrir(this, s -> cabecalho());
+        // A conferência do papel ao abrir o app é da SincronizacaoAutomatica (chama aoAtualizarEquipe).
     }
+
+    @Override public void aoAtualizarEquipe() { cabecalho(); }
 
     private void cabecalho() {
         SessionManager s = new SessionManager(this);

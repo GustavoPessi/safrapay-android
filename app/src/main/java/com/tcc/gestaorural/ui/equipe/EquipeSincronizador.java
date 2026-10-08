@@ -13,14 +13,15 @@ import com.tcc.gestaorural.util.SessionManager;
  * Confere o papel no servidor (GET /api/equipe/minha) e ajusta o app:
  * - avisa quando trocou de conta ("Você agora está na fazenda de Fulano");
  * - leva o colaborador pra tela dele e o dono/gerente pro Início, se estiverem no lugar errado.
- * Roda ao abrir o app (uma vez por processo), depois do login e quando o servidor responde 403
- * de papel.
+ * Roda ao abrir/voltar pro app (pela SincronizacaoAutomatica, na primeira tela visível), depois
+ * do login e quando o servidor recusa algo por papel (403 PAPEL) ou fazenda (409 FAZENDA).
  */
 public final class EquipeSincronizador {
 
     public interface Ouvinte { void onAtualizado(EquipeRepository.Situacao s); }
 
-    private static boolean verificadoNesteProcesso = false;
+    /** Telas que mostram algo da equipe (Início, tela do colaborador) e se redesenham após a conferência. */
+    public interface AtualizaComEquipe { void aoAtualizarEquipe(); }
 
     private EquipeSincronizador() {}
 
@@ -30,27 +31,19 @@ public final class EquipeSincronizador {
     /** Telas que servem pra qualquer papel (perfil, convites, configurações, sobre). */
     public interface TelaComum { }
 
-    public static void verificarAoAbrir(Activity a, Ouvinte ouvinte) {
-        SessionManager s = new SessionManager(a);
-        boolean forcar = s.papelDesatualizado();
-        if (verificadoNesteProcesso && !forcar) return;
-        verificar(a, ouvinte);
-    }
-
     public static void verificar(Activity a, Ouvinte ouvinte) {
         SessionManager s = new SessionManager(a);
         if (!s.estaLogado()) return;
-        verificadoNesteProcesso = true;
-        s.limparPapelDesatualizado();
         new EquipeRepository(a).atualizarPapel(new EquipeRepository.SituacaoCallback() {
             @Override public void onSituacao(EquipeRepository.Situacao sit) {
+                s.limparPapelDesatualizado(); // só depois de conferir de verdade (offline continua pendente)
                 if (a.isFinishing()) return;
                 if (sit.getMensagemTroca() != null) Toast.makeText(a, sit.getMensagemTroca(), Toast.LENGTH_LONG).show();
-                if (!levarParaTelaCerta(a) && ouvinte != null) ouvinte.onAtualizado(sit);
+                if (levarParaTelaCerta(a)) return;
+                if (a instanceof AtualizaComEquipe) ((AtualizaComEquipe) a).aoAtualizarEquipe();
+                if (ouvinte != null) ouvinte.onAtualizado(sit);
             }
-            @Override public void onErro(String mensagem) {
-                verificadoNesteProcesso = false; // sem internet: tenta de novo na próxima tela
-            }
+            @Override public void onErro(String mensagem) { /* sem internet: confere de novo na próxima abertura */ }
         });
     }
 

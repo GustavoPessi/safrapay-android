@@ -16,7 +16,7 @@ import com.tcc.gestaorural.ui.relatorio.IndicadoresActivity;
 import com.tcc.gestaorural.util.MoneyUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
-public class DashboardActivity extends BaseActivity {
+public class DashboardActivity extends BaseActivity implements com.tcc.gestaorural.ui.equipe.EquipeSincronizador.AtualizaComEquipe {
 
     private DashboardViewModel vm;
     private TextView txtOla, txtSaldo, txtReceitas, txtDespesas;
@@ -63,10 +63,10 @@ public class DashboardActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        atualizarEquipe();
-        // Confere o papel no servidor ao abrir o app (troca de conta, convites novos...).
-        com.tcc.gestaorural.ui.equipe.EquipeSincronizador.verificarAoAbrir(this, s -> atualizarEquipe());
+        atualizarEquipe(); // a conferência com o servidor (ao abrir o app) chama aoAtualizarEquipe()
     }
+
+    @Override public void aoAtualizarEquipe() { atualizarEquipe(); }
 
     /** Gerente vê de quem é a fazenda; qualquer um vê o aviso de convite pendente. */
     private void atualizarEquipe() {
