@@ -96,7 +96,7 @@ public class SyncManager {
 
     /** Chaves de "última sincronização" de cada entidade (por usuário). */
     private static final String[] ENTIDADES = {
-            "propriedade", "talhao", "safra", "receita", "despesa", "meta", "maquina", "anotacao_maquina"
+            "propriedade", "talhao", "safra", "receita", "despesa", "meta", "maquina", "anotacao_maquina", "exclusao"
     };
 
     /**
@@ -138,6 +138,9 @@ public class SyncManager {
             // Se outra sincronização estiver rodando (gatilho automático), espera ela terminar.
             TRAVA.lock();
             try {
+                // Exclusões feitas aqui sobem ANTES de tudo: o servidor exclui (em cascata) e o
+                // pull desta mesma passada já não traz o item de volta.
+                enviarExclusoes(bearer, usuarioId);
                 sincronizarPropriedades(bearer, usuarioId);
                 sincronizarTalhoes(bearer, usuarioId);
                 sincronizarSafras(bearer, usuarioId);
@@ -147,6 +150,9 @@ public class SyncManager {
                 sincronizarReceitas(bearer, usuarioId);
                 sincronizarDespesas(bearer, usuarioId);
                 sincronizarMetas(bearer, usuarioId);
+                // Por último: o que foi excluído em outros aparelhos (depois dos pulls, que já
+                // trouxeram as despesas desvinculadas de uma máquina excluída, por exemplo).
+                receberExclusoes(bearer, usuarioId);
                 // Depois de uma troca de conta os marcadores foram zerados: esta passada já foi o pull completo.
                 session.setPullCompletoPendente(false);
                 mainHandler.post(cb::onSucesso);
@@ -163,6 +169,74 @@ public class SyncManager {
                 TRAVA.unlock();
             }
         });
+    }
+
+    // ------------------------------------------------------------------
+    // Exclusões sincronizadas (08/10/2026) — ver ExclusoesSync e o backend ExclusaoService
+    // ------------------------------------------------------------------
+
+    private static final int EXCLUSOES_POR_ENVIO = 500;
+
+    /** POST /api/exclusoes/sync com as exclusões anotadas neste aparelho; apaga as que subiram. */
+    private void enviarExclusoes(String bearer, long usuarioId) throws Exception {
+        com.tcc.gestaorural.data.local.dao.ExclusaoPendenteDao dao = db.exclusaoPendenteDao();
+        while (true) {
+            List<com.tcc.gestaorural.data.local.entity.ExclusaoPendente> pendentes =
+                    dao.listarDoUsuario(usuarioId, EXCLUSOES_POR_ENVIO);
+            if (pendentes.isEmpty()) return;
+            List<com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto> itens = new ArrayList<>();
+            List<Long> ids = new ArrayList<>();
+            for (com.tcc.gestaorural.data.local.entity.ExclusaoPendente e : pendentes) {
+                itens.add(new com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto(e.entidade, e.uuid, e.excluidoEm));
+                ids.add(e.id);
+            }
+            Response<java.util.Map<String, Integer>> resp = api.enviarExclusoes(bearer, itens).execute();
+            if (!resp.isSuccessful()) throw new SyncException("Falha ao enviar exclusões para o servidor.");
+            dao.apagar(ids);
+            if (pendentes.size() < EXCLUSOES_POR_ENVIO) return;
+        }
+    }
+
+    /**
+     * GET /api/exclusoes/sync: apaga aqui o que foi excluído em outro aparelho. Apaga direto
+     * pelo DAO (sem anotar exclusão pendente) e as FKs com CASCADE levam os filhos.
+     */
+    private void receberExclusoes(String bearer, long usuarioId) throws Exception {
+        String chave = "ultima_sync_exclusao_" + usuarioId;
+        String desde = settings.get(chave, null);
+        Response<List<com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto>> resp =
+                api.receberExclusoes(bearer, desde).execute();
+        if (!resp.isSuccessful()) throw new SyncException("Falha ao buscar exclusões do servidor.");
+        List<com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto> avisos = resp.body();
+        if (avisos == null || avisos.isEmpty()) return;
+
+        String maior = desde;
+        for (com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto a : avisos) {
+            String uuid = a.getUuid();
+            String entidade = a.getEntidade() == null ? "" : a.getEntidade();
+            if (uuid != null) {
+                switch (entidade) {
+                    case "propriedade": db.propriedadeDao().apagarPorUuid(uuid); break;
+                    case "talhao": db.talhaoDao().apagarPorUuid(uuid); break;
+                    case "safra": db.safraDao().apagarPorUuid(uuid); break;
+                    case "receita": db.receitaDao().apagarPorUuid(uuid); break;
+                    case "despesa": db.despesaDao().apagarPorUuid(uuid); break;
+                    case "meta": db.metaFinanceiraDao().apagarPorUuid(uuid); break;
+                    case "maquina":
+                        // Igual à exclusão manual: as despesas ficam, só perdem o vínculo.
+                        Maquina m = db.maquinaDao().buscarPorUuid(uuid);
+                        if (m != null) db.despesaDao().desvincularMaquina(m.id);
+                        db.maquinaDao().apagarPorUuid(uuid);
+                        break;
+                    case "anotacao_maquina": db.anotacaoMaquinaDao().apagarPorUuid(uuid); break;
+                    default: break; // entidade nova que esta versão do app não conhece
+                }
+            }
+            if (a.getExcluidoEm() != null && (maior == null || a.getExcluidoEm().compareTo(maior) > 0)) {
+                maior = a.getExcluidoEm();
+            }
+        }
+        if (maior != null) settings.set(chave, maior);
     }
 
     // ------------------------------------------------------------------

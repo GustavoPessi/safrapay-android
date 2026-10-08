@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -20,7 +21,10 @@ public class SafraRepository {
 
     private final SafraDao dao;
 
+    private final Context ctx;
+
     public SafraRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         this.dao = AppDatabase.getInstance(context).safraDao();
     }
 
@@ -50,5 +54,10 @@ public class SafraRepository {
         });
     }
 
-    public void excluir(final Safra s) { AppDatabase.IO.execute(() -> dao.deletar(s)); }
+    public void excluir(final Safra s) {
+        AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.SAFRA, s.uuid);
+            dao.deletar(s);
+        });
+    }
 }

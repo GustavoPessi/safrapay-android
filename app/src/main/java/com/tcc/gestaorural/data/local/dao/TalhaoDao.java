@@ -39,4 +39,8 @@ public interface TalhaoDao {
     @Query("SELECT talhao.* FROM talhao JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId ORDER BY talhao.nome")
     List<Talhao> listarPorUsuarioSync(long usuarioId);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM talhao WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }

@@ -36,4 +36,8 @@ public interface PropriedadeDao {
     /** Assistente de IA: propriedades do usuario (contexto + consulta AREA). */
     @Query("SELECT * FROM propriedade WHERE usuario_id = :usuarioId ORDER BY nome")
     List<Propriedade> listarPorUsuarioSync(long usuarioId);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM propriedade WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }

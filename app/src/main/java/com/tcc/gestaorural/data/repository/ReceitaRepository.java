@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -20,7 +21,10 @@ public class ReceitaRepository {
 
     private final AnexoRepository anexoRepo;
 
+    private final Context ctx;
+
     public ReceitaRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         this.anexoRepo = new AnexoRepository(context);
         this.dao = AppDatabase.getInstance(context).receitaDao();
     }
@@ -57,6 +61,7 @@ public class ReceitaRepository {
     /** Excluir o lançamento apaga também o comprovante (linha + arquivo). */
     public void excluir(final Receita r) {
         AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.RECEITA, r.uuid);
             dao.deletar(r);
             anexoRepo.removerDoLancamentoSync(com.tcc.gestaorural.data.local.entity.Anexo.TIPO_RECEITA, r.uuid);
         });

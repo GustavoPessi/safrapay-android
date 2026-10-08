@@ -64,4 +64,8 @@ public interface SafraDao {
            "WHERE propriedade.usuario_id = :usuarioId " +
            "ORDER BY (safra.data_fim IS NULL) DESC, safra.ano_safra DESC")
     List<SafraContexto> listarContexto(long usuarioId);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM safra WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }
