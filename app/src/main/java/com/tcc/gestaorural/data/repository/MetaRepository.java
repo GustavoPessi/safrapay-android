@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -23,7 +24,10 @@ public class MetaRepository {
     private final ReceitaDao receitaDao;
     private final DespesaDao despesaDao;
 
+    private final Context ctx;
+
     public MetaRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         AppDatabase db = AppDatabase.getInstance(context);
         this.dao = db.metaFinanceiraDao();
         this.receitaDao = db.receitaDao();
@@ -61,5 +65,10 @@ public class MetaRepository {
         });
     }
 
-    public void excluir(final MetaFinanceira m) { AppDatabase.IO.execute(() -> dao.deletar(m)); }
+    public void excluir(final MetaFinanceira m) {
+        AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.META, m.uuid);
+            dao.deletar(m);
+        });
+    }
 }

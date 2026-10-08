@@ -34,4 +34,8 @@ public interface MaquinaDao {
     // Sincronizacao de Maquina (Fase 4).
     @Query("SELECT * FROM maquina WHERE usuario_id = :usuarioId AND sincronizado = 0")
     List<Maquina> listarNaoSincronizadas(long usuarioId);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM maquina WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }

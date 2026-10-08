@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -25,7 +26,10 @@ public class MaquinaRepository {
     private final AnotacaoMaquinaDao anotacaoDao;
     private final DespesaDao despesaDao;
 
+    private final Context ctx;
+
     public MaquinaRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         AppDatabase db = AppDatabase.getInstance(context);
         this.dao = db.maquinaDao();
         this.anotacaoDao = db.anotacaoMaquinaDao();
@@ -59,6 +63,7 @@ public class MaquinaRepository {
     public void excluir(final Maquina m) {
         AppDatabase.IO.execute(() -> {
             despesaDao.desvincularMaquina(m.id);
+            ExclusoesSync.registrar(ctx, ExclusoesSync.MAQUINA, m.uuid);
             dao.deletar(m);
         });
     }
@@ -92,7 +97,10 @@ public class MaquinaRepository {
     }
 
     public void excluirAnotacao(final AnotacaoMaquina a) {
-        AppDatabase.IO.execute(() -> anotacaoDao.deletar(a));
+        AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.ANOTACAO, a.uuid);
+            anotacaoDao.deletar(a);
+        });
     }
 
     /** Marca a anotação como concluída (1) ou pendente (0). */

@@ -20,14 +20,16 @@ import java.util.concurrent.Executors;
     entities = {
         Usuario.class, Propriedade.class, Talhao.class, Safra.class,
         CategoriaDespesa.class, Receita.class, Despesa.class, MetaFinanceira.class,
-        Maquina.class, AnotacaoMaquina.class, Cultura.class, Anexo.class
+        Maquina.class, AnotacaoMaquina.class, Cultura.class, Anexo.class,
+        ExclusaoPendente.class
     },
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract UsuarioDao usuarioDao();
+    public abstract com.tcc.gestaorural.data.local.dao.ExclusaoPendenteDao exclusaoPendenteDao();
     public abstract PropriedadeDao propriedadeDao();
     public abstract TalhaoDao talhaoDao();
     public abstract SafraDao safraDao();
@@ -162,6 +164,22 @@ public abstract class AppDatabase extends RoomDatabase {
     };
 
     /**
+     * Migração 11 → 12 (08/10/2026): exclusões feitas no aparelho que ainda não subiram pro
+     * servidor (ver ExclusaoPendente / ExclusoesSync). Tabela nova, nada muda nas outras.
+     */
+    static final Migration MIGRATION_11_12 = new Migration(11, 12) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS `exclusao_pendente` (" +
+                    "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`entidade` TEXT NOT NULL, " +
+                    "`uuid` TEXT NOT NULL, " +
+                    "`usuario_id` INTEGER NOT NULL, " +
+                    "`excluido_em` TEXT)");
+        }
+    };
+
+    /**
      * Troca de "conta" no multiusuário (entrou numa equipe, saiu, foi removido): apaga os dados
      * da fazenda no aparelho pra baixar os da outra conta. Mantém o usuário logado e as
      * categorias. Os comprovantes (anexo) ficam: ligam pelo uuid do lançamento e voltam a
@@ -184,6 +202,15 @@ public abstract class AppDatabase extends RoomDatabase {
         "propriedade", "talhao", "safra", "receita", "despesa", "meta_financeira", "maquina", "anotacao_maquina"
     };
 
+    /**
+     * Tabelas que o gatilho de "alteração local" observa: as sincronizadas + as exclusões
+     * pendentes (excluir não deixa linha com sincronizado = 0; deixa uma exclusão pendente).
+     */
+    public static final String[] TABELAS_OBSERVADAS = {
+        "propriedade", "talhao", "safra", "receita", "despesa", "meta_financeira", "maquina", "anotacao_maquina",
+        "exclusao_pendente"
+    };
+
     /** true se tem alguma alteração local ainda não enviada ao servidor. Fora da main thread. */
     public boolean temAlteracoesPendentes() {
         StringBuilder sql = new StringBuilder("SELECT ");
@@ -191,6 +218,7 @@ public abstract class AppDatabase extends RoomDatabase {
             if (i > 0) sql.append(" + ");
             sql.append("(SELECT COUNT(*) FROM `").append(TABELAS_SINCRONIZADAS[i]).append("` WHERE `sincronizado` = 0)");
         }
+        sql.append(" + (SELECT COUNT(*) FROM `exclusao_pendente`)");
         try (android.database.Cursor c = getOpenHelper().getReadableDatabase().query(sql.toString())) {
             return c.moveToFirst() && c.getLong(0) > 0;
         }
@@ -214,7 +242,7 @@ public abstract class AppDatabase extends RoomDatabase {
                             AppDatabase.class,
                             "gestao_rural.db")
                         .addCallback(SEED_CALLBACK)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                         .fallbackToDestructiveMigration()
                         .build();
                 }

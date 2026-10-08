@@ -57,4 +57,8 @@ public interface MetaFinanceiraDao {
            "JOIN propriedade ON propriedade.id = talhao.propriedade_id " +
            "WHERE propriedade.usuario_id = :usuarioId ORDER BY m.prazo")
     List<MetaContexto> listarContextoSync(long usuarioId);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM meta_financeira WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }

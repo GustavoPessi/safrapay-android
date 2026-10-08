@@ -46,4 +46,8 @@ public interface AnotacaoMaquinaDao {
            "WHERE maquina.usuario_id = :usuarioId AND anotacao_maquina.concluida = 0 " +
            "ORDER BY anotacao_maquina.data")
     List<AnotacaoMaquina> listarPendentesSync(long usuarioId);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM anotacao_maquina WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }

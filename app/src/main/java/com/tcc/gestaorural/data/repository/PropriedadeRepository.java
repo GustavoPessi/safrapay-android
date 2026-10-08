@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -18,7 +19,10 @@ public class PropriedadeRepository {
 
     private final PropriedadeDao dao;
 
+    private final Context ctx;
+
     public PropriedadeRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         this.dao = AppDatabase.getInstance(context).propriedadeDao();
     }
 
@@ -51,6 +55,9 @@ public class PropriedadeRepository {
     }
 
     public void excluir(final Propriedade p) {
-        AppDatabase.IO.execute(() -> dao.deletar(p));
+        AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.PROPRIEDADE, p.uuid);
+            dao.deletar(p);
+        });
     }
 }

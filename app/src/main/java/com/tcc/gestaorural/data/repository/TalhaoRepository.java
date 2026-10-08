@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -18,7 +19,10 @@ public class TalhaoRepository {
 
     private final TalhaoDao dao;
 
+    private final Context ctx;
+
     public TalhaoRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         this.dao = AppDatabase.getInstance(context).talhaoDao();
     }
 
@@ -45,5 +49,10 @@ public class TalhaoRepository {
         });
     }
 
-    public void excluir(final Talhao t) { AppDatabase.IO.execute(() -> dao.deletar(t)); }
+    public void excluir(final Talhao t) {
+        AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.TALHAO, t.uuid);
+            dao.deletar(t);
+        });
+    }
 }

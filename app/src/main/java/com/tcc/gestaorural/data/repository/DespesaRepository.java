@@ -1,5 +1,6 @@
 package com.tcc.gestaorural.data.repository;
 
+import com.tcc.gestaorural.data.sync.ExclusoesSync;
 import android.content.Context;
 
 import androidx.lifecycle.LiveData;
@@ -23,7 +24,10 @@ public class DespesaRepository {
 
     private final AnexoRepository anexoRepo;
 
+    private final Context ctx;
+
     public DespesaRepository(Context context) {
+        this.ctx = context.getApplicationContext();
         this.anexoRepo = new AnexoRepository(context);
         AppDatabase db = AppDatabase.getInstance(context);
         this.dao = db.despesaDao();
@@ -63,6 +67,7 @@ public class DespesaRepository {
     /** Excluir o lançamento apaga também o comprovante (linha + arquivo). */
     public void excluir(final Despesa d) {
         AppDatabase.IO.execute(() -> {
+            ExclusoesSync.registrar(ctx, ExclusoesSync.DESPESA, d.uuid);
             dao.deletar(d);
             anexoRepo.removerDoLancamentoSync(com.tcc.gestaorural.data.local.entity.Anexo.TIPO_DESPESA, d.uuid);
         });

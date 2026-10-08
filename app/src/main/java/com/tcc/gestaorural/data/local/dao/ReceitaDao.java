@@ -110,4 +110,8 @@ public interface ReceitaDao {
     @Query("SELECT COUNT(*) FROM receita WHERE safra_id = :safraId AND data_registro = :data " +
            "AND ABS(valor - :valor) < 0.005")
     int contarIguais(long safraId, double valor, String data);
+
+    /** Aplica uma exclusão vinda do servidor (SyncManager.receberExclusoes). As FKs com CASCADE levam os filhos. */
+    @Query("DELETE FROM receita WHERE uuid = :uuid")
+    int apagarPorUuid(String uuid);
 }

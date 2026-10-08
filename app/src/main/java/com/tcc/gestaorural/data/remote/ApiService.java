@@ -141,6 +141,15 @@ public interface ApiService {
     Call<List<MetaFinanceiraSyncItemDto>> sincronizarPullMetas(
             @Header("Authorization") String bearerToken, @Query("desde") String desde);
 
+    // Exclusões sincronizadas (08/10/2026): avisos de "excluí tal item" nos dois sentidos.
+    @POST("api/exclusoes/sync")
+    Call<java.util.Map<String, Integer>> enviarExclusoes(
+            @Header("Authorization") String bearerToken, @Body List<com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto> itens);
+
+    @GET("api/exclusoes/sync")
+    Call<List<com.tcc.gestaorural.data.remote.dto.ExclusaoSyncItemDto>> receberExclusoes(
+            @Header("Authorization") String bearerToken, @Query("desde") String desde);
+
     @POST("api/maquinas/sync")
     Call<List<MaquinaSyncItemDto>> sincronizarPushMaquinas(
             @Header("Authorization") String bearerToken, @Body List<MaquinaSyncItemDto> itens);

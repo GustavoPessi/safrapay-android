@@ -125,7 +125,7 @@ public final class SincronizacaoAutomatica {
 
     private void observarAlteracoes() {
         AppDatabase.getInstance(ctx).getInvalidationTracker().addObserver(
-                new InvalidationTracker.Observer(AppDatabase.TABELAS_SINCRONIZADAS) {
+                new InvalidationTracker.Observer(AppDatabase.TABELAS_OBSERVADAS) {
                     @Override public void onInvalidated(@NonNull Set<String> tabelas) {
                         // Cada nova alteração reinicia a espera.
                         main.removeCallbacks(sincronizarSeTiverAlteracao);
