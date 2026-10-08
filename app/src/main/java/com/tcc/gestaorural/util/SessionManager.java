@@ -26,6 +26,11 @@ public class SessionManager {
     public static final String PAPEL_COLABORADOR = "COLABORADOR";
     /** Valor de "fazenda carregada" quando os dados no aparelho são da própria conta. */
     public static final String FAZENDA_PROPRIA = "PROPRIA";
+    /**
+     * Prefixo da "fazenda carregada" do colaborador ("COLABORADOR:" + uuid do dono): ele não
+     * tem os dados da fazenda no aparelho, então não pode parecer igual à do gerente.
+     */
+    public static final String FAZENDA_COLABORADOR = "COLABORADOR:";
 
     private final SharedPreferences prefs;
 

@@ -15,6 +15,8 @@ public class TarefaDto {
     private String criadoPorNome;
     private String concluidoEm;
     private String concluidoPorNome;
+    /** Instante UTC (com hora) da criação — ex.: quando o problema foi reportado. */
+    private String criadoEm;
 
     /** Quem ficou responsável (null = sem responsável, qualquer um pode fazer). */
     public static class Responsavel {
@@ -53,4 +55,6 @@ public class TarefaDto {
     public void setConcluidoEm(String concluidoEm) { this.concluidoEm = concluidoEm; }
     public String getConcluidoPorNome() { return concluidoPorNome; }
     public void setConcluidoPorNome(String concluidoPorNome) { this.concluidoPorNome = concluidoPorNome; }
+    public String getCriadoEm() { return criadoEm; }
+    public void setCriadoEm(String criadoEm) { this.criadoEm = criadoEm; }
 }

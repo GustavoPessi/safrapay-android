@@ -90,4 +90,27 @@ public final class DateUtils {
             return isoParaBr(iso.substring(0, 10));
         }
     }
+
+    /** Instante do servidor (UTC ISO) → "08/10 às 14:32" no fuso do aparelho; "" se não der pra ler. */
+    public static synchronized String diaHoraDeInstante(String iso) {
+        if (iso == null || iso.length() < 16) return "";
+        try {
+            String t = iso.trim();
+            if (t.endsWith("Z") && !t.contains(".")) t = t.substring(0, t.length() - 1) + ".000Z";
+            Date d = ISO_UTC.parse(t);
+            return new SimpleDateFormat("dd/MM 'às' HH:mm", Locale.US).format(d);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Coluna local "yyyy-MM-dd HH:mm:ss" (criado_em do Room) → "08/10 às 14:32"; "" se não der. */
+    public static synchronized String diaHoraDeLocal(String local) {
+        if (local == null) return "";
+        try {
+            return new SimpleDateFormat("dd/MM 'às' HH:mm", Locale.US).format(DT.parse(local));
+        } catch (Exception e) {
+            return "";
+        }
+    }
 }

@@ -143,12 +143,18 @@ public class EquipeRepository {
         String donoNome = dto.getDono() != null ? dto.getDono().getNome() : null;
         int convites = dto.getConvitesPendentes() != null ? dto.getConvitesPendentes() : 0;
         String donoAnteriorNome = session.getDonoNome();
+        String papelAnterior = session.getPapel();
 
         session.salvarEquipe(papel, donoUuid, donoNome,
                 new Gson().toJson(dto.getPessoas() != null ? dto.getPessoas() : new ArrayList<>()), convites);
 
         boolean dono = SessionManager.PAPEL_DONO.equals(papel);
-        String fazendaNova = dono || donoUuid == null ? SessionManager.FAZENDA_PROPRIA : donoUuid;
+        boolean colaborador = SessionManager.PAPEL_COLABORADOR.equals(papel);
+        // O colaborador não baixa os dados da fazenda (app dele é online), então a "fazenda" dele
+        // fica marcada diferente da do gerente: virar gerente na mesma fazenda tem que baixar tudo
+        // (antes a troca colaborador → gerente não baixava nada — bug do teste de 08/10/2026).
+        String fazendaNova = dono || donoUuid == null ? SessionManager.FAZENDA_PROPRIA
+                : colaborador ? SessionManager.FAZENDA_COLABORADOR + donoUuid : donoUuid;
         String fazendaAtual = session.getFazendaCarregada();
 
         if (fazendaAtual == null && dono) {
@@ -158,17 +164,22 @@ public class EquipeRepository {
             return;
         }
         if (fazendaNova.equals(fazendaAtual) && !session.pullCompletoPendente()) {
+            if (!dono && !colaborador) corrigirGerenteSemDados();
             main.post(() -> cb.onSituacao(new Situacao(papel, null, convites)));
             return;
         }
 
+        String nomeDono = donoNome != null ? donoNome : "outro produtor";
+        boolean mesmaFazenda = !dono && donoUuid != null && fazendaAtual != null && fazendaAtual.endsWith(donoUuid);
         String aviso;
         if (fazendaNova.equals(fazendaAtual)) aviso = null; // só terminando um pull que tinha falhado
-        else if (!dono) aviso = "Você agora está na fazenda de " + (donoNome != null ? donoNome : "outro produtor") + ".";
+        else if (mesmaFazenda && !papel.equals(papelAnterior))
+            aviso = "Seu papel na fazenda de " + nomeDono + " mudou: agora você é " + (colaborador ? "colaborador" : "gerente") + ".";
+        else if (!dono) aviso = "Você agora está na fazenda de " + nomeDono + ".";
         else aviso = "Você saiu da equipe" + (donoAnteriorNome != null ? " de " + donoAnteriorNome : "")
                 + "; seus dados voltaram.";
 
-        final boolean baixar = !SessionManager.PAPEL_COLABORADOR.equals(papel);
+        final boolean baixar = !colaborador;
         AppDatabase.IO.execute(() -> {
             // Com a trava de sincronização: não apaga no meio de uma sincronização automática.
             SyncManager.comTrava(() -> {
@@ -183,6 +194,29 @@ public class EquipeRepository {
                 cb.onSituacao(new Situacao(papel, aviso, convites));
                 if (baixar) baixarTudo();
             });
+        });
+    }
+
+    /**
+     * Conserto de aparelhos que ficaram no estado do bug de 08/10 (eram colaborador, viraram
+     * gerente na mesma fazenda e nada foi baixado): gerente sem nenhuma propriedade nem máquina
+     * no aparelho → esquece os marcadores e baixa tudo. Se a fazenda estiver mesmo vazia, o pull
+     * só volta vazio (sem custo).
+     */
+    private void corrigirGerenteSemDados() {
+        AppDatabase.IO.execute(() -> {
+            boolean vazio;
+            try (android.database.Cursor c = AppDatabase.getInstance(ctx).getOpenHelper().getReadableDatabase().query(
+                    "SELECT (SELECT COUNT(*) FROM propriedade WHERE usuario_id = ?) + (SELECT COUNT(*) FROM maquina WHERE usuario_id = ?)",
+                    new Object[]{ session.getUsuarioId(), session.getUsuarioId() })) {
+                vazio = c.moveToFirst() && c.getLong(0) == 0;
+            } catch (Exception e) {
+                vazio = false;
+            }
+            if (!vazio) return;
+            new SyncManager(ctx).esquecerMarcadores();
+            session.setPullCompletoPendente(true);
+            main.post(this::baixarTudo);
         });
     }
 

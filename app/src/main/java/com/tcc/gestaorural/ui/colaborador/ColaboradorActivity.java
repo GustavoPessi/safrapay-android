@@ -260,13 +260,23 @@ public class ColaboradorActivity extends BaseActivity implements EquipeSincroniz
         if (Boolean.TRUE.equals(t.getMinha())) sb.append(getString(R.string.colab_tarefa_minha));
         else if (t.getResponsavel() == null) sb.append(getString(R.string.colab_tarefa_livre));
         else sb.append(getString(R.string.tarefa_responsavel_x, t.getResponsavel().getNome()));
+        // Quando foi criada/reportada (data e hora) e por quem (pedido do Gustavo, 08/10/2026).
+        String criada = criadaLinha(t.getCriadoPorNome(), DateUtils.diaHoraDeInstante(t.getCriadoEm()));
+        if (!criada.isEmpty()) sb.append("\n").append(criada);
         if (feita && t.getConcluidoPorNome() != null) {
             sb.append("\n").append(getString(R.string.tarefa_concluida_por, t.getConcluidoPorNome()));
-            if (t.getConcluidoEm() != null) sb.append(" em ").append(DateUtils.dataBrDeInstante(t.getConcluidoEm()));
-        } else if (t.getCriadoPorNome() != null) {
-            sb.append("\n").append(getString(R.string.tarefa_criada_por, t.getCriadoPorNome()));
+            String quando = DateUtils.diaHoraDeInstante(t.getConcluidoEm());
+            if (!quando.isEmpty()) sb.append(" em ").append(quando);
         }
         return sb.toString();
+    }
+
+    private String criadaLinha(String quem, String quando) {
+        boolean temQuem = quem != null && !quem.trim().isEmpty();
+        if (temQuem && !quando.isEmpty()) return getString(R.string.tarefa_criada_por_em, quem, quando);
+        if (temQuem) return getString(R.string.tarefa_criada_por, quem);
+        if (!quando.isEmpty()) return getString(R.string.tarefa_criada_em, quando);
+        return "";
     }
 
     private void alternar(TarefaDto t, boolean feita) {
