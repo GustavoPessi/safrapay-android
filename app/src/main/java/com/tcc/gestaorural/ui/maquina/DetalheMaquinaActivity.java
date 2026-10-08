@@ -179,13 +179,20 @@ public class DetalheMaquinaActivity extends BaseActivity {
             if (sb.length() > 0) sb.append(" • ");
             sb.append(getString(R.string.tarefa_responsavel_x, a.responsavelNome));
         }
+        // Quem criou/reportou e quando (data e hora; criado_em vem do servidor com hora desde 08/10).
+        String quando = DateUtils.diaHoraDeLocal(a.criadoEm);
+        boolean temQuem = a.criadoPorNome != null && !a.criadoPorNome.isEmpty();
+        if (temQuem || !quando.isEmpty()) {
+            if (sb.length() > 0) sb.append("\n");
+            if (temQuem && !quando.isEmpty()) sb.append(getString(R.string.tarefa_criada_por_em, a.criadoPorNome, quando));
+            else if (temQuem) sb.append(getString(R.string.tarefa_criada_por, a.criadoPorNome));
+            else sb.append(getString(R.string.tarefa_criada_em, quando));
+        }
         if (a.concluida == 1 && a.concluidoPorNome != null && !a.concluidoPorNome.isEmpty()) {
             if (sb.length() > 0) sb.append("\n");
             sb.append(getString(R.string.tarefa_concluida_por, a.concluidoPorNome));
-            if (a.concluidoEm != null && !a.concluidoEm.isEmpty()) sb.append(" em ").append(DateUtils.dataBrDeInstante(a.concluidoEm));
-        } else if (a.criadoPorNome != null && !a.criadoPorNome.isEmpty()) {
-            if (sb.length() > 0) sb.append("\n");
-            sb.append(getString(R.string.tarefa_criada_por, a.criadoPorNome));
+            String feitaEm = DateUtils.diaHoraDeInstante(a.concluidoEm);
+            if (!feitaEm.isEmpty()) sb.append(" em ").append(feitaEm);
         }
         return sb.toString();
     }

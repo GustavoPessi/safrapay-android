@@ -486,6 +486,8 @@
     <string name="tarefa_responsavel_x">Responsável: %1$s</string>
     <string name="tarefa_concluida_por">Feita por %1$s</string>
     <string name="tarefa_criada_por">Criada por %1$s</string>
+    <string name="tarefa_criada_por_em">Criada por %1$s em %2$s</string>
+    <string name="tarefa_criada_em">Criada em %1$s</string>
 
     <!-- App do colaborador -->
     <string name="colab_title">Máquinas e tarefas</string>

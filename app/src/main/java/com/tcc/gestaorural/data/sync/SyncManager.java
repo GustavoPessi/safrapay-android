@@ -950,7 +950,8 @@ public class SyncManager {
                     AnotacaoMaquina nova = new AnotacaoMaquina();
                     nova.uuid = dto.getUuid();
                     nova.maquinaId = pai.id;
-                    nova.criadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
+                    // criadoEm com hora vem do servidor desde 08/10 (edce42c); antes só tinha atualizadoEm.
+                    nova.criadoEm = DateUtils.deIsoUtc(dto.getCriadoEm() != null ? dto.getCriadoEm() : dto.getAtualizadoEm());
                     aplicarDto(nova, dto);
                     dao.inserir(nova);
                 } else {
@@ -992,6 +993,7 @@ public class SyncManager {
         a.concluidoEm = dto.getConcluidoEm();
         a.concluidoPorNome = dto.getConcluidoPorNome();
         a.criadoPorNome = dto.getCriadoPorNome();
+        if (dto.getCriadoEm() != null) a.criadoEm = DateUtils.deIsoUtc(dto.getCriadoEm());
         a.atualizadoEm = DateUtils.deIsoUtc(dto.getAtualizadoEm());
         a.sincronizado = 1;
         if (a.uuid == null) a.uuid = UUID.randomUUID().toString();

@@ -22,6 +22,8 @@ public class AnotacaoMaquinaSyncItemDto {
     private String concluidoEm;
     private String concluidoPorNome;
     private String criadoPorNome;
+    /** Instante UTC (com hora) em que a tarefa foi criada — só no pull (desde 08/10, edce42c). */
+    private String criadoEm;
 
     public String getUuid() { return uuid; }
     public void setUuid(String uuid) { this.uuid = uuid; }
@@ -47,4 +49,6 @@ public class AnotacaoMaquinaSyncItemDto {
     public void setConcluidoPorNome(String concluidoPorNome) { this.concluidoPorNome = concluidoPorNome; }
     public String getCriadoPorNome() { return criadoPorNome; }
     public void setCriadoPorNome(String criadoPorNome) { this.criadoPorNome = criadoPorNome; }
+    public String getCriadoEm() { return criadoEm; }
+    public void setCriadoEm(String criadoEm) { this.criadoEm = criadoEm; }
 }
