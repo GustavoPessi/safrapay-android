@@ -274,7 +274,6 @@
     <string name="dialog_confirmar_exclusao">Excluir a conta e todos os dados? Esta ação não pode ser desfeita.</string>
     <string name="msg_senha_alterada">Senha alterada</string>
     <string name="msg_conta_excluida">Conta excluída</string>
-    <string name="msg_export_dados_em_breve">Exportação de dados disponível em breve</string>
 
     <!-- Notificações -->
     <string name="notif_title">Notificações</string>
@@ -286,7 +285,7 @@
     <string name="sobre_title">Sobre e ajuda</string>
     <string name="sobre_versao">Versão 1.0 · Funciona offline</string>
     <string name="sobre_descricao">Protótipo desenvolvido como Trabalho de Conclusão de Curso em Ciência da Computação (UNESC), para auxiliar produtores rurais no acompanhamento financeiro e contábil.</string>
-    <string name="sobre_faq">Perguntas frequentes</string>
+    <string name="sobre_faq">📖 Manual de ajuda</string>
     <string name="sobre_suporte">Falar com o suporte</string>
     <string name="sobre_termos">Termos de uso</string>
     <string name="sobre_privacidade">Política de privacidade</string>
@@ -515,4 +514,13 @@
     <string name="colab_perfil">Perfil</string>
     <!-- Aviso de relatório gerencial (08/10/2026) -->
     <string name="aviso_relatorio_gerencial">Este é um relatório gerencial gerado automaticamente pelo SafraPay, destinado ao acompanhamento interno da propriedade. Não constitui documento contábil oficial e não substitui a contabilidade formal exigida por lei. Os valores refletem exclusivamente os lançamentos informados pelo usuário no aplicativo — o SafraPay não se responsabiliza pela exatidão, completude ou adequação fiscal desses dados.</string>
+    <string name="exp_csv_aviso_titulo">Antes de exportar</string>
+    <string name="exp_csv_aviso_ok">Entendi, exportar CSV</string>
+    <!-- Exportar meus dados (LGPD) -->
+    <string name="export_dados_titulo">Exportar meus dados</string>
+    <string name="export_dados_gerando">Gerando a planilha com os seus dados…</string>
+    <string name="export_dados_em_equipe">Enquanto você está na equipe de %1$s, os dados deste aparelho são da fazenda dele. Para exportar os seus próprios dados, saia da equipe (eles voltam pro aparelho) ou peça ao dono para exportar os da fazenda.</string>
+    <!-- Manual de ajuda -->
+    <string name="ajuda_title">Manual de ajuda</string>
+    <string name="ajuda_intro">Toque num assunto pra ver a explicação.</string>
 </resources>

@@ -102,7 +102,23 @@ public class RelatorioActivity extends BaseActivity {
         };
         new AlertDialog.Builder(this)
                 .setTitle(R.string.exp_titulo)
-                .setItems(opcoes, (d, which) -> exportar(formatos[which]))
+                .setItems(opcoes, (d, which) -> {
+                    if (formatos[which] == Formato.CSV) avisarAntesDoCsv(); else exportar(formatos[which]);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * O CSV é dado puro (pra importar em outra ferramenta), então o aviso de relatório
+     * gerencial não vai dentro do arquivo — aparece aqui antes de gerar e vai junto no texto
+     * do compartilhamento (corpo do e-mail / legenda no WhatsApp).
+     */
+    private void avisarAntesDoCsv() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.exp_csv_aviso_titulo)
+                .setMessage(R.string.aviso_relatorio_gerencial)
+                .setPositiveButton(R.string.exp_csv_aviso_ok, (d, w) -> exportar(Formato.CSV))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
