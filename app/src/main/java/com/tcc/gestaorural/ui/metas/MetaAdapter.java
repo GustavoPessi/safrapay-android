@@ -47,6 +47,8 @@ public class MetaAdapter extends RecyclerView.Adapter<MetaAdapter.VH> {
                 MoneyUtils.formatar(mp.valorAtual), MoneyUtils.formatar(mp.meta.valorAlvo))
                 + " · " + mp.percentual + "%";
         h.textoProgresso.setText(texto);
+        h.textoProgresso.setTextColor(androidx.core.content.ContextCompat.getColor(h.itemView.getContext(),
+                mp.valorAtual < 0 ? R.color.despesa : R.color.text_secondary));
         h.itemView.setOnClickListener(v -> listener.clicou(mp));
     }
 

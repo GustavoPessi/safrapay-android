@@ -44,6 +44,9 @@ public class DashboardActivity extends BaseActivity implements com.tcc.gestaorur
         vm.getResumo().observe(this, r -> {
             if (r == null) return;
             txtSaldo.setText(MoneyUtils.formatar(r.saldo));
+            // Saldo negativo em vermelho (antes ficava preto e passava despercebido).
+            txtSaldo.setTextColor(androidx.core.content.ContextCompat.getColor(this,
+                    r.saldo < 0 ? R.color.despesa : R.color.text_primary));
             txtReceitas.setText(MoneyUtils.formatar(r.receitas));
             txtDespesas.setText(MoneyUtils.formatar(r.despesas));
         });
