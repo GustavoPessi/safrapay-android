@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@color/background">
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -25,8 +26,9 @@
                 android:layout_height="wrap_content" android:text="@string/dash_saldo_titulo"
                 android:textSize="@dimen/text_caption" />
             <TextView android:id="@+id/txtSaldo" style="@style/Text.H1"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_xs" android:textSize="32sp" />
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs" android:textSize="32sp"
+                app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="32sp" app:autoSizeStepGranularity="1sp" android:maxLines="1" />
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_md" android:orientation="horizontal">
@@ -36,7 +38,8 @@
                         android:layout_height="wrap_content" android:text="@string/extrato_receitas"
                         android:textSize="@dimen/text_caption" />
                     <TextView android:id="@+id/txtReceitas" style="@style/Text.H2"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
                         android:textColor="@color/receita" />
                 </LinearLayout>
                 <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
@@ -45,7 +48,8 @@
                         android:layout_height="wrap_content" android:text="@string/extrato_despesas"
                         android:textSize="@dimen/text_caption" />
                     <TextView android:id="@+id/txtDespesas" style="@style/Text.H2"
-                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
                         android:textColor="@color/despesa" />
                 </LinearLayout>
             </LinearLayout>

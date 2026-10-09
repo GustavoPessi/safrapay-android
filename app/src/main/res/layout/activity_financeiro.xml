@@ -31,37 +31,42 @@
                 android:text="@string/filtro_mes" />
         </com.google.android.material.chip.ChipGroup>
 
-        <!-- Resumo -->
+        <!-- Resumo: saldo na linha inteira e receitas | despesas embaixo. Os valores diminuem a
+             fonte sozinhos (autoSize) pra caber numa linha mesmo com milhões. -->
         <LinearLayout
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
-            android:orientation="horizontal" android:padding="@dimen/space_md">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:orientation="vertical">
-                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:text="@string/extrato_receitas"
-                    android:textSize="@dimen/text_caption" />
-                <TextView android:id="@+id/txtTotalReceitas" style="@style/Text.H2"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/receita" />
-            </LinearLayout>
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:orientation="vertical">
-                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:text="@string/extrato_despesas"
-                    android:textSize="@dimen/text_caption" />
-                <TextView android:id="@+id/txtTotalDespesas" style="@style/Text.H2"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/despesa" />
-            </LinearLayout>
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                android:layout_weight="1" android:orientation="vertical">
-                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:text="@string/extrato_saldo"
-                    android:textSize="@dimen/text_caption" />
-                <TextView android:id="@+id/txtSaldo" style="@style/Text.H2"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary" />
+            android:orientation="vertical" android:padding="@dimen/space_md">
+            <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="@string/extrato_saldo"
+                android:textSize="@dimen/text_caption" />
+            <TextView android:id="@+id/txtSaldo" style="@style/Text.H1"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h1" app:autoSizeStepGranularity="1sp" android:maxLines="1"
+                android:textColor="@color/text_primary" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" android:orientation="horizontal">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical"
+                    android:layout_marginEnd="@dimen/space_sm">
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/extrato_receitas"
+                        android:textSize="@dimen/text_caption" />
+                    <TextView android:id="@+id/txtTotalReceitas" style="@style/Text.H2"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
+                        android:textColor="@color/receita" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:orientation="vertical">
+                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="@string/extrato_despesas"
+                        android:textSize="@dimen/text_caption" />
+                    <TextView android:id="@+id/txtTotalDespesas" style="@style/Text.H2"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
+                        android:textColor="@color/despesa" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

@@ -92,16 +92,31 @@ public class AcompanhamentoMetaActivity extends BaseActivity {
 
     private double nz(Double d) { return d == null ? 0 : d; }
 
-    private void recalcular() { valorAtual = Math.max(0, receitas - despesas); atualizarUI(); }
+    /**
+     * Resultado da safra = receitas − despesas, SEM esconder prejuízo: antes o negativo virava
+     * R$ 0,00 e a meta parecia só "não começada" (relato do Gustavo, 09/10/2026).
+     */
+    private void recalcular() { valorAtual = receitas - despesas; atualizarUI(); }
 
     private void atualizarUI() {
+        boolean prejuizo = valorAtual < 0;
         txtValores.setText(getString(R.string.meta_de,
                 MoneyUtils.formatar(valorAtual), MoneyUtils.formatar(valorAlvo)));
-        int pct = (valorAlvo > 0) ? (int) Math.min(100, Math.round(valorAtual / valorAlvo * 100)) : 0;
-        txtPercentual.setText(getString(R.string.meta_percentual, pct));
+        txtValores.setTextColor(androidx.core.content.ContextCompat.getColor(this,
+                prejuizo ? R.color.despesa : R.color.text_primary));
+        int pct = (valorAlvo > 0) ? (int) Math.max(0, Math.min(100, Math.round(valorAtual / valorAlvo * 100))) : 0;
+        if (prejuizo) {
+            txtPercentual.setText(getString(R.string.meta_prejuizo, MoneyUtils.formatar(-valorAtual)));
+            txtPercentual.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.despesa));
+        } else {
+            txtPercentual.setText(getString(R.string.meta_percentual, pct));
+            txtPercentual.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.green_700));
+        }
         progresso.setProgressCompat(pct, true);
+        // Falta = alvo − resultado: com prejuízo, inclui cobrir o prejuízo antes de chegar na meta.
         double falta = Math.max(0, valorAlvo - valorAtual);
         if (falta <= 0) txtFalta.setText(R.string.meta_concluida);
+        else if (prejuizo) txtFalta.setText(getString(R.string.meta_falta_com_prejuizo, MoneyUtils.formatar(falta)));
         else txtFalta.setText(getString(R.string.meta_falta, MoneyUtils.formatar(falta)));
         atualizarEstimativa();
     }

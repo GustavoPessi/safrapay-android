@@ -71,6 +71,8 @@ public class FinanceiroActivity extends BaseActivity {
             txtReceitas.setText(MoneyUtils.formatar(e.receitas));
             txtDespesas.setText(MoneyUtils.formatar(e.despesas));
             txtSaldo.setText(MoneyUtils.formatar(e.saldo));
+            txtSaldo.setTextColor(androidx.core.content.ContextCompat.getColor(this,
+                    e.saldo < 0 ? R.color.despesa : R.color.text_primary));
         });
     }
 

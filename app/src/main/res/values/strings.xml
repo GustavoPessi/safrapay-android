@@ -200,6 +200,8 @@
     <string name="meta_de">%1$s de %2$s</string>
     <string name="meta_percentual">%1$d%% da meta atingida</string>
     <string name="meta_falta">Falta %1$s para atingir a meta</string>
+    <string name="meta_prejuizo">Safra no prejuízo: %1$s negativos</string>
+    <string name="meta_falta_com_prejuizo">Falta %1$s para atingir a meta (inclui cobrir o prejuízo)</string>
     <string name="meta_concluida">Meta atingida! 🎉</string>
     <string name="meta_prazo_label">Prazo: %1$s</string>
     <string name="meta_estimativas">Estimativas para atingir a meta</string>

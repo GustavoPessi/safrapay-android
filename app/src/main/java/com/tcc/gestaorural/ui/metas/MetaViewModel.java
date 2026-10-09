@@ -63,11 +63,12 @@ public class MetaViewModel extends AndroidViewModel {
     private void recombinar() {
         List<MetaProgresso> out = new ArrayList<>();
         for (MetaResumo m : ultMetas) {
-            double saldo = Math.max(0, v(recSafra, m.safraId) - v(desSafra, m.safraId));
+            // Sem esconder prejuízo: o valor pode ser negativo; só o percentual fica entre 0 e 100.
+            double saldo = v(recSafra, m.safraId) - v(desSafra, m.safraId);
             MetaProgresso mp = new MetaProgresso();
             mp.meta = m;
             mp.valorAtual = saldo;
-            mp.percentual = (m.valorAlvo > 0) ? (int) Math.min(100, Math.round(saldo / m.valorAlvo * 100)) : 0;
+            mp.percentual = (m.valorAlvo > 0) ? (int) Math.max(0, Math.min(100, Math.round(saldo / m.valorAlvo * 100))) : 0;
             out.add(mp);
         }
         lista.setValue(out);
