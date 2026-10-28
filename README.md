@@ -1,4 +1,4 @@
-# 🌱 SafraPay — App Android
+# SafraPay — App Android
 
 App Android para pequenos e médios produtores rurais controlarem propriedades, talhões, safras, despesas, receitas, metas e máquinas. Funciona **sem internet** no campo e sincroniza com o servidor quando a conexão volta.
 
