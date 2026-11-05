@@ -6,72 +6,94 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="@dimen/space_lg">
+    <!-- Filtros + resumo sobem junto quando a lista rola pra baixo e voltam ao rolar pra cima
+         (scroll|enterAlways|snap), sobrando a tela quase inteira pros lançamentos. -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarFiltros"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:background="@color/background"
+        android:stateListAnimator="@null"
+        app:elevation="0dp">
 
-        <TextView android:id="@+id/txtSafra" style="@style/Text.Body"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:textColor="@color/text_secondary" />
-
-        <!-- Filtro de período (componente reaproveitável, ui/comum/SeletorPeriodo) -->
-        <include layout="@layout/view_seletor_periodo"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_sm" />
-
-        <!-- Resumo: saldo na linha inteira e receitas | despesas embaixo. Os valores diminuem a
-             fonte sozinhos (autoSize) pra caber numa linha mesmo com milhões. -->
         <LinearLayout
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
-            android:orientation="vertical" android:padding="@dimen/space_md">
-            <TextView style="@style/Text.Body" android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:text="@string/extrato_saldo"
-                android:textSize="@dimen/text_caption" />
-            <TextView android:id="@+id/txtSaldo" style="@style/Text.H1"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/space_lg" android:paddingEnd="@dimen/space_lg"
+            android:paddingTop="@dimen/space_lg" android:paddingBottom="@dimen/space_sm"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
+
+            <!-- Filtro de safra (só em Finanças geral; escondido quando a tela é de uma safra) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilFiltroSafra"
+                style="@style/Widget.App.TextInputLayout"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h1" app:autoSizeStepGranularity="1sp" android:maxLines="1"
-                android:textColor="@color/text_primary" />
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_sm" android:orientation="horizontal">
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical"
-                    android:layout_marginEnd="@dimen/space_sm">
-                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:text="@string/extrato_receitas"
-                        android:textSize="@dimen/text_caption" />
-                    <TextView android:id="@+id/txtTotalReceitas" style="@style/Text.H2"
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
-                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
-                        android:textColor="@color/receita" />
-                </LinearLayout>
-                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:orientation="vertical">
-                    <TextView style="@style/Text.Body" android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" android:text="@string/extrato_despesas"
-                        android:textSize="@dimen/text_caption" />
-                    <TextView android:id="@+id/txtTotalDespesas" style="@style/Text.H2"
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
-                        app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
-                        android:textColor="@color/despesa" />
+                android:hint="@string/financas_filtro_safra"
+                app:endIconMode="dropdown_menu">
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/dropFiltroSafra"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:inputType="none" android:saveEnabled="false" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Filtro de período (componente reaproveitável, ui/comum/SeletorPeriodo) -->
+            <include layout="@layout/view_seletor_periodo"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_sm" />
+
+            <!-- Resumo: saldo na linha inteira e receitas | despesas embaixo. Os valores diminuem a
+                 fonte sozinhos (autoSize) pra caber numa linha mesmo com milhões. -->
+            <LinearLayout
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_md" android:background="@drawable/bg_card"
+                android:orientation="vertical" android:padding="@dimen/space_md">
+                <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:text="@string/extrato_saldo"
+                    android:textSize="@dimen/text_caption" />
+                <TextView android:id="@+id/txtSaldo" style="@style/Text.H1"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h1" app:autoSizeStepGranularity="1sp" android:maxLines="1"
+                    android:textColor="@color/text_primary" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_sm" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical"
+                        android:layout_marginEnd="@dimen/space_sm">
+                        <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:text="@string/extrato_receitas"
+                            android:textSize="@dimen/text_caption" />
+                        <TextView android:id="@+id/txtTotalReceitas" style="@style/Text.H2"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
+                            android:textColor="@color/receita" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:orientation="vertical">
+                        <TextView style="@style/Text.Body" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:text="@string/extrato_despesas"
+                            android:textSize="@dimen/text_caption" />
+                        <TextView android:id="@+id/txtTotalDespesas" style="@style/Text.H2"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            app:autoSizeTextType="uniform" app:autoSizeMinTextSize="12sp" app:autoSizeMaxTextSize="@dimen/text_h2" app:autoSizeStepGranularity="1sp" android:maxLines="1"
+                            android:textColor="@color/despesa" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <FrameLayout android:layout_width="match_parent" android:layout_height="0dp"
-            android:layout_weight="1" android:layout_marginTop="@dimen/space_md">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler"
-                android:layout_width="match_parent" android:layout_height="match_parent"
-                android:clipToPadding="false" android:paddingBottom="80dp" />
-            <TextView android:id="@+id/txtVazio" style="@style/Text.Body"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_gravity="center" android:gravity="center"
-                android:text="@string/extrato_vazio" android:visibility="gone" />
-        </FrameLayout>
-    </LinearLayout>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingStart="@dimen/space_lg" android:paddingEnd="@dimen/space_lg"
+            android:paddingBottom="80dp" />
+        <TextView android:id="@+id/txtVazio" style="@style/Text.Body"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center" android:gravity="center"
+            android:text="@string/extrato_vazio" android:visibility="gone" />
+    </FrameLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabNovo"

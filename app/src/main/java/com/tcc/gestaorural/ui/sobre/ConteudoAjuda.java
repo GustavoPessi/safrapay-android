@@ -34,7 +34,7 @@ final class ConteudoAjuda {
           "• Receita: o que entrou (venda de grão, por exemplo). Despesa: o que saiu.\n"
         + "• Despesas têm categoria: Máquinas, Combustível, Insumos, Sementes, Impostos, Documentos ou Outras despesas operacionais.\n"
         + "• Na categoria Máquinas dá pra dizer qual máquina gerou o gasto — o total aparece no detalhe da máquina.\n"
-        + "• Em Finanças, filtre por Tudo, Dia, Mês, Ano ou um intervalo de datas; as setas ‹ › passam pro anterior/próximo e tocar na data abre o calendário.\n"
+        + "• Em Finanças, filtre por safra e por período (Tudo, Dia, Mês, Ano ou um intervalo de datas); as setas ‹ › passam pro anterior/próximo e tocar na data abre o calendário. Ao rolar a lista, os filtros sobem pra dar mais espaço.\n"
         + "• Comprovante: anexe a foto da nota ou do recibo (câmera ou galeria). Por enquanto a foto fica só neste celular." },
 
         { "🎯 Metas",

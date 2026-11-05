@@ -185,6 +185,7 @@
     <string name="dash_add_despesa">+ Despesa</string>
     <string name="financas_global_title">Finanças</string>
     <string name="financas_todas_safras">Todas as safras</string>
+    <string name="financas_filtro_safra">Safra</string>
 
     <!-- Metas -->
     <string name="meta_lista_title">Metas financeiras</string>

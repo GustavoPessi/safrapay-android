@@ -12,6 +12,8 @@ import com.tcc.gestaorural.data.local.entity.Receita;
 import com.tcc.gestaorural.data.local.model.Lancamento;
 import com.tcc.gestaorural.data.repository.DespesaRepository;
 import com.tcc.gestaorural.data.repository.ReceitaRepository;
+import com.tcc.gestaorural.data.local.model.SafraOpcao;
+import com.tcc.gestaorural.data.repository.SafraRepository;
 import com.tcc.gestaorural.util.Periodo;
 
 import java.util.ArrayList;
@@ -28,21 +30,28 @@ public class FinanceiroViewModel extends AndroidViewModel {
 
     private final ReceitaRepository receitaRepo;
     private final DespesaRepository despesaRepo;
+    private final SafraRepository safraRepo;
     private final MediatorLiveData<Extrato> extrato = new MediatorLiveData<>();
 
     private List<Receita> ultReceitas = new ArrayList<>();
     private List<Despesa> ultDespesas = new ArrayList<>();
     // Filtro de período (Tudo / Dia / Mês / Ano / Intervalo) — fica no VM pra sobreviver à rotação.
     private Periodo periodo = Periodo.tudo();
+    // Filtro de safra em Finanças geral: 0 = todas.
+    private long safraFiltro = 0L;
     private boolean iniciado = false;
 
     public FinanceiroViewModel(@NonNull Application app) {
         super(app);
         receitaRepo = new ReceitaRepository(app);
         despesaRepo = new DespesaRepository(app);
+        safraRepo = new SafraRepository(app);
     }
 
     public LiveData<Extrato> getExtrato() { return extrato; }
+
+    /** Safras do usuário pro filtro de Finanças geral. */
+    public LiveData<List<SafraOpcao>> opcoesSafra(long usuarioId) { return safraRepo.observarOpcoes(usuarioId); }
 
     public void iniciar(long safraId) {
         if (iniciado) return;
@@ -72,6 +81,10 @@ public class FinanceiroViewModel extends AndroidViewModel {
 
     public Periodo getPeriodo() { return periodo; }
 
+    public long getSafraFiltro() { return safraFiltro; }
+
+    public void setSafraFiltro(long id) { safraFiltro = id; recombinar(); }
+
     public void setPeriodo(Periodo p) { periodo = (p != null) ? p : Periodo.tudo(); recombinar(); }
 
     private void recombinar() {
@@ -80,6 +93,7 @@ public class FinanceiroViewModel extends AndroidViewModel {
 
         for (Receita r : ultReceitas) {
             if (!periodo.contem(r.dataRegistro)) continue;
+            if (safraFiltro != 0L && r.safraId != safraFiltro) continue;
             Lancamento l = new Lancamento();
             l.id = r.id; l.tipo = Lancamento.TIPO_RECEITA; l.descricao = r.descricao;
             l.valor = r.valor; l.data = r.dataRegistro; l.safraId = r.safraId;
@@ -87,6 +101,7 @@ public class FinanceiroViewModel extends AndroidViewModel {
         }
         for (Despesa d : ultDespesas) {
             if (!periodo.contem(d.dataRegistro)) continue;
+            if (safraFiltro != 0L && d.safraId != safraFiltro) continue;
             Lancamento l = new Lancamento();
             l.id = d.id; l.tipo = Lancamento.TIPO_DESPESA; l.descricao = d.descricao;
             l.valor = d.valor; l.data = d.dataRegistro; l.safraId = d.safraId;
