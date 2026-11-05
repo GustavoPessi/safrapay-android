@@ -526,6 +526,7 @@
     <string name="ajuda_title">Manual de ajuda</string>
     <string name="ajuda_intro">Toque num assunto pra ver a explicação.</string>
     <!-- Filtro de período (ui/comum/SeletorPeriodo) -->
+    <string name="periodo_label">Período</string>
     <string name="periodo_tudo">Tudo</string>
     <string name="periodo_dia">Dia</string>
     <string name="periodo_mes">Mês</string>

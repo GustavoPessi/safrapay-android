@@ -3,6 +3,9 @@ package com.tcc.gestaorural.ui.comum;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -12,17 +15,19 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MaskUtils;
 import com.tcc.gestaorural.util.Periodo;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
- * Controla o layout view_seletor_periodo (incluído com &lt;include&gt;): chips Dia / Mês / Ano /
- * Intervalo (e "Tudo", se permitido), setas ‹ › pra andar e toque no texto pra escolher a data.
+ * Controla o layout view_seletor_periodo (incluído com &lt;include&gt;): lista suspensa Dia / Mês /
+ * Ano / Intervalo (e "Tudo", se permitido), setas ‹ › pra andar e toque no texto pra escolher a data.
  * Feito pra ser reaproveitado (Relatório, Finanças e, depois, a tela de comparação).
  */
 public class SeletorPeriodo {
@@ -36,14 +41,14 @@ public class SeletorPeriodo {
     private final ImageButton btnAnterior, btnProximo;
     private final View linhaNavegacao, linhaIntervalo;
     private final EditText edtInicio, edtFim;
-    private final ChipGroup chips;
+    private final MaterialAutoCompleteTextView dropTipo;
+    private final List<Periodo.Tipo> tipos = new ArrayList<>();
     private Listener listener;
     private Periodo periodo;
-    private boolean montando;
 
     public SeletorPeriodo(Activity activity, View raiz, boolean permitirTudo, Periodo inicial) {
         this.activity = activity;
-        chips = raiz.findViewById(R.id.chipsPeriodo);
+        dropTipo = raiz.findViewById(R.id.dropTipoPeriodo);
         txtPeriodo = raiz.findViewById(R.id.txtPeriodo);
         btnAnterior = raiz.findViewById(R.id.btnPeriodoAnterior);
         btnProximo = raiz.findViewById(R.id.btnPeriodoProximo);
@@ -54,12 +59,25 @@ public class SeletorPeriodo {
         MaskUtils.aplicarData(edtInicio);
         MaskUtils.aplicarData(edtFim);
 
-        raiz.findViewById(R.id.chipPeriodoTudo).setVisibility(permitirTudo ? View.VISIBLE : View.GONE);
+        if (permitirTudo) tipos.add(Periodo.Tipo.TUDO);
+        tipos.add(Periodo.Tipo.DIA);
+        tipos.add(Periodo.Tipo.MES);
+        tipos.add(Periodo.Tipo.ANO);
+        tipos.add(Periodo.Tipo.INTERVALO);
+        List<String> nomes = new ArrayList<>();
+        for (Periodo.Tipo t : tipos) nomes.add(activity.getString(nomeTipo(t)));
+        dropTipo.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_list_item_1, nomes));
 
         btnAnterior.setOnClickListener(v -> mudar(periodo.andar(-1)));
         btnProximo.setOnClickListener(v -> mudar(periodo.andar(1)));
         txtPeriodo.setOnClickListener(v -> escolher());
         raiz.findViewById(R.id.btnPeriodoAplicar).setOnClickListener(v -> aplicarIntervalo());
+        // "Concluído" no teclado da data final também aplica.
+        edtFim.setOnEditorActionListener((v, acao, ev) -> {
+            if (acao != EditorInfo.IME_ACTION_DONE) return false;
+            aplicarIntervalo();
+            return true;
+        });
 
         periodo = inicial != null ? inicial : Periodo.atual(Periodo.Tipo.ANO);
         if (!permitirTudo && periodo.getTipo() == Periodo.Tipo.TUDO) periodo = Periodo.atual(Periodo.Tipo.ANO);
@@ -67,14 +85,10 @@ public class SeletorPeriodo {
             edtInicio.setText(DateUtils.isoParaBr(periodo.inicio()));
             edtFim.setText(DateUtils.isoParaBr(periodo.fim()));
         }
-        montando = true;
-        chips.check(idChip(periodo.getTipo()));
-        montando = false;
         atualizarTela();
 
-        chips.setOnCheckedStateChangeListener((g, ids) -> {
-            if (montando || ids.isEmpty()) return;
-            Periodo.Tipo tipo = tipoDoChip(ids.get(0));
+        dropTipo.setOnItemClickListener((parent, v, pos, id) -> {
+            Periodo.Tipo tipo = tipos.get(pos);
             if (tipo == periodo.getTipo()) return;
             if (tipo == Periodo.Tipo.INTERVALO) {
                 // Começa o intervalo com o que estava na tela (ou mês atual, se era "Tudo").
@@ -107,23 +121,14 @@ public class SeletorPeriodo {
                 in.getString(chave + ".ini"), in.getString(chave + ".fim"));
     }
 
-    /** Ids fixos por tipo (chips do view_seletor_periodo.xml), estáveis entre recriações. */
-    private static int idChip(Periodo.Tipo tipo) {
+    private static int nomeTipo(Periodo.Tipo tipo) {
         switch (tipo) {
-            case TUDO: return R.id.chipPeriodoTudo;
-            case DIA: return R.id.chipPeriodoDia;
-            case MES: return R.id.chipPeriodoMes;
-            case ANO: return R.id.chipPeriodoAno;
-            default: return R.id.chipPeriodoIntervalo;
+            case TUDO: return R.string.periodo_tudo;
+            case DIA: return R.string.periodo_dia;
+            case MES: return R.string.periodo_mes;
+            case ANO: return R.string.periodo_ano;
+            default: return R.string.periodo_intervalo;
         }
-    }
-
-    private static Periodo.Tipo tipoDoChip(int id) {
-        if (id == R.id.chipPeriodoTudo) return Periodo.Tipo.TUDO;
-        if (id == R.id.chipPeriodoDia) return Periodo.Tipo.DIA;
-        if (id == R.id.chipPeriodoMes) return Periodo.Tipo.MES;
-        if (id == R.id.chipPeriodoAno) return Periodo.Tipo.ANO;
-        return Periodo.Tipo.INTERVALO;
     }
 
     private void mudar(Periodo novo) {
@@ -138,6 +143,7 @@ public class SeletorPeriodo {
         linhaIntervalo.setVisibility(intervalo ? View.VISIBLE : View.GONE);
         linhaNavegacao.setVisibility(intervalo || tudo ? View.GONE : View.VISIBLE);
         txtPeriodo.setText(periodo.rotulo());
+        dropTipo.setText(activity.getString(nomeTipo(periodo.getTipo())), false);
         String r = periodo.rotulo();
         btnAnterior.setContentDescription(activity.getString(R.string.periodo_anterior) + " (" + r + ")");
         btnProximo.setContentDescription(activity.getString(R.string.periodo_proximo) + " (" + r + ")");
@@ -150,7 +156,17 @@ public class SeletorPeriodo {
             Toast.makeText(activity, R.string.periodo_data_invalida, Toast.LENGTH_SHORT).show();
             return;
         }
+        esconderTeclado();
         mudar(Periodo.intervalo(ini, fim));
+    }
+
+    /** Fecha o teclado e tira o foco dos campos de data depois de aplicar o intervalo. */
+    private void esconderTeclado() {
+        View foco = activity.getCurrentFocus();
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (imm != null) imm.hideSoftInputFromWindow(foco != null ? foco.getWindowToken() : edtFim.getWindowToken(), 0);
+        edtInicio.clearFocus();
+        edtFim.clearFocus();
     }
 
     /** Toque no texto: calendário (dia) ou roletas de mês/ano. */
