@@ -62,7 +62,8 @@ public class AcompanhamentoMetaActivity extends BaseActivity {
                 if (r != null) {
                     String cultura = (r.culturaNome == null || r.culturaNome.trim().isEmpty())
                             ? getString(R.string.safra_sem_cultura) : r.culturaNome;
-                    txtCultura.setText(cultura + "  •  " + r.anoSafra);
+                    txtCultura.setText(cultura + "  •  "
+                            + com.tcc.gestaorural.util.SafraPeriodo.rotulo(r.anoSafra, r.dataInicio, r.dataFim));
                 }
             });
             configurarSaldo(m);

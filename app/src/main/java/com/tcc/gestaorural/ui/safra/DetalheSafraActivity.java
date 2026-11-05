@@ -38,8 +38,9 @@ public class DetalheSafraActivity extends BaseActivity {
         vm.obterResumo(safraId).observe(this, r -> {
             if (r == null) return;
             txtCultura.setText(r.culturaNome);
+            String periodo = com.tcc.gestaorural.util.SafraPeriodo.rotulo(r.anoSafra, r.dataInicio, r.dataFim);
             txtAno.setText((r.variedade == null || r.variedade.isEmpty())
-                    ? r.anoSafra : r.anoSafra + "  •  " + r.variedade);
+                    ? periodo : periodo + "  •  " + r.variedade);
             txtInicio.setText(getString(R.string.hint_safra_inicio) + ": " + ouTraco(r.dataInicio));
             txtFim.setText(getString(R.string.hint_safra_fim) + ": " + ouTraco(r.dataFim));
         });

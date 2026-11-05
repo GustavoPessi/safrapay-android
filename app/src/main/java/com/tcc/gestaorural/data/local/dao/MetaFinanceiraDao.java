@@ -3,6 +3,7 @@ package com.tcc.gestaorural.data.local.dao;
 import com.tcc.gestaorural.data.local.model.MetaContexto;
 import androidx.lifecycle.LiveData;
 import androidx.room.*;
+import com.tcc.gestaorural.util.SafraPeriodo;
 
 import com.tcc.gestaorural.data.local.entity.MetaFinanceira;
 import com.tcc.gestaorural.data.local.model.MetaResumo;
@@ -19,7 +20,7 @@ public interface MetaFinanceiraDao {
 
     @Query("SELECT m.id AS metaId, m.descricao AS descricao, m.valor_alvo AS valorAlvo, " +
            "m.prazo AS prazo, m.safra_id AS safraId, " +
-           "(IFNULL(talhao.cultura,'Safra') || ' ' || safra.ano_safra) AS safraLabel " +
+           "(IFNULL(talhao.cultura,'Safra') || ' ' || " + SafraPeriodo.SQL + ") AS safraLabel " +
            "FROM meta_financeira m " +
            "JOIN safra ON safra.id = m.safra_id " +
            "JOIN talhao ON talhao.id = safra.talhao_id " +
@@ -49,7 +50,7 @@ public interface MetaFinanceiraDao {
 
     /** Assistente de IA (consulta METAS): metas do usuario com a safra vinculada. */
     @Query("SELECT m.descricao AS descricao, m.valor_alvo AS valorAlvo, m.prazo AS prazo, " +
-           "safra.uuid AS safraUuid, talhao.cultura AS cultura, safra.ano_safra AS anoSafra, " +
+           "safra.uuid AS safraUuid, talhao.cultura AS cultura, " + SafraPeriodo.SQL + " AS anoSafra, " +
            "talhao.nome AS talhaoNome " +
            "FROM meta_financeira m " +
            "JOIN safra ON safra.id = m.safra_id " +

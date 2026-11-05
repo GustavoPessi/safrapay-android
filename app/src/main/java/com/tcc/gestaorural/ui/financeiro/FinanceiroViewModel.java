@@ -12,7 +12,7 @@ import com.tcc.gestaorural.data.local.entity.Receita;
 import com.tcc.gestaorural.data.local.model.Lancamento;
 import com.tcc.gestaorural.data.repository.DespesaRepository;
 import com.tcc.gestaorural.data.repository.ReceitaRepository;
-import com.tcc.gestaorural.util.DateUtils;
+import com.tcc.gestaorural.util.Periodo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,16 +26,14 @@ public class FinanceiroViewModel extends AndroidViewModel {
         public double receitas, despesas, saldo;
     }
 
-    public static final int FILTRO_TUDO = 0;
-    public static final int FILTRO_MES = 1;
-
     private final ReceitaRepository receitaRepo;
     private final DespesaRepository despesaRepo;
     private final MediatorLiveData<Extrato> extrato = new MediatorLiveData<>();
 
     private List<Receita> ultReceitas = new ArrayList<>();
     private List<Despesa> ultDespesas = new ArrayList<>();
-    private int filtro = FILTRO_TUDO;
+    // Filtro de período (Tudo / Dia / Mês / Ano / Intervalo) — fica no VM pra sobreviver à rotação.
+    private Periodo periodo = Periodo.tudo();
     private boolean iniciado = false;
 
     public FinanceiroViewModel(@NonNull Application app) {
@@ -72,22 +70,23 @@ public class FinanceiroViewModel extends AndroidViewModel {
         });
     }
 
-    public void setFiltro(int f) { filtro = f; recombinar(); }
+    public Periodo getPeriodo() { return periodo; }
+
+    public void setPeriodo(Periodo p) { periodo = (p != null) ? p : Periodo.tudo(); recombinar(); }
 
     private void recombinar() {
         List<Lancamento> itens = new ArrayList<>();
-        String mes = DateUtils.anoMesAtual();
         double totR = 0, totD = 0;
 
         for (Receita r : ultReceitas) {
-            if (filtro == FILTRO_MES && (r.dataRegistro == null || !r.dataRegistro.startsWith(mes))) continue;
+            if (!periodo.contem(r.dataRegistro)) continue;
             Lancamento l = new Lancamento();
             l.id = r.id; l.tipo = Lancamento.TIPO_RECEITA; l.descricao = r.descricao;
             l.valor = r.valor; l.data = r.dataRegistro; l.safraId = r.safraId;
             itens.add(l); totR += r.valor;
         }
         for (Despesa d : ultDespesas) {
-            if (filtro == FILTRO_MES && (d.dataRegistro == null || !d.dataRegistro.startsWith(mes))) continue;
+            if (!periodo.contem(d.dataRegistro)) continue;
             Lancamento l = new Lancamento();
             l.id = d.id; l.tipo = Lancamento.TIPO_DESPESA; l.descricao = d.descricao;
             l.valor = d.valor; l.data = d.dataRegistro; l.safraId = d.safraId;

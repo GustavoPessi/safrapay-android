@@ -25,6 +25,7 @@ import com.tcc.gestaorural.ui.BaseActivity;
 import com.tcc.gestaorural.ui.NavKeys;
 import com.tcc.gestaorural.ui.sucesso.SucessoActivity;
 import com.tcc.gestaorural.util.MaskUtils;
+import com.tcc.gestaorural.util.DateUtils;
 import com.tcc.gestaorural.util.MoneyUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
@@ -95,6 +96,12 @@ public class NovaSafraRapidaActivity extends BaseActivity {
         MaskUtils.aplicarData(edtInicio);
         MaskUtils.aplicarData(edtFim);
         MaskUtils.aplicarData(edtMetaPrazo);
+
+        // Início = hoje e ano = ano atual já preenchidos (editáveis) — sugestão do Gustavo, 15/10/2026.
+        if (savedInstanceState == null) {
+            edtInicio.setText(DateUtils.hojeBr());
+            edtAno.setText(DateUtils.hojeIso().substring(0, 4));
+        }
 
         propriedadeRepo.listar(usuarioId).observe(this, this::popularPropriedades);
 

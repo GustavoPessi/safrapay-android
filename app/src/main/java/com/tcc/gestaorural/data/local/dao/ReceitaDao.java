@@ -3,6 +3,7 @@ package com.tcc.gestaorural.data.local.dao;
 import com.tcc.gestaorural.data.local.model.LancamentoLinha;
 import androidx.lifecycle.LiveData;
 import androidx.room.*;
+import com.tcc.gestaorural.util.SafraPeriodo;
 import com.tcc.gestaorural.data.local.entity.Receita;
 import com.tcc.gestaorural.data.local.model.SaldoLinha;
 import com.tcc.gestaorural.data.local.model.MesTotal;
@@ -95,7 +96,7 @@ public interface ReceitaDao {
 
     @Query("SELECT 'RECEITA' AS tipo, receita.id AS id, receita.uuid AS uuid, receita.data_registro AS data, receita.valor AS valor, " +
            "receita.descricao AS descricao, CAST(NULL AS TEXT) AS categoria, safra.uuid AS safraUuid, " +
-           "talhao.cultura AS cultura, safra.ano_safra AS anoSafra, talhao.nome AS talhaoNome, " +
+           "talhao.cultura AS cultura, " + SafraPeriodo.SQL + " AS anoSafra, talhao.nome AS talhaoNome, " +
            "talhao.uuid AS talhaoUuid, propriedade.uuid AS propriedadeUuid, " +
            "CAST(NULL AS TEXT) AS maquinaUuid, CAST(NULL AS TEXT) AS maquinaNome " +
            "FROM receita " +

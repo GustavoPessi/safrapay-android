@@ -25,7 +25,8 @@ final class ConteudoAjuda {
 
         { "🌱 Talhão e safra",
           "• Talhão é cada área da propriedade onde se planta (ex.: \"Talhão da baixada\"). Informe a área em hectares e a cultura (soja, milho...).\n"
-        + "• Safra é um ciclo de plantio num talhão: ano (ex.: 2026/27), variedade da semente, data de início e de fim.\n"
+        + "• Safra é um ciclo de plantio num talhão: ano, variedade da semente, data de início e de fim. Na safra nova, início e ano já vêm com a data de hoje (dá pra mudar).\n"
+        + "• Se a safra começa num ano e termina no outro, o app mostra o período assim: 2026/2027.\n"
         + "• Safra ativa = safra sem data de fim. Quando colher e fechar a safra, preencha a data de fim.\n"
         + "• Todo gasto e toda receita ficam ligados a uma safra — é assim que o app mostra quanto cada lavoura deu de lucro ou prejuízo." },
 
@@ -33,6 +34,7 @@ final class ConteudoAjuda {
           "• Receita: o que entrou (venda de grão, por exemplo). Despesa: o que saiu.\n"
         + "• Despesas têm categoria: Máquinas, Combustível, Insumos, Sementes, Impostos, Documentos ou Outras despesas operacionais.\n"
         + "• Na categoria Máquinas dá pra dizer qual máquina gerou o gasto — o total aparece no detalhe da máquina.\n"
+        + "• Em Finanças, filtre por Tudo, Dia, Mês, Ano ou um intervalo de datas; as setas ‹ › passam pro anterior/próximo e tocar na data abre o calendário.\n"
         + "• Comprovante: anexe a foto da nota ou do recibo (câmera ou galeria). Por enquanto a foto fica só neste celular." },
 
         { "🎯 Metas",
@@ -48,7 +50,7 @@ final class ConteudoAjuda {
 
         { "📊 Relatórios",
           "• Indicadores: receitas, despesas e saldo por mês.\n"
-        + "• Relatório por período: escolha as datas e exporte em PDF, Excel ou CSV pra mandar ao contador, banco ou cooperativa.\n"
+        + "• Relatório por período: escolha um dia, mês, ano ou intervalo de datas e exporte em PDF, Excel ou CSV pra mandar ao contador, banco ou cooperativa.\n"
         + "• DRE: resultado do ano organizado como demonstração de resultado.\n\n"
         + "Os relatórios são gerenciais: servem pra acompanhar a propriedade e não substituem a contabilidade formal." },
 

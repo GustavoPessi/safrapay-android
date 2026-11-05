@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filtro de período reaproveitável (Relatório por período, Finanças): Dia / Mês / Ano /
+     Intervalo (+ "Tudo" onde fizer sentido). Controlado por ui/comum/SeletorPeriodo. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/seletorPeriodo"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:scrollbars="none">
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipsPeriodo"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            app:singleSelection="true" app:selectionRequired="true" app:singleLine="true">
+            <!-- "Tudo" só aparece onde a tela permite (SeletorPeriodo esconde no Relatório) -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPeriodoTudo" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/periodo_tudo" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPeriodoDia" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/periodo_dia" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPeriodoMes" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/periodo_mes" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPeriodoAno" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/periodo_ano" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPeriodoIntervalo" style="@style/Widget.Material3.Chip.Filter"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/periodo_intervalo" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
+    <!-- ‹  novembro de 2026  ›  (toque no texto pra escolher) -->
+    <LinearLayout android:id="@+id/linhaNavegacao"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        android:background="@drawable/bg_card"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <ImageButton android:id="@+id/btnPeriodoAnterior"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/periodo_anterior"
+            android:rotation="180"
+            android:src="@drawable/ic_chevron" />
+        <TextView android:id="@+id/txtPeriodo" style="@style/Text.Body"
+            android:layout_width="0dp" android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold" />
+        <ImageButton android:id="@+id/btnPeriodoProximo"
+            android:layout_width="48dp" android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/periodo_proximo"
+            android:src="@drawable/ic_chevron" />
+    </LinearLayout>
+
+    <!-- Intervalo livre: duas datas + Aplicar -->
+    <LinearLayout android:id="@+id/linhaIntervalo"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        android:orientation="vertical" android:visibility="gone">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/space_sm" android:hint="@string/hint_data_inicio">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtPeriodoInicio" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="number" android:maxLength="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.App.TextInputLayout"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_sm" android:hint="@string/hint_data_fim">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtPeriodoFim" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:inputType="number" android:maxLength="10" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+        <Button android:id="@+id/btnPeriodoAplicar" style="@style/Widget.App.Button"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/rel_aplicar" />
+    </LinearLayout>
+</LinearLayout>

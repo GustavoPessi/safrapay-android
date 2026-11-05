@@ -3,6 +3,7 @@ package com.tcc.gestaorural.data.local.dao;
 import com.tcc.gestaorural.data.local.model.LancamentoLinha;
 import androidx.lifecycle.LiveData;
 import androidx.room.*;
+import com.tcc.gestaorural.util.SafraPeriodo;
 import com.tcc.gestaorural.data.local.entity.Despesa;
 import com.tcc.gestaorural.data.local.model.SaldoLinha;
 import com.tcc.gestaorural.data.local.model.MesTotal;
@@ -135,7 +136,7 @@ public interface DespesaDao {
 
     @Query("SELECT 'DESPESA' AS tipo, despesa.id AS id, despesa.uuid AS uuid, despesa.data_registro AS data, despesa.valor AS valor, " +
            "despesa.descricao AS descricao, categoria_despesa.nome AS categoria, safra.uuid AS safraUuid, " +
-           "talhao.cultura AS cultura, safra.ano_safra AS anoSafra, talhao.nome AS talhaoNome, " +
+           "talhao.cultura AS cultura, " + SafraPeriodo.SQL + " AS anoSafra, talhao.nome AS talhaoNome, " +
            "talhao.uuid AS talhaoUuid, propriedade.uuid AS propriedadeUuid, " +
            "maquina.uuid AS maquinaUuid, maquina.nome AS maquinaNome " +
            "FROM despesa " +

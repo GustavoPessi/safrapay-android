@@ -60,6 +60,10 @@ public class NovaSafraActivity extends BaseActivity {
             });
         } else {
             mostrarTalhao(talhaoId);
+            // Safra nova: início = hoje e ano = ano atual já preenchidos (editáveis) — sugestão do
+            // Gustavo, 15/10/2026. Se o fim cair em outro ano, as listas mostram "2026/2027".
+            edtInicio.setText(com.tcc.gestaorural.util.DateUtils.hojeBr());
+            edtAno.setText(com.tcc.gestaorural.util.DateUtils.hojeIso().substring(0, 4));
         }
 
         btnSalvar.setOnClickListener(v -> salvar());

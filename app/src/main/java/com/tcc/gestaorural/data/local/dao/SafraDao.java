@@ -2,6 +2,7 @@ package com.tcc.gestaorural.data.local.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.*;
+import com.tcc.gestaorural.util.SafraPeriodo;
 import com.tcc.gestaorural.data.local.entity.Safra;
 import com.tcc.gestaorural.data.local.model.SafraOpcao;
 import com.tcc.gestaorural.data.local.model.SafraResumo;
@@ -30,7 +31,7 @@ public interface SafraDao {
            "FROM safra JOIN talhao ON talhao.id = safra.talhao_id WHERE safra.id = :id LIMIT 1")
     LiveData<SafraResumo> observarResumoPorId(long id);
 
-    @Query("SELECT safra.id AS id, talhao.cultura AS cultura, safra.ano_safra AS anoSafra, " +
+    @Query("SELECT safra.id AS id, talhao.cultura AS cultura, " + SafraPeriodo.SQL + " AS anoSafra, " +
            "talhao.nome AS talhaoNome " +
            "FROM safra " +
            "JOIN talhao ON talhao.id = safra.talhao_id " +

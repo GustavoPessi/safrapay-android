@@ -40,7 +40,7 @@ public class SafraAdapter extends RecyclerView.Adapter<SafraAdapter.VH> {
         SafraResumo s = itens.get(pos);
         h.nome.setText((s.culturaNome == null || s.culturaNome.trim().isEmpty())
                 ? h.itemView.getContext().getString(R.string.safra_sem_cultura) : s.culturaNome);
-        String info = s.anoSafra;
+        String info = com.tcc.gestaorural.util.SafraPeriodo.rotulo(s.anoSafra, s.dataInicio, s.dataFim);
         if (s.variedade != null && !s.variedade.isEmpty()) info += "  •  " + s.variedade;
         h.info.setText(info);
         h.itemView.setOnClickListener(v -> listener.clicou(s));

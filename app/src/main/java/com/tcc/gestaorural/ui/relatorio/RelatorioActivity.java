@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,15 +11,14 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.AppDatabase;
 import com.tcc.gestaorural.export.ExportadorRelatorio;
 import com.tcc.gestaorural.export.ExportadorRelatorio.Formato;
 import com.tcc.gestaorural.ui.BaseActivity;
+import com.tcc.gestaorural.ui.comum.SeletorPeriodo;
 import com.tcc.gestaorural.ui.relatorio.RelatorioViewModel.MesLinha;
-import com.tcc.gestaorural.util.DateUtils;
-import com.tcc.gestaorural.util.MaskUtils;
+import com.tcc.gestaorural.util.Periodo;
 import com.tcc.gestaorural.util.MoneyUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
@@ -31,7 +29,7 @@ public class RelatorioActivity extends BaseActivity {
     };
 
     private RelatorioViewModel vm;
-    private TextInputEditText edtInicio, edtFim;
+    private SeletorPeriodo seletor;
     private TextView txtTotReceitas, txtTotDespesas, txtTotSaldo, txtVazio;
     private LinearLayout chartContainer;
     private long usuarioId;
@@ -48,23 +46,17 @@ public class RelatorioActivity extends BaseActivity {
         vm = new ViewModelProvider(this).get(RelatorioViewModel.class);
         usuarioId = new SessionManager(this).getUsuarioId();
 
-        edtInicio = findViewById(R.id.edtInicio);
-        edtFim = findViewById(R.id.edtFim);
         txtTotReceitas = findViewById(R.id.txtTotReceitas);
         txtTotDespesas = findViewById(R.id.txtTotDespesas);
         txtTotSaldo = findViewById(R.id.txtTotSaldo);
         txtVazio = findViewById(R.id.txtVazio);
         chartContainer = findViewById(R.id.chartContainer);
 
-        MaskUtils.aplicarData(edtInicio);
-        MaskUtils.aplicarData(edtFim);
-
-        // Período padrão: ano corrente
-        String ano = DateUtils.hojeIso().substring(0, 4);
-        edtInicio.setText("01/01/" + ano);
-        edtFim.setText(DateUtils.hojeBr());
-
-        ((Button) findViewById(R.id.btnAplicar)).setOnClickListener(v -> aplicar());
+        // Período padrão: ano corrente (sem "Tudo" — o relatório precisa de início e fim).
+        Periodo inicial = SeletorPeriodo.restaurar(savedInstanceState, "periodo");
+        seletor = new SeletorPeriodo(this, findViewById(R.id.seletorPeriodo), false,
+                inicial != null ? inicial : Periodo.atual(Periodo.Tipo.ANO));
+        seletor.setListener(p -> aplicar());
         findViewById(R.id.btnExportar).setOnClickListener(v -> escolherFormato());
 
         vm.getRelatorio().observe(this, r -> {
@@ -78,14 +70,17 @@ public class RelatorioActivity extends BaseActivity {
         aplicar();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        seletor.salvar(out, "periodo");
+    }
+
     private void aplicar() {
-        String ini = DateUtils.brParaIso(txt(edtInicio));
-        String fim = DateUtils.brParaIso(txt(edtFim));
-        if (ini == null) ini = DateUtils.hojeIso().substring(0, 4) + "-01-01";
-        if (fim == null) fim = DateUtils.hojeIso();
-        periodoIni = ini;
-        periodoFim = fim;
-        vm.definirPeriodo(usuarioId, ini, fim);
+        Periodo p = seletor.getPeriodo();
+        periodoIni = p.inicio();
+        periodoFim = p.fim();
+        vm.definirPeriodo(usuarioId, periodoIni, periodoFim);
     }
 
     // ------------------------------------------------------------------
@@ -124,7 +119,7 @@ public class RelatorioActivity extends BaseActivity {
     }
 
     private void exportar(Formato formato) {
-        aplicar(); // garante que o arquivo sai com o período que está nos campos
+        aplicar(); // garante que o arquivo sai com o período escolhido no filtro
         final String ini = periodoIni, fim = periodoFim;
         exportando = true;
         Toast.makeText(this, R.string.exp_gerando, Toast.LENGTH_SHORT).show();
@@ -182,5 +177,4 @@ public class RelatorioActivity extends BaseActivity {
         } catch (Exception e) { return yyyyMM; }
     }
 
-    private String txt(TextInputEditText e) { return e.getText() == null ? "" : e.getText().toString().trim(); }
 }

@@ -3,6 +3,8 @@ package com.tcc.gestaorural.data.local.dao;
 import androidx.room.Dao;
 import androidx.room.Query;
 
+import com.tcc.gestaorural.util.SafraPeriodo;
+
 import com.tcc.gestaorural.export.Lancamento;
 
 import java.util.List;
@@ -21,7 +23,7 @@ public interface RelatorioExportDao {
      */
     @Query("SELECT 'R' AS tipo, receita.data_registro AS data, receita.descricao AS descricao, " +
            "receita.valor AS valor, propriedade.nome AS propriedade, talhao.nome AS talhao, " +
-           "talhao.cultura AS cultura, safra.ano_safra AS safra, NULL AS categoria, NULL AS maquina " +
+           "talhao.cultura AS cultura, " + SafraPeriodo.SQL + " AS safra, NULL AS categoria, NULL AS maquina " +
            "FROM receita " +
            "JOIN safra ON safra.id = receita.safra_id " +
            "JOIN talhao ON talhao.id = safra.talhao_id " +
@@ -31,7 +33,7 @@ public interface RelatorioExportDao {
            "UNION ALL " +
            "SELECT 'D' AS tipo, despesa.data_registro AS data, despesa.descricao AS descricao, " +
            "despesa.valor AS valor, propriedade.nome AS propriedade, talhao.nome AS talhao, " +
-           "talhao.cultura AS cultura, safra.ano_safra AS safra, categoria_despesa.nome AS categoria, " +
+           "talhao.cultura AS cultura, " + SafraPeriodo.SQL + " AS safra, categoria_despesa.nome AS categoria, " +
            "maquina.nome AS maquina " +
            "FROM despesa " +
            "JOIN safra ON safra.id = despesa.safra_id " +

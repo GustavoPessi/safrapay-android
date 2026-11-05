@@ -16,20 +16,10 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:textColor="@color/text_secondary" />
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipsFiltro"
+        <!-- Filtro de período (componente reaproveitável, ui/comum/SeletorPeriodo) -->
+        <include layout="@layout/view_seletor_periodo"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_sm"
-            app:singleSelection="true" app:selectionRequired="true">
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipTudo" style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/filtro_tudo" android:checked="true" />
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipMes" style="@style/Widget.Material3.Chip.Filter"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/filtro_mes" />
-        </com.google.android.material.chip.ChipGroup>
+            android:layout_marginTop="@dimen/space_sm" />
 
         <!-- Resumo: saldo na linha inteira e receitas | despesas embaixo. Os valores diminuem a
              fonte sozinhos (autoSize) pra caber numa linha mesmo com milhões. -->

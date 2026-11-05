@@ -11,11 +11,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.tcc.gestaorural.R;
 import com.tcc.gestaorural.data.local.model.Lancamento;
 import com.tcc.gestaorural.ui.NavKeys;
+import com.tcc.gestaorural.ui.comum.SeletorPeriodo;
 import com.tcc.gestaorural.util.MoneyUtils;
 import com.tcc.gestaorural.util.SessionManager;
 
@@ -46,12 +46,9 @@ public class FinanceiroActivity extends BaseActivity {
         adapter = new LancamentoAdapter(this::abrirDetalhe);
         recycler.setAdapter(adapter);
 
-        ChipGroup chips = findViewById(R.id.chipsFiltro);
-        chips.setOnCheckedStateChangeListener((group, ids) -> {
-            int f = (group.getCheckedChipId() == R.id.chipMes)
-                    ? FinanceiroViewModel.FILTRO_MES : FinanceiroViewModel.FILTRO_TUDO;
-            vm.setFiltro(f);
-        });
+        // Filtro de período: Tudo (padrão) / Dia / Mês / Ano / Intervalo.
+        SeletorPeriodo seletor = new SeletorPeriodo(this, findViewById(R.id.seletorPeriodo), true, vm.getPeriodo());
+        seletor.setListener(vm::setPeriodo);
 
         FloatingActionButton fab = findViewById(R.id.fabNovo);
         fab.setOnClickListener(v -> escolherTipo());

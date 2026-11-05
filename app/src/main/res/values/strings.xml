@@ -145,8 +145,6 @@
     <string name="extrato_receitas">Receitas</string>
     <string name="extrato_despesas">Despesas</string>
     <string name="extrato_saldo">Saldo</string>
-    <string name="filtro_tudo">Tudo</string>
-    <string name="filtro_mes">Este mês</string>
     <string name="extrato_vazio">Nenhum lançamento ainda.\nToque em + para adicionar.</string>
     <string name="dialog_escolher_tipo">O que deseja lançar?</string>
 
@@ -527,4 +525,15 @@
     <!-- Manual de ajuda -->
     <string name="ajuda_title">Manual de ajuda</string>
     <string name="ajuda_intro">Toque num assunto pra ver a explicação.</string>
+    <!-- Filtro de período (ui/comum/SeletorPeriodo) -->
+    <string name="periodo_tudo">Tudo</string>
+    <string name="periodo_dia">Dia</string>
+    <string name="periodo_mes">Mês</string>
+    <string name="periodo_ano">Ano</string>
+    <string name="periodo_intervalo">Intervalo</string>
+    <string name="periodo_anterior">Período anterior</string>
+    <string name="periodo_proximo">Próximo período</string>
+    <string name="periodo_escolher_mes">Escolher mês</string>
+    <string name="periodo_escolher_ano">Escolher ano</string>
+    <string name="periodo_data_invalida">Informe as duas datas (dd/mm/aaaa)</string>
 </resources>
