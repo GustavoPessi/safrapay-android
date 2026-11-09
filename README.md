@@ -34,12 +34,16 @@ Projeto de TCC do curso de Ciência da Computação da UNESC (2026). O aplicativ
 
 ## 3. Entrar no aplicativo
 
-Na primeira abertura aparecem telas de apresentação (toque em **Pular** ou **Próximo**) e depois a tela de login. Há duas formas de entrar:
+Cada avaliador cria a **própria conta**, o que já testa o cadastro. Use um e-mail real ao qual você tenha acesso, porque a conta precisa ser confirmada por e-mail.
 
-- **Conta de demonstração (recomendada):** já tem propriedades, talhões, safras, lançamentos, metas e máquinas com **dados fictícios**. O e-mail e a senha são enviados aos avaliadores junto com a entrega, fora do repositório (não ficam no código por segurança). Informe esses dados e toque em **Entrar**.
-- **Conta nova:** toque em **Não tem conta? Cadastre-se**, preencha os dados e confirme o cadastro pelo link enviado ao e-mail informado. A conta começa vazia.
+1. Na primeira abertura aparecem telas de apresentação: toque em **Pular** ou **Próximo** até chegar à tela de login.
+2. Toque em **Não tem conta? Cadastre-se**, preencha os dados e conclua o cadastro.
+3. Abra o e-mail de confirmação enviado pelo SafraPay (`noreply@safra-pay.com`; confira também a caixa de spam) e toque no link de confirmação.
+4. Volte ao app, informe e-mail e senha e toque em **Entrar**. Antes da confirmação, o app avisa "Confirme seu e-mail antes de entrar".
 
-Depois do login, o app baixa os dados da conta do servidor. Se algo não aparecer, use **Perfil → Sincronizar dados**.
+A conta começa vazia: o roteiro abaixo começa pelos cadastros. Os dados ficam no celular e são enviados ao servidor automaticamente; ao entrar com a mesma conta em outro aparelho, eles são baixados (ou use **Perfil → Sincronizar dados**).
+
+Também dá para testar **Esqueci minha senha** na tela de login: o app envia um e-mail com o link para criar uma nova senha.
 
 ## 4. Roteiro de teste
 
@@ -90,7 +94,7 @@ No **Início**, toque em **Falar com o assistente (IA)** e teste, por exemplo:
 2. Cadastre uma despesa: ela é salva normalmente no celular.
 3. Desative o modo avião: o app sincroniza sozinho em alguns segundos (ou use **Perfil → Sincronizar dados**).
 
-### 4.8 Uso em equipe (opcional, precisa de uma segunda conta)
+### 4.8 Uso em equipe (opcional, precisa de uma segunda conta, com outro e-mail)
 
 1. Com a conta principal: **Perfil → Minha equipe → Convidar pessoa**, informe o e-mail da segunda conta e o papel (**gerente** usa o app completo com os dados da fazenda; **colaborador** vê só máquinas e tarefas).
 2. Com a segunda conta (em outro celular, ou saindo e entrando de novo): **Perfil → Convites recebidos**, abra o convite e aceite.
@@ -162,7 +166,7 @@ app/src/main/java/com/tcc/gestaorural/
 
 - **"Sem conexão" ao entrar:** confira a internet do celular; o servidor `https://api.safra-pay.com` precisa estar acessível.
 - **Dados não aparecem depois do login:** **Perfil → Sincronizar dados**.
-- **Não chegou o e-mail de confirmação da conta nova:** verifique a caixa de spam ou use a conta de demonstração.
+- **Não chegou o e-mail de confirmação:** verifique a caixa de spam e aguarde alguns minutos; confira se o e-mail foi digitado corretamente no cadastro.
 - **Assistente não responde:** ele precisa de internet; sem conexão, o restante do app continua funcionando.
 
 ## Autor
